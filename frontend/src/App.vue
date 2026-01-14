@@ -1,142 +1,207 @@
 <template>
-  <div class="container">
-    <h1>Insurance Tracker</h1>
+  <v-app>
+    <v-app-bar color="primary" elevation="2">
+      <v-app-bar-title>
+        <v-icon icon="mdi-shield-check" class="mr-2"></v-icon>
+        PolicyNest
+      </v-app-bar-title>
+    </v-app-bar>
 
-    <div class="card">
-      <h2>Add New Policy</h2>
-      <form @submit.prevent="submitPolicy">
-        <input v-model="form.provider" placeholder="Provider (e.g. Geico)" required />
-        <select v-model="form.type" required>
-          <option disabled value="">Select Type</option>
-          <option>Car</option>
-          <option>Home</option>
-          <option>Life</option>
-          <option>Medical</option>
-        </select>
-        <div class="date-group">
-          <label>Start: <input type="date" v-model="form.start_date" required /></label>
-          <label>End: <input type="date" v-model="form.end_date" required /></label>
-        </div>
-        <input
-          type="number"
-          step="0.01"
-          v-model="form.premium"
-          placeholder="Premium Cost"
-          required
-        />
-        <input type="file" @change="handleFileUpload" />
-        <button type="submit">Save Policy</button>
-      </form>
-    </div>
+    <v-main class="bg-grey-lighten-4">
+      <v-container>
+        
+        <v-row class="mb-4" align="center">
+          <v-col>
+            <h2 class="text-h4">My Policies</h2>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn color="primary" prepend-icon="mdi-plus" @click="dialog = true">
+              Add Policy
+            </v-btn>
+          </v-col>
+        </v-row>
 
-    <div class="card">
-      <h2>Your Policies</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Provider</th>
-            <th>Type</th>
-            <th>Dates</th>
-            <th>Premium</th>
-            <th>Doc</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="policy in policies" :key="policy.id">
-            <td>{{ policy.provider }}</td>
-            <td>{{ policy.type }}</td>
-            <td>{{ policy.start_date }} to {{ policy.end_date }}</td>
-            <td>${{ policy.premium }}</td>
-            <td>
-              <span v-if="policy.document_path">✅</span>
-              <span v-else>❌</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+        <v-card elevation="2">
+          <v-data-table
+            :headers="headers"
+            :items="policies"
+            :loading="loading"
+            class="elevation-1"
+          >
+            <template v-slot:item.type="{ item }">
+              <v-chip :color="getTypeColor(item.type)" size="small" variant="flat">
+                {{ item.type }}
+              </v-chip>
+            </template>
+
+            <template v-slot:item.premium="{ item }">
+              <strong>${{ item.premium.toFixed(2) }}</strong>
+            </template>
+
+            <template v-slot:item.document_path="{ item }">
+              <v-btn
+                v-if="item.document_path"
+                size="small"
+                variant="text"
+                color="primary"
+                prepend-icon="mdi-file-pdf-box"
+                :href="getDocumentUrl(item.document_path)"
+                target="_blank"
+              >
+                View PDF
+              </v-btn>
+              <span v-else class="text-caption text-grey">No Doc</span>
+            </template>
+          </v-data-table>
+        </v-card>
+
+        <v-dialog v-model="dialog" max-width="600px">
+          <v-card>
+            <v-card-title>
+              <span class="text-h5">New Policy</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-form ref="form" @submit.prevent="submitPolicy">
+                <v-row>
+                  <v-col cols="12" sm="6">
+                    <v-text-field v-model="form.provider" label="Provider (e.g. Geico)" variant="outlined" required></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-select 
+                      v-model="form.type" 
+                      :items="['Car', 'Home', 'Life', 'Medical', 'Pet']" 
+                      label="Type" 
+                      variant="outlined"
+                      required
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field type="date" v-model="form.start_date" label="Start Date" variant="outlined" required></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field type="date" v-model="form.end_date" label="End Date" variant="outlined" required></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field type="number" step="0.01" v-model="form.premium" label="Premium ($)" variant="outlined" prefix="$" required></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-file-input 
+                      @change="handleFileUpload" 
+                      label="Upload Policy Document (PDF)" 
+                      variant="outlined" 
+                      prepend-icon="mdi-paperclip"
+                      accept=".pdf"
+                    ></v-file-input>
+                  </v-col>
+                </v-row>
+              </v-form>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="grey-darken-1" variant="text" @click="dialog = false">Cancel</v-btn>
+              <v-btn color="primary" variant="flat" @click="submitPolicy" :loading="submitting">Save Policy</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
   data() {
     return {
+      dialog: false,
+      loading: false,
+      submitting: false,
       policies: [],
+      headers: [
+        { title: 'Provider', key: 'provider', align: 'start' },
+        { title: 'Type', key: 'type' },
+        { title: 'Start Date', key: 'start_date' },
+        { title: 'End Date', key: 'end_date' },
+        { title: 'Premium', key: 'premium' },
+        { title: 'Document', key: 'document_path', sortable: false },
+      ],
       form: {
         provider: '',
-        type: '',
+        type: null,
         start_date: '',
         end_date: '',
         premium: '',
       },
-      file: null,
-    }
+      file: null
+    };
   },
   methods: {
     async fetchPolicies() {
-      const res = await axios.get('http://localhost:8000/policies/')
-      this.policies = res.data
+      this.loading = true;
+      try {
+        const res = await axios.get('http://localhost:8000/policies/');
+        this.policies = res.data;
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
     },
     handleFileUpload(event) {
-      this.file = event.target.files[0]
+      // Vuetify file input returns an array of files
+      this.file = event.target.files[0];
     },
     async submitPolicy() {
-      let formData = new FormData()
-      formData.append('provider', this.form.provider)
-      formData.append('type', this.form.type)
-      formData.append('start_date', this.form.start_date)
-      formData.append('end_date', this.form.end_date)
-      formData.append('premium', this.form.premium)
+      if (!this.form.provider || !this.form.premium) return; // Simple validation
+
+      this.submitting = true;
+      let formData = new FormData();
+      formData.append('provider', this.form.provider);
+      formData.append('type', this.form.type);
+      formData.append('start_date', this.form.start_date);
+      formData.append('end_date', this.form.end_date);
+      formData.append('premium', this.form.premium);
       if (this.file) {
-        formData.append('file', this.file)
+        formData.append('file', this.file);
       }
 
-      await axios.post('http://localhost:8000/policies/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-
-      this.fetchPolicies()
-      this.form = { provider: '', type: '', start_date: '', end_date: '', premium: '' }
-      this.file = null
+      try {
+        await axios.post('http://localhost:8000/policies/', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        this.fetchPolicies();
+        this.dialog = false;
+        // Reset form
+        this.form = { provider: '', type: null, start_date: '', end_date: '', premium: '' };
+        this.file = null;
+      } catch (e) {
+        console.error("Error upload", e);
+      } finally {
+        this.submitting = false;
+      }
     },
+    getTypeColor(type) {
+      const colors = {
+        'Car': 'blue',
+        'Home': 'orange',
+        'Life': 'green',
+        'Medical': 'red',
+        'Pet': 'purple'
+      };
+      return colors[type] || 'grey';
+    },
+    getDocumentUrl(path) {
+      if (!path) return '#';
+      const filename = path.split('/').pop();
+      return `http://localhost:8000/uploads/${filename}`;
+    }
   },
   mounted() {
-    this.fetchPolicies()
-  },
-}
+    this.fetchPolicies();
+  }
+};
 </script>
-
-<style>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  font-family: sans-serif;
-}
-.card {
-  border: 1px solid #ddd;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-}
-input,
-select,
-button {
-  display: block;
-  margin-bottom: 10px;
-  width: 100%;
-  padding: 8px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th,
-td {
-  text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-}
-</style>
