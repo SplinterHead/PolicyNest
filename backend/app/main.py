@@ -140,3 +140,26 @@ def read_policies(household_id: Optional[int] = None, db: Session = Depends(get_
     if household_id:
         query = query.filter(models.Policy.household_id == household_id)
     return query.all()
+
+
+@app.put("/policies/{policy_id}/document")
+def update_policy_document(
+    policy_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
+):
+    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    # Save file
+    upload_folder = "uploads"
+    os.makedirs(upload_folder, exist_ok=True)
+    file_location = f"{upload_folder}/{file.filename}"
+
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+
+    # Update DB
+    policy.document_path = file_location
+    db.commit()
+    db.refresh(policy)
+    return policy

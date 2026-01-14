@@ -147,6 +147,11 @@ export default {
     }
   },
   emits: ['update:modelValue', 'update:assetId'],
+  computed: {
+    isDark() {
+      return this.$vuetify.theme.global.name === 'dark'
+    },
+  },
   methods: {
     onAssetSelect(id) {
       this.selectedAssetId = id
