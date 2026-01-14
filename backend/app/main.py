@@ -4,6 +4,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import Depends, FastAPI, File, Form, UploadFile
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -22,7 +23,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+# Make files accessible at http://localhost:8000/uploads/filename.pdf
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Dependency
 def get_db():
