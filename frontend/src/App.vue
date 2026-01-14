@@ -143,9 +143,16 @@ export default {
   },
   methods: {
     toggleTheme() {
-      this.$vuetify.theme.global.name = this.isDark ? 'light' : 'dark'
+      const newTheme = this.isDark ? 'light' : 'dark'
+      this.$vuetify.theme.global.name = newTheme
+      localStorage.setItem('insurance-theme', newTheme)
     },
+
     async loadApp() {
+      const savedTheme = localStorage.getItem('insurance-theme')
+      if (savedTheme) {
+        this.$vuetify.theme.global.name = savedTheme
+      }
       try {
         const res = await axios.get('http://localhost:8000/households/')
         this.households = res.data
@@ -208,7 +215,7 @@ export default {
         await axios.post('http://localhost:8000/policies/', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        this.switchHousehold(this.currentHousehold) // Refresh list
+        this.switchHousehold(this.currentHousehold)
         this.policyDialog = false
       } catch (e) {
         console.error(e)
@@ -222,3 +229,20 @@ export default {
   },
 }
 </script>
+
+<style>
+:root {
+  --title-font: 'Montserrat', sans-serif;
+}
+
+.v-application .text-h1,
+.v-application .text-h2,
+.v-application .text-h3,
+.v-application .text-h4,
+.v-application .text-h5,
+.v-application .text-h6,
+.v-card-title,
+.v-app-bar-title {
+  font-family: var(--title-font) !important;
+}
+</style>
