@@ -65,6 +65,10 @@
                 @update:assetId="form.asset_id = $event"
               />
             </v-col>
+            <v-col cols="12" v-else-if="form.type === 'Life'">
+              <LifePolicyForm v-model="form.attributes" />
+            </v-col>
+
             <v-col cols="12">
               <v-file-input
                 @change="handleFileUpload"
@@ -91,9 +95,10 @@
 
 <script>
 import CarPolicyForm from './forms/CarPolicyForm.vue'
+import LifePolicyForm from './forms/LifePolicyForm.vue'
 
 export default {
-  components: { CarPolicyForm },
+  components: { CarPolicyForm, LifePolicyForm },
   props: {
     modelValue: Boolean,
     loading: Boolean,

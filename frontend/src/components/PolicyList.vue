@@ -82,7 +82,7 @@
               </v-col>
             </v-row>
 
-            <v-row class="mt-2" v-if="['Car'].includes(selectedPolicy.type)">
+            <v-row class="mt-2" v-if="['Car', 'Life'].includes(selectedPolicy.type)">
               <v-col cols="12">
                 <v-card class="pa-4 bg-surface" border variant="flat">
                   <div class="text-subtitle-1 font-weight-bold mb-3 d-flex align-center">
@@ -187,6 +187,118 @@
                               "
                             ></v-icon>
                             Windscreen
+                          </v-chip>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </div>
+                  <div v-else-if="selectedPolicy.type === 'Life'">
+                    <v-row dense>
+                      <v-col cols="12" md="6">
+                        <v-list density="compact" class="bg-transparent">
+                          <v-list-item>
+                            <template v-slot:prepend
+                              ><v-icon size="small" class="mr-4">mdi-shield-star</v-icon></template
+                            >
+                            <v-list-item-title>Cover Type</v-list-item-title>
+                            <template v-slot:append
+                              ><span class="font-weight-medium">{{
+                                selectedPolicy.attributes.cover_type || 'Level Term'
+                              }}</span></template
+                            >
+                          </v-list-item>
+                          <v-list-item>
+                            <template v-slot:prepend
+                              ><v-icon size="small" class="mr-4"
+                                >mdi-account-group</v-icon
+                              ></template
+                            >
+                            <v-list-item-title>Beneficiaries</v-list-item-title>
+                            <template v-slot:append>
+                              <div
+                                class="text-right text-caption font-weight-bold"
+                                style="max-width: 150px"
+                              >
+                                {{ selectedPolicy.attributes.beneficiaries || '-' }}
+                              </div>
+                            </template>
+                          </v-list-item>
+                          <v-list-item>
+                            <template v-slot:prepend
+                              ><v-icon size="small" class="mr-4">mdi-piggy-bank</v-icon></template
+                            >
+                            <v-list-item-title>Sum Assured</v-list-item-title>
+                            <template v-slot:append
+                              ><span class="text-h6 font-weight-bold text-success">{{
+                                formatCurrency(selectedPolicy.attributes.sum_assured || 0)
+                              }}</span></template
+                            >
+                          </v-list-item>
+                        </v-list>
+                      </v-col>
+
+                      <v-col cols="12" md="6">
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                          <v-chip
+                            :color="selectedPolicy.attributes.joint_policy ? 'purple' : 'default'"
+                            variant="tonal"
+                          >
+                            <v-icon
+                              start
+                              :icon="
+                                selectedPolicy.attributes.joint_policy
+                                  ? 'mdi-account-multiple-check'
+                                  : 'mdi-account'
+                              "
+                            ></v-icon>
+                            {{
+                              selectedPolicy.attributes.joint_policy
+                                ? 'Joint Policy'
+                                : 'Single Policy'
+                            }}
+                          </v-chip>
+
+                          <v-chip
+                            :color="
+                              selectedPolicy.attributes.critical_illness ? 'green' : 'default'
+                            "
+                            variant="tonal"
+                          >
+                            <v-icon
+                              start
+                              :icon="
+                                selectedPolicy.attributes.critical_illness
+                                  ? 'mdi-check'
+                                  : 'mdi-close'
+                              "
+                            ></v-icon>
+                            Critical Illness
+                          </v-chip>
+
+                          <v-chip
+                            :color="selectedPolicy.attributes.in_trust ? 'blue' : 'default'"
+                            variant="tonal"
+                          >
+                            <v-icon
+                              start
+                              :icon="
+                                selectedPolicy.attributes.in_trust ? 'mdi-bank' : 'mdi-bank-outline'
+                              "
+                            ></v-icon>
+                            In Trust
+                          </v-chip>
+
+                          <v-chip
+                            :color="selectedPolicy.attributes.waiver_premium ? 'green' : 'default'"
+                            variant="tonal"
+                          >
+                            <v-icon
+                              start
+                              :icon="
+                                selectedPolicy.attributes.waiver_premium ? 'mdi-check' : 'mdi-close'
+                              "
+                            ></v-icon>
+                            Waiver of Premium
                           </v-chip>
                         </div>
                       </v-col>
