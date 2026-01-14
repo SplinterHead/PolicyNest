@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import InventoryView from '../views/InventoryView.vue'
 import PoliciesView from '../views/PoliciesView.vue'
 
 const routes = [
@@ -6,6 +7,7 @@ const routes = [
     path: '/',
     redirect: '/policies', // Default to policies
   },
+  { path: '/inventory', name: 'inventory', component: InventoryView },
   {
     path: '/policies',
     name: 'policies',

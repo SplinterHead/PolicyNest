@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from datetime import date
@@ -60,17 +61,47 @@ def create_household(name: str = Form(...), db: Session = Depends(get_db)):
     return new_household
 
 
+# --- ASSET ENDPOINTS ---
+
+
+@app.get("/assets/")
+def read_assets(household_id: int, db: Session = Depends(get_db)):
+    return (
+        db.query(models.Asset).filter(models.Asset.household_id == household_id).all()
+    )
+
+
+@app.post("/assets/")
+def create_asset(
+    household_id: int = Form(...),
+    name: str = Form(...),
+    type: str = Form(...),
+    details: str = Form("{}"),  # JSON string
+    db: Session = Depends(get_db),
+):
+    parsed_details = json.loads(details)
+    db_asset = models.Asset(
+        household_id=household_id, name=name, type=type, details=parsed_details
+    )
+    db.add(db_asset)
+    db.commit()
+    db.refresh(db_asset)
+    return db_asset
+
+
 # --- POLICY ENDPOINTS ---
 
 
 @app.post("/policies/")
 def create_policy(
-    household_id: int = Form(...),  # NEW: Policies must belong to a household
+    household_id: int = Form(...),
+    asset_id: Optional[int] = Form(None),
     provider: str = Form(...),
     type: str = Form(...),
     start_date: date = Form(...),
     end_date: date = Form(...),
     premium: float = Form(...),
+    attributes: str = Form("{}"),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
@@ -82,15 +113,20 @@ def create_policy(
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
+    parsed_attributes = json.loads(attributes)
+
     db_policy = models.Policy(
         household_id=household_id,
+        asset_id=asset_id,
         provider=provider,
         type=type,
         start_date=start_date,
         end_date=end_date,
         premium=premium,
+        attributes=parsed_attributes,
         document_path=file_location,
     )
+
     db.add(db_policy)
     db.commit()
     db.refresh(db_policy)

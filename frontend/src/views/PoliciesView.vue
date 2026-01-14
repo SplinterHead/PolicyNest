@@ -14,7 +14,12 @@
 
     <PolicyList :policies="policies" :loading="loading" />
 
-    <PolicyForm v-model="policyDialog" :loading="submitting" @submit="handlePolicySubmit" />
+    <PolicyForm
+      v-model="policyDialog"
+      :loading="submitting"
+      :assets="assets"
+      @submit="handlePolicySubmit"
+    />
   </div>
 </template>
 
@@ -32,6 +37,7 @@ export default {
   data() {
     return {
       policies: [],
+      assets: [],
       loading: false,
       policyDialog: false,
       submitting: false,
@@ -51,10 +57,12 @@ export default {
       if (!this.currentHousehold) return
       this.loading = true
       try {
-        const res = await axios.get(
-          `http://localhost:8000/policies/?household_id=${this.currentHousehold.id}`,
-        )
-        this.policies = res.data
+        const [polRes, assetRes] = await Promise.all([
+          axios.get(`http://localhost:8000/policies/?household_id=${this.currentHousehold.id}`),
+          axios.get(`http://localhost:8000/assets/?household_id=${this.currentHousehold.id}`),
+        ])
+        this.policies = polRes.data
+        this.assets = assetRes.data
       } catch (e) {
         console.error(e)
       } finally {
@@ -70,6 +78,8 @@ export default {
       formData.append('start_date', payload.start_date)
       formData.append('end_date', payload.end_date)
       formData.append('premium', payload.premium)
+      formData.append('attributes', payload.attributes)
+      if (payload.asset_id) formData.append('asset_id', payload.asset_id)
       if (payload.file) formData.append('file', payload.file)
 
       try {

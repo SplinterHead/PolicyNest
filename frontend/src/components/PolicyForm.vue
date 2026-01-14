@@ -3,10 +3,12 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     max-width="600px"
+    scrollable
   >
     <v-card rounded="lg">
       <v-card-title class="pa-4 bg-primary text-white">New Policy</v-card-title>
-      <v-card-text class="pt-4">
+
+      <v-card-text class="pt-4" style="max-height: 80vh">
         <v-form ref="form" @submit.prevent="submit">
           <v-row dense>
             <v-col cols="12" sm="6"
@@ -55,6 +57,14 @@
                 prefix="$"
               ></v-text-field
             ></v-col>
+
+            <v-col cols="12" v-if="form.type === 'Car'">
+              <CarPolicyForm
+                v-model="form.attributes"
+                :assets="assets"
+                @update:assetId="form.asset_id = $event"
+              />
+            </v-col>
             <v-col cols="12">
               <v-file-input
                 @change="handleFileUpload"
@@ -68,6 +78,7 @@
           </v-row>
         </v-form>
       </v-card-text>
+
       <v-divider></v-divider>
       <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
@@ -79,15 +90,27 @@
 </template>
 
 <script>
+import CarPolicyForm from './forms/CarPolicyForm.vue'
+
 export default {
+  components: { CarPolicyForm },
   props: {
     modelValue: Boolean,
     loading: Boolean,
+    assets: Array,
   },
   emits: ['update:modelValue', 'submit'],
   data() {
     return {
-      form: { provider: '', type: null, start_date: '', end_date: '', premium: '' },
+      form: {
+        asset_id: null,
+        provider: '',
+        type: null,
+        start_date: '',
+        end_date: '',
+        premium: '',
+        attributes: {}, // <-- New object for dynamic data
+      },
       file: null,
     }
   },
@@ -96,21 +119,26 @@ export default {
       this.file = event.target.files[0]
     },
     submit() {
-      // Validate
       if (!this.form.provider || !this.form.premium) return
-
-      // Emit data up to parent
-      this.$emit('submit', { ...this.form, file: this.file })
-
-      // Reset logic is better handled here after success,
-      // but for simplicity we can reset on close or via a watcher.
+      this.$emit('submit', {
+        ...this.form,
+        attributes: JSON.stringify(this.form.attributes),
+        file: this.file,
+      })
     },
   },
   watch: {
-    // Reset form when dialog closes
     modelValue(val) {
       if (!val) {
-        this.form = { provider: '', type: null, start_date: '', end_date: '', premium: '' }
+        // Reset form
+        this.form = {
+          provider: '',
+          type: null,
+          start_date: '',
+          end_date: '',
+          premium: '',
+          attributes: {},
+        }
         this.file = null
       }
     },

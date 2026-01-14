@@ -78,6 +78,12 @@
         color="primary"
       />
       <v-list-item
+        prepend-icon="mdi-car-multiple"
+        title="Inventory"
+        value="inventory"
+        to="/inventory"
+      />
+      <v-list-item
         prepend-icon="mdi-cog"
         title="Settings"
         value="settings"
