@@ -7,7 +7,7 @@
       PolicyNest
     </v-app-bar-title>
 
-    <v-spacer></v-spacer>
+    <v-spacer />
 
     <v-btn icon @click="$emit('toggle-theme')" class="mr-2">
       <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>

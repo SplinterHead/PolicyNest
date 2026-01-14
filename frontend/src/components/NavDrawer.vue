@@ -62,21 +62,28 @@
             prepend-icon="mdi-cog-outline"
             title="Manage Households"
             @click="$emit('open-manage')"
-          ></v-list-item>
+          />
         </v-list>
       </v-menu>
     </div>
 
-    <v-divider></v-divider>
+    <v-divider />
 
     <v-list density="compact" nav>
       <v-list-item
         prepend-icon="mdi-file-document-multiple"
         title="Policies"
         value="policies"
-        active
+        to="/policies"
         color="primary"
-      ></v-list-item>
+      />
+      <v-list-item
+        prepend-icon="mdi-cog"
+        title="Settings"
+        value="settings"
+        to="/settings"
+        color="primary"
+      />
     </v-list>
   </v-navigation-drawer>
 </template>

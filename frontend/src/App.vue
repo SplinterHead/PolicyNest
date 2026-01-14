@@ -13,26 +13,7 @@
 
     <v-main :class="isDark ? '' : 'bg-grey-lighten-4'">
       <v-container fluid class="pa-6">
-        <div v-if="initialized && currentHousehold">
-          <v-row class="mb-4" align="center">
-            <v-col>
-              <div class="text-caption text-medium-emphasis">DASHBOARD</div>
-              <h1 class="text-h4 font-weight-thin">{{ currentHousehold.name }}</h1>
-            </v-col>
-            <v-col cols="auto">
-              <v-btn
-                color="primary"
-                prepend-icon="mdi-plus"
-                size="large"
-                @click="policyDialog = true"
-              >
-                Add Policy
-              </v-btn>
-            </v-col>
-          </v-row>
-
-          <PolicyList :policies="policies" :loading="loadingPolicies" />
-        </div>
+        <router-view v-if="initialized" :current-household="currentHousehold"></router-view>
 
         <div
           v-else-if="checkingStatus"
@@ -43,8 +24,6 @@
         </div>
       </v-container>
     </v-main>
-
-    <PolicyForm v-model="policyDialog" :loading="submittingPolicy" @submit="handlePolicySubmit" />
 
     <v-dialog v-model="showOnboarding" persistent max-width="450px">
       <v-card class="text-center pa-6 rounded-xl">
@@ -112,11 +91,9 @@
 import axios from 'axios'
 import NavBar from './components/NavBar.vue'
 import NavDrawer from './components/NavDrawer.vue'
-import PolicyList from './components/PolicyList.vue'
-import PolicyForm from './components/PolicyForm.vue'
 
 export default {
-  components: { NavBar, NavDrawer, PolicyList, PolicyForm },
+  components: { NavBar, NavDrawer },
   data() {
     return {
       drawer: null,
@@ -124,16 +101,11 @@ export default {
       initialized: false,
       showOnboarding: false,
       manageDialog: false,
-      policyDialog: false,
 
       households: [],
       currentHousehold: null,
-      policies: [],
-
       newHouseholdName: '',
       creatingHousehold: false,
-      loadingPolicies: false,
-      submittingPolicy: false,
     }
   },
   computed: {
@@ -147,18 +119,16 @@ export default {
       this.$vuetify.theme.global.name = newTheme
       localStorage.setItem('insurance-theme', newTheme)
     },
-
     async loadApp() {
       const savedTheme = localStorage.getItem('insurance-theme')
-      if (savedTheme) {
-        this.$vuetify.theme.global.name = savedTheme
-      }
+      if (savedTheme) this.$vuetify.theme.global.name = savedTheme
+
       try {
         const res = await axios.get('http://localhost:8000/households/')
         this.households = res.data
         if (this.households.length > 0) {
           this.initialized = true
-          if (!this.currentHousehold) this.switchHousehold(this.households[0])
+          if (!this.currentHousehold) this.currentHousehold = this.households[0]
         } else {
           this.showOnboarding = true
         }
@@ -168,19 +138,8 @@ export default {
         this.checkingStatus = false
       }
     },
-    async switchHousehold(household) {
+    switchHousehold(household) {
       this.currentHousehold = household
-      this.loadingPolicies = true
-      try {
-        const res = await axios.get(
-          `http://localhost:8000/policies/?household_id=${this.currentHousehold.id}`,
-        )
-        this.policies = res.data
-      } catch (e) {
-        console.error(e)
-      } finally {
-        this.loadingPolicies = false
-      }
     },
     async createHousehold(isOnboarding) {
       if (!this.newHouseholdName) return
@@ -198,29 +157,6 @@ export default {
         console.error(e)
       } finally {
         this.creatingHousehold = false
-      }
-    },
-    async handlePolicySubmit(payload) {
-      this.submittingPolicy = true
-      let formData = new FormData()
-      formData.append('household_id', this.currentHousehold.id)
-      formData.append('provider', payload.provider)
-      formData.append('type', payload.type)
-      formData.append('start_date', payload.start_date)
-      formData.append('end_date', payload.end_date)
-      formData.append('premium', payload.premium)
-      if (payload.file) formData.append('file', payload.file)
-
-      try {
-        await axios.post('http://localhost:8000/policies/', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-        this.switchHousehold(this.currentHousehold)
-        this.policyDialog = false
-      } catch (e) {
-        console.error(e)
-      } finally {
-        this.submittingPolicy = false
       }
     },
   },
