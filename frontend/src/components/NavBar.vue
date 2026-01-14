@@ -4,7 +4,8 @@
 
     <v-app-bar-title class="font-weight-bold text-primary">
       <v-icon icon="mdi-shield-check" class="mr-2"></v-icon>
-      PolicyNest
+      <span class="font-weight-bold">policy</span>
+      <span class="font-weight-light">nest</span>
     </v-app-bar-title>
 
     <v-spacer />
