@@ -45,6 +45,12 @@ def get_system_status(db: Session = Depends(get_db)):
     return {"initialized": False, "household": None}
 
 
+@app.get("/households/")
+def read_households(db: Session = Depends(get_db)):
+    """List all households for the switcher menu."""
+    return db.query(models.Household).all()
+
+
 @app.post("/households/")
 def create_household(name: str = Form(...), db: Session = Depends(get_db)):
     new_household = models.Household(name=name)
