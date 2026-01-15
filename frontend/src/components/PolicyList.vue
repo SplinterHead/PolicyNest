@@ -18,9 +18,17 @@
             >{{ item.type }}</v-chip
           >
         </template>
-        <template v-slot:item.premium="{ item }"
-          ><strong>{{ formatCurrency(item.premium) }}</strong></template
-        >
+        <template v-slot:item.premium="{ item }">
+          <div class="d-flex flex-column align-start">
+            <strong>{{ formatCurrency(item.premium) }}</strong>
+            <span
+              class="text-caption text-medium-emphasis"
+              style="font-size: 0.7rem !important; line-height: 1"
+            >
+              {{ item.attributes.payment_frequency === 'Monthly' ? '/ month' : '/ year' }}
+            </span>
+          </div>
+        </template>
         <template v-slot:item.document_path="{ item }">
           <v-icon v-if="item.document_path" color="primary" icon="mdi-file-pdf-box"></v-icon>
           <span v-else class="text-caption text-disabled">-</span>
@@ -222,9 +230,7 @@
                           </v-list-item>
                           <v-list-item>
                             <template v-slot:prepend>
-                              <v-icon size="small" class="mr-4">
-                                mdi-account-group
-                              </v-icon>
+                              <v-icon size="small" class="mr-4"> mdi-account-group </v-icon>
                             </template>
                             <v-list-item-title>Beneficiaries</v-list-item-title>
                             <template v-slot:append>
@@ -272,7 +278,9 @@
                           </v-chip>
 
                           <v-chip
-                            :color="selectedPolicy.attributes.critical_illness ? 'green' : 'default'"
+                            :color="
+                              selectedPolicy.attributes.critical_illness ? 'green' : 'default'
+                            "
                             variant="tonal"
                           >
                             <v-icon
@@ -292,7 +300,9 @@
                           >
                             <v-icon
                               start
-                              :icon="selectedPolicy.attributes.in_trust ? 'mdi-bank' : 'mdi-bank-outline'"
+                              :icon="
+                                selectedPolicy.attributes.in_trust ? 'mdi-bank' : 'mdi-bank-outline'
+                              "
                             />
                             In Trust
                           </v-chip>
@@ -303,7 +313,9 @@
                           >
                             <v-icon
                               start
-                              :icon="selectedPolicy.attributes.waiver_premium ? 'mdi-check' : 'mdi-close'"
+                              :icon="
+                                selectedPolicy.attributes.waiver_premium ? 'mdi-check' : 'mdi-close'
+                              "
                             />
                             Waiver of Premium
                           </v-chip>
@@ -353,11 +365,7 @@
                   </object>
 
                   <div v-else-if="isUploading" class="text-center">
-                    <v-progress-circular
-                      indeterminate
-                      color="primary"
-                      size="64"
-                    />
+                    <v-progress-circular indeterminate color="primary" size="64" />
                     <div class="mt-4 font-weight-bold text-primary">Uploading...</div>
                   </div>
 
@@ -396,8 +404,8 @@
         <v-card-title class="text-h5">Delete Policy?</v-card-title>
         <v-card-text>
           Are you sure you want to delete the policy for
-          <strong>{{ policyToDelete?.provider }}</strong>? 
-          This action cannot be undone.
+          <strong>{{ policyToDelete?.provider }}</strong
+          >? This action cannot be undone.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -451,8 +459,8 @@ export default {
       return new Intl.NumberFormat('en-GB', {
         style: 'currency',
         currency: this.currencyCode,
-        currencyDisplay: 'narrowSymbol'
-      }).format(value);
+        currencyDisplay: 'narrowSymbol',
+      }).format(value)
     },
     formatDate(dateStr) {
       if (!dateStr) return '-'

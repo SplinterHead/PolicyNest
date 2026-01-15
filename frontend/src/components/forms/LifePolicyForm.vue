@@ -1,5 +1,5 @@
 <template>
-  <v-card variant="tonal" class="pa-3 mt-2" rounded="lg">
+  <v-card class="mt-2 mb-2 elevation-0" rounded="lg">
     <div class="d-flex align-center text-primary font-weight-bold mb-4">
       <v-icon icon="mdi-heart-pulse" class="mr-2"></v-icon>
       Cover Details
@@ -104,9 +104,12 @@ export default {
   emits: ['update:modelValue'],
   computed: {
     currencySymbol() {
-      const symbols = { 'GBP': '£', 'USD': '$', 'EUR': '€', 'AUD': '$', 'CAD': '$' };
-      return symbols[this.currencyCode] || '$';
-    }
+      const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: '$', CAD: '$' }
+      return symbols[this.currencyCode] || '$'
+    },
+    isDark() {
+      return this.$vuetify.theme.global.name === 'dark'
+    },
   },
   methods: {
     update() {

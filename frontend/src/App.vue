@@ -87,9 +87,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="manageDialog = false">
-            Close
-          </v-btn>
+          <v-btn variant="text" @click="manageDialog = false"> Close </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -129,14 +127,14 @@ export default {
       localStorage.setItem('theme', newTheme)
     },
     updateCurrency(newVal) {
-      this.currencyCode = newVal;
-      localStorage.setItem('currencyCode', newVal);
+      this.currencyCode = newVal
+      localStorage.setItem('currencyCode', newVal)
     },
     async loadApp() {
       const savedTheme = localStorage.getItem('theme')
       if (savedTheme) this.$vuetify.theme.global.name = savedTheme
-      const savedCurrencyCode = localStorage.getItem('currencyCode');
-      if (savedCurrencyCode) this.updateCurrency(savedCurrencyCode);
+      const savedCurrencyCode = localStorage.getItem('currencyCode')
+      if (savedCurrencyCode) this.updateCurrency(savedCurrencyCode)
 
       try {
         const res = await axios.get('http://localhost:8000/households/')

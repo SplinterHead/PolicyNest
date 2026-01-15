@@ -39,9 +39,9 @@ import PolicyForm from '../components/PolicyForm.vue'
 export default {
   name: 'PoliciesView',
   components: { PolicyList, PolicyForm },
-  props: { 
+  props: {
     currencyCode: String,
-    currentHousehold: Object
+    currentHousehold: Object,
   },
   data() {
     return {
@@ -62,6 +62,9 @@ export default {
           this.loadData()
         }
       },
+    },
+    policyDialog(val) {
+      if (!val) this.selectedPolicy = null
     },
   },
   methods: {
@@ -130,11 +133,6 @@ export default {
     if (this.currentHousehold && this.currentHousehold.id) {
       this.loadData()
     }
-  },
-  watch: {
-    policyDialog(val) {
-      if (!val) this.selectedPolicy = null
-    },
   },
 }
 </script>

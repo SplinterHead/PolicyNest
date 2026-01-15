@@ -9,7 +9,7 @@
           </div>
 
           <v-select
-            :model-value="currencyCode" 
+            :model-value="currencyCode"
             @update:modelValue="$emit('update-currency', $event)"
             :items="currencies"
             item-title="label"
@@ -20,41 +20,18 @@
             hint="This affects how premiums and sums are displayed."
             persistent-hint
           >
-             <template v-slot:selection="{ item }">
-               <span class="mr-2 text-h6">{{ item.raw.symbol }}</span>
-               {{ item.raw.label }}
-             </template>
-             <template v-slot:item="{ props, item }">
-               <v-list-item v-bind="props" :subtitle="item.raw.code">
-                  <template v-slot:prepend>
-                    <span class="mr-4 font-weight-bold">{{ item.raw.symbol }}</span>
-                  </template>
-               </v-list-item>
-             </template>
+            <template v-slot:selection="{ item }">
+              <span class="mr-2 text-h6">{{ item.raw.symbol }}</span>
+              {{ item.raw.label }}
+            </template>
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props" :subtitle="item.raw.code">
+                <template v-slot:prepend>
+                  <span class="mr-4 font-weight-bold">{{ item.raw.symbol }}</span>
+                </template>
+              </v-list-item>
+            </template>
           </v-select>
-          
-          <!-- <v-select
-            :model-value="currencyCode" 
-            @update:modelValue="$emit('update-currency', $event)"
-            :items="currencies"
-            item-title="label"
-            item-value="code"
-            label="Application Currency"
-            variant="outlined"
-            density="comfortable"
-          >
-             <template v-slot:selection="{ item }">
-               <span class="mr-2 text-h6">{{ item.symbol }}</span>
-               {{ item.label }}
-             </template>
-             <template v-slot:item="{ props, item }">
-               <v-list-item v-bind="props" :subtitle="item.code">
-                  <template v-slot:prepend>
-                    <span class="mr-4 font-weight-bold">{{ item.symbol }}</span>
-                  </template>
-               </v-list-item>
-             </template>
-          </v-select> -->
         </v-card>
       </v-col>
     </v-row>
@@ -73,8 +50,8 @@ export default {
         { code: 'USD', label: 'US Dollar', symbol: '$' },
         { code: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
         { code: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
-      ]
-    };
-  }
+      ],
+    }
+  },
 }
 </script>
