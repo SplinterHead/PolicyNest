@@ -13,14 +13,19 @@
 
     <v-main :class="isDark ? '' : 'bg-grey-lighten-4'">
       <v-container fluid class="pa-6">
-        <router-view v-if="initialized" :current-household="currentHousehold"></router-view>
+        <router-view
+          v-if="initialized"
+          :current-household="currentHousehold"
+          :currency-code="currencyCode"
+          @update-currency="updateCurrency"
+        />
 
         <div
           v-else-if="checkingStatus"
           class="d-flex justify-center align-center"
           style="height: 70vh"
         >
-          <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary" size="64" />
         </div>
       </v-container>
     </v-main>
@@ -33,7 +38,7 @@
           label="Household Name"
           variant="outlined"
           @keyup.enter="createHousehold(true)"
-        ></v-text-field>
+        />
         <v-btn
           block
           color="primary"
@@ -42,8 +47,9 @@
           rounded="lg"
           @click="createHousehold(true)"
           :loading="creatingHousehold"
-          >Get Started</v-btn
         >
+          Get Started
+        </v-btn>
       </v-card>
     </v-dialog>
 
@@ -53,11 +59,11 @@
         <v-card-text class="pa-4">
           <v-list lines="one" border class="rounded-lg mb-4">
             <v-list-item v-for="h in households" :key="h.id" :title="h.name">
-              <template v-slot:append
-                ><v-chip v-if="currentHousehold?.id === h.id" size="x-small" color="success"
-                  >Active</v-chip
-                ></template
-              >
+              <template v-slot:append>
+                <v-chip v-if="currentHousehold?.id === h.id" size="x-small" color="success">
+                  Active
+                </v-chip>
+              </template>
             </v-list-item>
           </v-list>
           <div class="d-flex">
@@ -68,20 +74,23 @@
               density="compact"
               hide-details
               class="mr-2"
-            ></v-text-field>
+            />
             <v-btn
               color="primary"
               height="40"
               @click="createHousehold(false)"
               :loading="creatingHousehold"
-              >Add</v-btn
             >
+              Add
+            </v-btn>
           </div>
         </v-card-text>
-        <v-card-actions
-          ><v-spacer></v-spacer
-          ><v-btn variant="text" @click="manageDialog = false">Close</v-btn></v-card-actions
-        >
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="manageDialog = false">
+            Close
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-app>
@@ -96,16 +105,16 @@ export default {
   components: { NavBar, NavDrawer },
   data() {
     return {
-      drawer: null,
       checkingStatus: true,
-      initialized: false,
-      showOnboarding: false,
-      manageDialog: false,
-
-      households: [],
-      currentHousehold: null,
-      newHouseholdName: '',
       creatingHousehold: false,
+      currencyCode: 'GBP',
+      currentHousehold: null,
+      drawer: null,
+      households: [],
+      initialized: false,
+      manageDialog: false,
+      newHouseholdName: '',
+      showOnboarding: false,
     }
   },
   computed: {
@@ -117,11 +126,17 @@ export default {
     toggleTheme() {
       const newTheme = this.isDark ? 'light' : 'dark'
       this.$vuetify.theme.global.name = newTheme
-      localStorage.setItem('insurance-theme', newTheme)
+      localStorage.setItem('theme', newTheme)
+    },
+    updateCurrency(newVal) {
+      this.currencyCode = newVal;
+      localStorage.setItem('currencyCode', newVal);
     },
     async loadApp() {
-      const savedTheme = localStorage.getItem('insurance-theme')
+      const savedTheme = localStorage.getItem('theme')
       if (savedTheme) this.$vuetify.theme.global.name = savedTheme
+      const savedCurrencyCode = localStorage.getItem('currencyCode');
+      if (savedCurrencyCode) this.updateCurrency(savedCurrencyCode);
 
       try {
         const res = await axios.get('http://localhost:8000/households/')

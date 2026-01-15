@@ -13,16 +13,18 @@
     </v-row>
 
     <PolicyList
-      :policies="policies"
+      :currency-code="currencyCode"
       :loading="loading"
+      :policies="policies"
       @edit="openEditDialog"
       @delete="handleDelete"
     />
 
     <PolicyForm
       v-model="policyDialog"
-      :loading="submitting"
       :assets="assets"
+      :currency-code="currencyCode"
+      :loading="submitting"
       :policy-to-edit="selectedPolicy"
       @submit="handlePolicySubmit"
     />
@@ -37,7 +39,10 @@ import PolicyForm from '../components/PolicyForm.vue'
 export default {
   name: 'PoliciesView',
   components: { PolicyList, PolicyForm },
-  props: { currentHousehold: Object },
+  props: { 
+    currencyCode: String,
+    currentHousehold: Object
+  },
   data() {
     return {
       policies: [],

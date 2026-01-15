@@ -210,22 +210,22 @@
                       <v-col cols="12" md="6">
                         <v-list density="compact" class="bg-transparent">
                           <v-list-item>
-                            <template v-slot:prepend
-                              ><v-icon size="small" class="mr-4">mdi-shield-star</v-icon></template
-                            >
+                            <template v-slot:prepend>
+                              <v-icon size="small" class="mr-4">mdi-shield-star</v-icon>
+                            </template>
                             <v-list-item-title>Cover Type</v-list-item-title>
-                            <template v-slot:append
-                              ><span class="font-weight-medium">{{
-                                selectedPolicy.attributes.cover_type || 'Level Term'
-                              }}</span></template
-                            >
+                            <template v-slot:append>
+                              <span class="font-weight-medium">
+                                {{ selectedPolicy.attributes.cover_type || 'Level Term' }}
+                              </span>
+                            </template>
                           </v-list-item>
                           <v-list-item>
-                            <template v-slot:prepend
-                              ><v-icon size="small" class="mr-4"
-                                >mdi-account-group</v-icon
-                              ></template
-                            >
+                            <template v-slot:prepend>
+                              <v-icon size="small" class="mr-4">
+                                mdi-account-group
+                              </v-icon>
+                            </template>
                             <v-list-item-title>Beneficiaries</v-list-item-title>
                             <template v-slot:append>
                               <div
@@ -237,15 +237,15 @@
                             </template>
                           </v-list-item>
                           <v-list-item>
-                            <template v-slot:prepend
-                              ><v-icon size="small" class="mr-4">mdi-piggy-bank</v-icon></template
-                            >
+                            <template v-slot:prepend>
+                              <v-icon size="small" class="mr-4">mdi-piggy-bank</v-icon>
+                            </template>
                             <v-list-item-title>Sum Assured</v-list-item-title>
-                            <template v-slot:append
-                              ><span class="text-h6 font-weight-bold text-success">{{
-                                formatCurrency(selectedPolicy.attributes.sum_assured || 0)
-                              }}</span></template
-                            >
+                            <template v-slot:append>
+                              <span class="text-h6 font-weight-bold text-success">
+                                {{ formatCurrency(selectedPolicy.attributes.sum_assured || 0) }}
+                              </span>
+                            </template>
                           </v-list-item>
                         </v-list>
                       </v-col>
@@ -263,7 +263,7 @@
                                   ? 'mdi-account-multiple-check'
                                   : 'mdi-account'
                               "
-                            ></v-icon>
+                            />
                             {{
                               selectedPolicy.attributes.joint_policy
                                 ? 'Joint Policy'
@@ -272,9 +272,7 @@
                           </v-chip>
 
                           <v-chip
-                            :color="
-                              selectedPolicy.attributes.critical_illness ? 'green' : 'default'
-                            "
+                            :color="selectedPolicy.attributes.critical_illness ? 'green' : 'default'"
                             variant="tonal"
                           >
                             <v-icon
@@ -284,7 +282,7 @@
                                   ? 'mdi-check'
                                   : 'mdi-close'
                               "
-                            ></v-icon>
+                            />
                             Critical Illness
                           </v-chip>
 
@@ -294,10 +292,8 @@
                           >
                             <v-icon
                               start
-                              :icon="
-                                selectedPolicy.attributes.in_trust ? 'mdi-bank' : 'mdi-bank-outline'
-                              "
-                            ></v-icon>
+                              :icon="selectedPolicy.attributes.in_trust ? 'mdi-bank' : 'mdi-bank-outline'"
+                            />
                             In Trust
                           </v-chip>
 
@@ -307,10 +303,8 @@
                           >
                             <v-icon
                               start
-                              :icon="
-                                selectedPolicy.attributes.waiver_premium ? 'mdi-check' : 'mdi-close'
-                              "
-                            ></v-icon>
+                              :icon="selectedPolicy.attributes.waiver_premium ? 'mdi-check' : 'mdi-close'"
+                            />
                             Waiver of Premium
                           </v-chip>
                         </div>
@@ -352,8 +346,9 @@
                         class="mt-4"
                         :href="getDocumentUrl(selectedPolicy.document_path)"
                         target="_blank"
-                        >Download PDF</v-btn
                       >
+                        Download PDF
+                      </v-btn>
                     </div>
                   </object>
 
@@ -362,7 +357,7 @@
                       indeterminate
                       color="primary"
                       size="64"
-                    ></v-progress-circular>
+                    />
                     <div class="mt-4 font-weight-bold text-primary">Uploading...</div>
                   </div>
 
@@ -399,13 +394,13 @@
     <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title class="text-h5">Delete Policy?</v-card-title>
-        <v-card-text
-          >Are you sure you want to delete the policy for
-          <strong>{{ policyToDelete?.provider }}</strong
-          >? This action cannot be undone.</v-card-text
-        >
+        <v-card-text>
+          Are you sure you want to delete the policy for
+          <strong>{{ policyToDelete?.provider }}</strong>? 
+          This action cannot be undone.
+        </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn color="grey" variant="text" @click="deleteDialog = false">Cancel</v-btn>
           <v-btn color="red" variant="flat" @click="executeDelete">Delete</v-btn>
         </v-card-actions>
@@ -419,8 +414,9 @@ import axios from 'axios'
 
 export default {
   props: {
-    policies: Array,
+    currencyCode: String,
     loading: Boolean,
+    policies: Array,
   },
   emits: ['edit', 'delete'],
   computed: {
@@ -430,12 +426,12 @@ export default {
   },
   data() {
     return {
-      showDetail: false,
-      selectedPolicy: null,
+      deleteDialog: false,
       isDragging: false,
       isUploading: false,
-      deleteDialog: false,
       policyToDelete: null,
+      selectedPolicy: null,
+      showDetail: false,
       headers: [
         { title: 'Provider', key: 'provider', align: 'start' },
         { title: 'Type', key: 'type' },
@@ -452,7 +448,11 @@ export default {
       this.showDetail = true
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: this.currencyCode,
+        currencyDisplay: 'narrowSymbol'
+      }).format(value);
     },
     formatDate(dateStr) {
       if (!dateStr) return '-'

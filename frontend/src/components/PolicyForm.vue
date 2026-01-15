@@ -11,14 +11,14 @@
       <v-card-text class="pt-4" style="max-height: 80vh">
         <v-form ref="form" @submit.prevent="submit">
           <v-row dense>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+            <v-col cols="12" sm="6">
+              <v-text-field
                 v-model="form.provider"
                 label="Provider"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
+              />
+            </v-col>
             <v-col cols="12" sm="6">
               <v-select
                 v-model="form.type"
@@ -26,37 +26,37 @@
                 label="Type"
                 variant="outlined"
                 density="comfortable"
-              ></v-select>
+              />
             </v-col>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+            <v-col cols="12" sm="6">
+              <v-text-field
                 type="date"
                 v-model="form.start_date"
                 label="Start Date"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+              />
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
                 type="date"
                 v-model="form.end_date"
                 label="End Date"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12"
-              ><v-text-field
+              />
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
                 type="number"
                 step="0.01"
                 v-model="form.premium"
                 label="Premium Cost"
                 variant="outlined"
                 density="comfortable"
-                prefix="$"
-              ></v-text-field
-            ></v-col>
+                :prefix="currencySymbol"
+              />
+            </v-col>
 
             <v-col cols="12" v-if="form.type === 'Car'">
               <CarPolicyForm
@@ -77,15 +77,15 @@
                 density="comfortable"
                 accept=".pdf"
                 prepend-inner-icon="mdi-paperclip"
-              ></v-file-input>
+              />
             </v-col>
           </v-row>
         </v-form>
       </v-card-text>
 
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions class="pa-4">
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn variant="text" @click="$emit('update:modelValue', false)">Cancel</v-btn>
         <v-btn color="primary" variant="flat" @click="submit" :loading="loading">Save Policy</v-btn>
       </v-card-actions>
@@ -100,9 +100,10 @@ import LifePolicyForm from './forms/LifePolicyForm.vue'
 export default {
   components: { CarPolicyForm, LifePolicyForm },
   props: {
-    modelValue: Boolean,
-    loading: Boolean,
     assets: Array,
+    currencyCode: String,
+    loading: Boolean,
+    modelValue: Boolean,
     policyToEdit: Object,
   },
   emits: ['update:modelValue', 'submit'],
@@ -118,6 +119,12 @@ export default {
         attributes: {},
       },
       file: null,
+    }
+  },
+  computed: {
+    currencySymbol() {
+      const symbols = { 'GBP': '£', 'USD': '$', 'EUR': '€', 'AUD': '$', 'CAD': '$' };
+      return symbols[this.currencyCode] || '$';
     }
   },
   methods: {

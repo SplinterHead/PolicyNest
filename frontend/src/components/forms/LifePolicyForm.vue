@@ -95,12 +95,19 @@
 <script>
 export default {
   props: {
+    currencyCode: String,
     modelValue: {
       type: Object,
       default: () => ({}),
     },
   },
   emits: ['update:modelValue'],
+  computed: {
+    currencySymbol() {
+      const symbols = { 'GBP': '£', 'USD': '$', 'EUR': '€', 'AUD': '$', 'CAD': '$' };
+      return symbols[this.currencyCode] || '$';
+    }
+  },
   methods: {
     update() {
       this.$emit('update:modelValue', this.modelValue)

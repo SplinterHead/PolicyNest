@@ -138,8 +138,9 @@
 <script>
 export default {
   props: {
-    modelValue: { type: Object, default: () => ({}) },
     assets: { type: Array, default: () => [] },
+    currencyCode: String,
+    modelValue: { type: Object, default: () => ({}) },
   },
   data() {
     return {
@@ -148,6 +149,10 @@ export default {
   },
   emits: ['update:modelValue', 'update:assetId'],
   computed: {
+    currencySymbol() {
+      const symbols = { 'GBP': '£', 'USD': '$', 'EUR': '€', 'AUD': '$', 'CAD': '$' };
+      return symbols[this.currencyCode] || '$';
+    },
     isDark() {
       return this.$vuetify.theme.global.name === 'dark'
     },
