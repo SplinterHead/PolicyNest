@@ -135,7 +135,6 @@ def create_policy(
 
 @app.get("/policies/")
 def read_policies(household_id: Optional[int] = None, db: Session = Depends(get_db)):
-    # If household_id is provided, filter by it. Otherwise return all (for now)
     query = db.query(models.Policy)
     if household_id:
         query = query.filter(models.Policy.household_id == household_id)
@@ -150,7 +149,6 @@ def update_policy_document(
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    # Save file
     upload_folder = "uploads"
     os.makedirs(upload_folder, exist_ok=True)
     file_location = f"{upload_folder}/{file.filename}"
@@ -158,8 +156,61 @@ def update_policy_document(
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
-    # Update DB
     policy.document_path = file_location
+    db.commit()
+    db.refresh(policy)
+    return policy
+
+
+@app.delete("/policies/{policy_id}")
+def delete_policy(policy_id: int, db: Session = Depends(get_db)):
+    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    if policy.document_path and os.path.exists(policy.document_path):
+        os.remove(policy.document_path)
+
+    db.delete(policy)
+    db.commit()
+    return {"ok": True}
+
+
+@app.put("/policies/{policy_id}")
+def update_policy(
+    policy_id: int,
+    household_id: int = Form(...),
+    asset_id: Optional[int] = Form(None),
+    provider: str = Form(...),
+    type: str = Form(...),
+    start_date: date = Form(...),
+    end_date: date = Form(...),
+    premium: float = Form(...),
+    attributes: str = Form("{}"),
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+):
+    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    if file:
+        upload_folder = "uploads"
+        os.makedirs(upload_folder, exist_ok=True)
+        file_location = f"{upload_folder}/{file.filename}"
+        with open(file_location, "wb+") as file_object:
+            shutil.copyfileobj(file.file, file_object)
+        policy.document_path = file_location
+
+    policy.household_id = household_id
+    policy.asset_id = asset_id
+    policy.provider = provider
+    policy.type = type
+    policy.start_date = start_date
+    policy.end_date = end_date
+    policy.premium = premium
+    policy.attributes = json.loads(attributes)
+
     db.commit()
     db.refresh(policy)
     return policy

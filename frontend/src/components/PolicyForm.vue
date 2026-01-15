@@ -103,6 +103,7 @@ export default {
     modelValue: Boolean,
     loading: Boolean,
     assets: Array,
+    policyToEdit: Object,
   },
   emits: ['update:modelValue', 'submit'],
   data() {
@@ -114,7 +115,7 @@ export default {
         start_date: '',
         end_date: '',
         premium: '',
-        attributes: {}, // <-- New object for dynamic data
+        attributes: {},
       },
       file: null,
     }
@@ -129,20 +130,25 @@ export default {
         ...this.form,
         attributes: JSON.stringify(this.form.attributes),
         file: this.file,
+        id: this.policyToEdit?.id,
       })
     },
   },
   watch: {
-    modelValue(val) {
-      if (!val) {
-        // Reset form
-        this.form = {
-          provider: '',
-          type: null,
-          start_date: '',
-          end_date: '',
-          premium: '',
-          attributes: {},
+    modelValue(isOpen) {
+      if (isOpen) {
+        if (this.policyToEdit) {
+          this.form = { ...this.policyToEdit }
+        } else {
+          this.form = {
+            asset_id: null,
+            provider: '',
+            type: null,
+            start_date: '',
+            end_date: '',
+            premium: '',
+            attributes: {},
+          }
         }
         this.file = null
       }

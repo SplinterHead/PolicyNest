@@ -25,6 +25,19 @@
           <v-icon v-if="item.document_path" color="primary" icon="mdi-file-pdf-box"></v-icon>
           <span v-else class="text-caption text-disabled">-</span>
         </template>
+        <template v-slot:item.actions="{ item }">
+          <div class="d-flex justify-end">
+            <v-btn icon size="small" variant="text" color="blue" @click.stop="$emit('edit', item)">
+              <v-icon>mdi-pencil</v-icon>
+              <v-tooltip activator="parent" location="top">Edit</v-tooltip>
+            </v-btn>
+
+            <v-btn icon size="small" variant="text" color="red" @click.stop="confirmDelete(item)">
+              <v-icon>mdi-delete</v-icon>
+              <v-tooltip activator="parent" location="top">Delete</v-tooltip>
+            </v-btn>
+          </div>
+        </template>
       </v-data-table>
     </v-card>
 
@@ -382,6 +395,22 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="deleteDialog" max-width="400px">
+      <v-card>
+        <v-card-title class="text-h5">Delete Policy?</v-card-title>
+        <v-card-text
+          >Are you sure you want to delete the policy for
+          <strong>{{ policyToDelete?.provider }}</strong
+          >? This action cannot be undone.</v-card-text
+        >
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey" variant="text" @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn color="red" variant="flat" @click="executeDelete">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -393,6 +422,7 @@ export default {
     policies: Array,
     loading: Boolean,
   },
+  emits: ['edit', 'delete'],
   computed: {
     isDark() {
       return this.$vuetify.theme.global.name === 'dark'
@@ -404,13 +434,15 @@ export default {
       selectedPolicy: null,
       isDragging: false,
       isUploading: false,
+      deleteDialog: false,
+      policyToDelete: null,
       headers: [
         { title: 'Provider', key: 'provider', align: 'start' },
         { title: 'Type', key: 'type' },
         { title: 'Start Date', key: 'start_date' },
         { title: 'End Date', key: 'end_date' },
         { title: 'Premium', key: 'premium' },
-        { title: 'Doc', key: 'document_path', sortable: false, align: 'end' },
+        { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
       ],
     }
   },
@@ -459,6 +491,18 @@ export default {
         this.uploadDocument(file)
       } else {
         alert('Please upload a PDF file.')
+      }
+    },
+    confirmDelete(item) {
+      this.policyToDelete = item
+      this.deleteDialog = true
+    },
+    executeDelete() {
+      if (this.policyToDelete) {
+        this.$emit('delete', this.policyToDelete.id)
+        this.deleteDialog = false
+        this.policyToDelete = null
+      } else {
       }
     },
     async uploadDocument(file) {

@@ -12,12 +12,18 @@
       </v-col>
     </v-row>
 
-    <PolicyList :policies="policies" :loading="loading" />
+    <PolicyList
+      :policies="policies"
+      :loading="loading"
+      @edit="openEditDialog"
+      @delete="handleDelete"
+    />
 
     <PolicyForm
       v-model="policyDialog"
       :loading="submitting"
       :assets="assets"
+      :policy-to-edit="selectedPolicy"
       @submit="handlePolicySubmit"
     />
   </div>
@@ -31,9 +37,7 @@ import PolicyForm from '../components/PolicyForm.vue'
 export default {
   name: 'PoliciesView',
   components: { PolicyList, PolicyForm },
-  props: {
-    currentHousehold: Object, // Received from App.vue
-  },
+  props: { currentHousehold: Object },
   data() {
     return {
       policies: [],
@@ -41,19 +45,26 @@ export default {
       loading: false,
       policyDialog: false,
       submitting: false,
+      selectedPolicy: null,
     }
   },
   watch: {
-    // Re-fetch if the user switches household in the parent App.vue
     currentHousehold: {
-      immediate: true, // Run on load
+      immediate: true,
+      deep: true,
       handler(newVal) {
-        if (newVal) this.fetchPolicies()
+        if (newVal && newVal.id) {
+          this.loadData()
+        }
       },
     },
   },
   methods: {
-    async fetchPolicies() {
+    openEditDialog(policy) {
+      this.selectedPolicy = policy
+      this.policyDialog = true
+    },
+    async loadData() {
       if (!this.currentHousehold) return
       this.loading = true
       try {
@@ -83,16 +94,41 @@ export default {
       if (payload.file) formData.append('file', payload.file)
 
       try {
-        await axios.post('http://localhost:8000/policies/', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-        this.fetchPolicies()
+        if (payload.id) {
+          await axios.put(`http://localhost:8000/policies/${payload.id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          })
+        } else {
+          await axios.post('http://localhost:8000/policies/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          })
+        }
+        this.loadData()
         this.policyDialog = false
+        this.selectedPolicy = null
       } catch (e) {
         console.error(e)
       } finally {
         this.submitting = false
       }
+    },
+    async handleDelete(id) {
+      try {
+        await axios.delete(`http://localhost:8000/policies/${id}`)
+        this.loadData()
+      } catch (e) {
+        console.error('Delete failed', e)
+      }
+    },
+  },
+  mounted() {
+    if (this.currentHousehold && this.currentHousehold.id) {
+      this.loadData()
+    }
+  },
+  watch: {
+    policyDialog(val) {
+      if (!val) this.selectedPolicy = null
     },
   },
 }
