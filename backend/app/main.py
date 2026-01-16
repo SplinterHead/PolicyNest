@@ -114,6 +114,27 @@ def create_asset(
     return db_asset
 
 
+@api_router.delete("/assets/{asset_id}")
+def delete_asset(asset_id: int, db: Session = Depends(get_db)):
+    asset = db.query(models.Asset).filter(models.Asset.id == asset_id).first()
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    policies = db.query(models.Policy).filter(models.Policy.asset_id == asset_id).all()
+    for policy in policies:
+        if policy.document_path and os.path.exists(policy.document_path):
+            try:
+                os.remove(policy.document_path)
+            except Exception as e:
+                print(f"Error deleting file {policy.document_path}: {e}")
+    for p in policies:
+        db.delete(p)
+
+    db.delete(asset)
+    db.commit()
+
+    return {"ok": True}
+
+
 # --- POLICY ENDPOINTS ---
 
 
