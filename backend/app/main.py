@@ -34,9 +34,6 @@ def get_db():
         db.close()
 
 
-# --- ONBOARDING ENDPOINTS ---
-
-
 @app.get("/system/status")
 def get_system_status(db: Session = Depends(get_db)):
     """Checks if a household exists to determine if onboarding is needed."""
@@ -44,6 +41,9 @@ def get_system_status(db: Session = Depends(get_db)):
     if household:
         return {"initialized": True, "household": household}
     return {"initialized": False, "household": None}
+
+
+# --- HOUSEHOLD ENDPOINTS ---
 
 
 @app.get("/households/")
@@ -59,6 +59,29 @@ def create_household(name: str = Form(...), db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_household)
     return new_household
+
+
+@app.delete("/households/{household_id}")
+def delete_household(household_id: int, db: Session = Depends(get_db)):
+    household = (
+        db.query(models.Household).filter(models.Household.id == household_id).first()
+    )
+    if not household:
+        raise HTTPException(status_code=404, detail="Household not found")
+    policies = (
+        db.query(models.Policy).filter(models.Policy.household_id == household_id).all()
+    )
+    for policy in policies:
+        if policy.document_path and os.path.exists(policy.document_path):
+            try:
+                os.remove(policy.document_path)
+            except Exception as e:
+                print(f"Error deleting file {policy.document_path}: {e}")
+
+    db.delete(household)
+    db.commit()
+
+    return {"ok": True}
 
 
 # --- ASSET ENDPOINTS ---

@@ -8,9 +8,8 @@ class Household(Base):
     __tablename__ = "households"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)  # e.g. "The Smith Family"
+    name = Column(String, index=True)
 
-    # Relationship to policies
     policies = relationship("Policy", back_populates="household")
     assets = relationship("Asset", back_populates="household")
 
@@ -19,9 +18,9 @@ class Asset(Base):
     __tablename__ = "assets"
     id = Column(Integer, primary_key=True, index=True)
     household_id = Column(Integer, ForeignKey("households.id"))
-    name = Column(String)  # e.g. "Dad's Honda"
-    type = Column(String)  # e.g. "Vehicle"
-    details = Column(JSON, default={})  # Stores { make: 'Honda', reg: 'ABC' }
+    name = Column(String)
+    type = Column(String)
+    details = Column(JSON, default={})
 
     household = relationship("Household", back_populates="assets")
     policies = relationship("Policy", back_populates="asset")

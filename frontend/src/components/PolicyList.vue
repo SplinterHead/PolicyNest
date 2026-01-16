@@ -510,7 +510,6 @@ export default {
         this.$emit('delete', this.policyToDelete.id)
         this.deleteDialog = false
         this.policyToDelete = null
-      } else {
       }
     },
     async uploadDocument(file) {
@@ -519,17 +518,12 @@ export default {
       formData.append('file', file)
 
       try {
-        // Call the new backend endpoint
         const res = await axios.put(
           `http://localhost:8000/policies/${this.selectedPolicy.id}/document`,
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } },
         )
-
-        // Update local state immediately to show the PDF
         this.selectedPolicy.document_path = res.data.document_path
-
-        // Also update the main list so the icon appears in the table behind the modal
         const index = this.policies.findIndex((p) => p.id === this.selectedPolicy.id)
         if (index !== -1) {
           this.policies[index].document_path = res.data.document_path

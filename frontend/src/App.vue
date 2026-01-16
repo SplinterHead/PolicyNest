@@ -59,35 +59,78 @@
         <v-card-text class="pa-4">
           <v-list lines="one" border class="rounded-lg mb-4">
             <v-list-item v-for="h in households" :key="h.id" :title="h.name">
+              <template v-slot:subtitle v-if="currentHousehold?.id === h.id">
+                <span class="text-success font-weight-bold text-caption">Currently Active</span>
+              </template>
+
               <template v-slot:append>
-                <v-chip v-if="currentHousehold?.id === h.id" size="x-small" color="success">
-                  Active
-                </v-chip>
+                <v-btn
+                  v-if="currentHousehold?.id !== h.id"
+                  size="small"
+                  variant="text"
+                  color="primary"
+                  @click="switchHousehold(h)"
+                  >Switch</v-btn
+                >
+
+                <v-btn
+                  icon="mdi-delete"
+                  size="small"
+                  variant="text"
+                  color="grey"
+                  class="ml-2"
+                  @click="confirmDeleteHousehold(h)"
+                ></v-btn>
               </template>
             </v-list-item>
           </v-list>
+
           <div class="d-flex">
             <v-text-field
               v-model="newHouseholdName"
-              label="Name"
+              label="New Household Name"
               variant="outlined"
               density="compact"
               hide-details
               class="mr-2"
-            />
+            ></v-text-field>
             <v-btn
               color="primary"
               height="40"
               @click="createHousehold(false)"
               :loading="creatingHousehold"
+              >Add</v-btn
             >
-              Add
-            </v-btn>
           </div>
         </v-card-text>
+        <v-card-actions
+          ><v-spacer></v-spacer
+          ><v-btn variant="text" @click="manageDialog = false">Close</v-btn></v-card-actions
+        >
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="deleteHouseholdDialog" max-width="400px">
+      <v-card>
+        <v-card-title class="text-h5 text-red">Delete Household?</v-card-title>
+        <v-card-text>
+          Are you sure you want to delete <strong>{{ householdToDelete?.name }}</strong
+          >? <br /><br />
+          <v-alert type="warning" variant="tonal" density="compact" border="start">
+            This will permanently delete all
+            <strong>Policies, Assets, and Documents</strong> associated with this household.
+          </v-alert>
+        </v-card-text>
         <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="manageDialog = false"> Close </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="grey" variant="text" @click="deleteHouseholdDialog = false">Cancel</v-btn>
+          <v-btn
+            color="red"
+            variant="flat"
+            @click="executeDeleteHousehold"
+            :loading="deletingHousehold"
+            >Delete Forever</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -107,8 +150,11 @@ export default {
       creatingHousehold: false,
       currencyCode: 'GBP',
       currentHousehold: null,
+      deleteHouseholdDialog: false,
+      deletingHousehold: false,
       drawer: null,
       households: [],
+      householdToDelete: null,
       initialized: false,
       manageDialog: false,
       newHouseholdName: '',
@@ -153,6 +199,36 @@ export default {
     },
     switchHousehold(household) {
       this.currentHousehold = household
+      this.manageDialog = false
+    },
+    confirmDeleteHousehold(household) {
+      this.householdToDelete = household
+      this.deleteHouseholdDialog = true
+    },
+    async executeDeleteHousehold() {
+      if (!this.householdToDelete) return
+      this.deletingHousehold = true
+      try {
+        await axios.delete(`http://localhost:8000/households/${this.householdToDelete.id}`)
+        this.households = this.households.filter((h) => h.id !== this.householdToDelete.id)
+        if (this.currentHousehold && this.currentHousehold.id === this.householdToDelete.id) {
+          if (this.households.length > 0) {
+            this.switchHousehold(this.households[0])
+          } else {
+            this.currentHousehold = null
+            this.showOnboarding = true
+            this.manageDialog = false
+          }
+        }
+
+        this.deleteHouseholdDialog = false
+        this.householdToDelete = null
+      } catch (e) {
+        console.error('Failed to delete household', e)
+        alert('Could not delete household. Ensure all policies are removed or try again.')
+      } finally {
+        this.deletingHousehold = false
+      }
     },
     async createHousehold(isOnboarding) {
       if (!this.newHouseholdName) return
