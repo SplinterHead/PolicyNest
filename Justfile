@@ -2,6 +2,8 @@ fmt:
   just backend/format
   just frontend/format
 
-run:
+stop:
   docker compose down
+
+run: stop
   docker compose up -d --build

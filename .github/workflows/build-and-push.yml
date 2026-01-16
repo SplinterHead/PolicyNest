@@ -1,0 +1,87 @@
+name: Build and Push
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend]
+        include:
+          - service: backend
+            image_name: policynest-backend
+          - service: frontend
+            image_name: policynest-frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # 1. Check if files in the specific service folder changed
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            src:
+              - '${{ matrix.service }}/**'
+
+      # 2. Login to Docker Hub (Only if changes detected)
+      - name: Login to Docker Hub
+        if: steps.changes.outputs.src == 'true'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Calculate Next Version based on Commits
+      # It looks for tags like "backend-v1.0.0" and calculates the next one
+      - name: Determine Version
+        if: steps.changes.outputs.src == 'true'
+        id: semver
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          # Prefix tags so frontend/backend versions don't clash
+          tag_prefix: "${{ matrix.service }}-v"
+          # Standard Conventional Commit patterns
+          major_pattern: "(MAJOR)"
+          minor_pattern: "(feat)"
+          version_format: "${major}.${minor}.${patch}"
+          # If no "feat" or "fix" found, bump patch by default? (Optional)
+          bump_each_commit: false 
+
+      # 4. Set up Docker Buildx
+      - name: Set up Docker Buildx
+        if: steps.changes.outputs.src == 'true'
+        uses: docker/setup-buildx-action@v2
+
+      # 5. Build and Push
+      - name: Build and push
+        if: steps.changes.outputs.src == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.image_name }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.image_name }}:${{ steps.semver.outputs.version }}
+
+      # 6. Push the new Tag back to GitHub
+      # This saves the version so the next run knows where to start counting from
+      - name: Create Tag
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tagName = "${{ matrix.service }}-v${{ steps.semver.outputs.version }}";
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tagName}`,
+              sha: context.sha
+            })
