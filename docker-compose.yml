@@ -1,19 +1,9 @@
 services:
-  backend:
-    build: ./backend
-    container_name: policynest_backend
+  policynest:
+    build: .
+    container_name: policynest
     ports:
       - 8000:8000
     volumes:
-      - ./data/uploads:/app/uploads
-      - ./data/policynest.db:/app/insurance.db
-    restart: always
-
-  frontend:
-    build: ./frontend
-    container_name: policynest_frontend
-    ports:
-      - 8080:80
-    depends_on:
-      - backend
-    restart: always
+      - ./data2:/data
+    restart: unless-stopped

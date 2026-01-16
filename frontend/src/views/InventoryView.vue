@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '../services/api'
 
 export default {
   props: { currentHousehold: Object },
@@ -107,9 +107,7 @@ export default {
   },
   methods: {
     async fetchAssets() {
-      const res = await axios.get(
-        `http://localhost:8000/assets/?household_id=${this.currentHousehold.id}`,
-      )
+      const res = await api.get(`/assets/?household_id=${this.currentHousehold.id}`)
       this.assets = res.data
     },
     async saveAsset() {
@@ -127,7 +125,7 @@ export default {
       formData.append('type', 'Vehicle')
       formData.append('details', JSON.stringify(details))
 
-      await axios.post('http://localhost:8000/assets/', formData)
+      await api.post('/assets/', formData)
       this.fetchAssets()
       this.dialog = false
       this.saving = false

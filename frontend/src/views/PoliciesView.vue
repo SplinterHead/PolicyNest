@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '../services/api'
 import PolicyList from '../components/PolicyList.vue'
 import PolicyForm from '../components/PolicyForm.vue'
 
@@ -77,8 +77,8 @@ export default {
       this.loading = true
       try {
         const [polRes, assetRes] = await Promise.all([
-          axios.get(`http://localhost:8000/policies/?household_id=${this.currentHousehold.id}`),
-          axios.get(`http://localhost:8000/assets/?household_id=${this.currentHousehold.id}`),
+          api.get(`/policies/?household_id=${this.currentHousehold.id}`),
+          api.get(`/assets/?household_id=${this.currentHousehold.id}`),
         ])
         this.policies = polRes.data
         this.assets = assetRes.data
@@ -103,13 +103,9 @@ export default {
 
       try {
         if (payload.id) {
-          await axios.put(`http://localhost:8000/policies/${payload.id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          })
+          await api.put(`/policies/${payload.id}`, formData)
         } else {
-          await axios.post('http://localhost:8000/policies/', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          })
+          await api.post('/policies/', formData)
         }
         this.loadData()
         this.policyDialog = false
@@ -122,7 +118,7 @@ export default {
     },
     async handleDelete(id) {
       try {
-        await axios.delete(`http://localhost:8000/policies/${id}`)
+        await api.delete(`/policies/${id}`)
         this.loadData()
       } catch (e) {
         console.error('Delete failed', e)

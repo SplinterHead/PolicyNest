@@ -36,23 +36,30 @@ _Create new Car insurance policy_
 
 More screenshots are available in the [docs](./docs/img/)
 
-## 🚀 Quick Start (Docker)
+## 🚀 Quick Start (Docker Compose)
 
 This is the recommended way to run the application.
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/SplinterHead/policynest.git
-    cd policynest
+1.  **Create the docker-compose.yml file**
+    ```yaml
+    services:
+      policynest:
+        image: splinterhead27/policynest:latest
+        container_name: policynest
+        ports:
+        - 8000:8000
+        volumes:
+        - ./data:/data
+        restart: unless-stopped
     ```
 
 2.  **Start the stack**
-    ```bash
-    docker-compose up --build -d
-    ```
+   ```bash
+   docker-compose up
+   ``` 
 
 3.  **Access the App**
-    * **Frontend:** `http://localhost:8080`
+    * **Frontend:** `http://localhost:8000`
     * **Backend API Docs:** `http://localhost:8000/docs`
 
 4.  **First Run:** You will be prompted to create your first "Household" (e.g., *The Smith Residence*) to initialize the database.

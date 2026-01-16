@@ -418,7 +418,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api, { getFileUrl } from '../services/api'
 
 export default {
   props: {
@@ -481,9 +481,7 @@ export default {
       return 'text-success'
     },
     getDocumentUrl(path) {
-      if (!path) return '#'
-      const filename = path.split('/').pop()
-      return `http://localhost:8000/uploads/${filename}`
+      return getFileUrl(path)
     },
     triggerFileInput() {
       this.$refs.fileInput.click()
@@ -518,11 +516,7 @@ export default {
       formData.append('file', file)
 
       try {
-        const res = await axios.put(
-          `http://localhost:8000/policies/${this.selectedPolicy.id}/document`,
-          formData,
-          { headers: { 'Content-Type': 'multipart/form-data' } },
-        )
+        const res = await api.put(`/policies/${this.selectedPolicy.id}/document`, formData)
         this.selectedPolicy.document_path = res.data.document_path
         const index = this.policies.findIndex((p) => p.id === this.selectedPolicy.id)
         if (index !== -1) {

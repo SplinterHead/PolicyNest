@@ -4,8 +4,8 @@ import shutil
 from datetime import date
 from typing import Optional
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
@@ -14,16 +14,15 @@ from . import database, models
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
+api_router = APIRouter(prefix="/api")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+UPLOADS_DIR = "/data/uploads"
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+if not os.path.exists(UPLOADS_DIR):
+    os.makedirs(UPLOADS_DIR)
+
+
+app.mount(UPLOADS_DIR, StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 
 def get_db():
@@ -34,7 +33,10 @@ def get_db():
         db.close()
 
 
-@app.get("/system/status")
+# --- API ENDPOINTS ---
+
+
+@api_router.get("/system/status")
 def get_system_status(db: Session = Depends(get_db)):
     """Checks if a household exists to determine if onboarding is needed."""
     household = db.query(models.Household).first()
@@ -46,13 +48,13 @@ def get_system_status(db: Session = Depends(get_db)):
 # --- HOUSEHOLD ENDPOINTS ---
 
 
-@app.get("/households/")
+@api_router.get("/households/")
 def read_households(db: Session = Depends(get_db)):
     """List all households for the switcher menu."""
     return db.query(models.Household).all()
 
 
-@app.post("/households/")
+@api_router.post("/households/")
 def create_household(name: str = Form(...), db: Session = Depends(get_db)):
     new_household = models.Household(name=name)
     db.add(new_household)
@@ -61,7 +63,7 @@ def create_household(name: str = Form(...), db: Session = Depends(get_db)):
     return new_household
 
 
-@app.delete("/households/{household_id}")
+@api_router.delete("/households/{household_id}")
 def delete_household(household_id: int, db: Session = Depends(get_db)):
     household = (
         db.query(models.Household).filter(models.Household.id == household_id).first()
@@ -87,19 +89,19 @@ def delete_household(household_id: int, db: Session = Depends(get_db)):
 # --- ASSET ENDPOINTS ---
 
 
-@app.get("/assets/")
+@api_router.get("/assets/")
 def read_assets(household_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.Asset).filter(models.Asset.household_id == household_id).all()
     )
 
 
-@app.post("/assets/")
+@api_router.post("/assets/")
 def create_asset(
     household_id: int = Form(...),
     name: str = Form(...),
     type: str = Form(...),
-    details: str = Form("{}"),  # JSON string
+    details: str = Form("{}"),
     db: Session = Depends(get_db),
 ):
     parsed_details = json.loads(details)
@@ -115,7 +117,7 @@ def create_asset(
 # --- POLICY ENDPOINTS ---
 
 
-@app.post("/policies/")
+@api_router.post("/policies/")
 def create_policy(
     household_id: int = Form(...),
     asset_id: Optional[int] = Form(None),
@@ -130,9 +132,7 @@ def create_policy(
 ):
     file_location = None
     if file:
-        upload_folder = "uploads"
-        os.makedirs(upload_folder, exist_ok=True)
-        file_location = f"{upload_folder}/{file.filename}"
+        file_location = f"{UPLOADS_DIR}/{file.filename}"
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
@@ -156,7 +156,7 @@ def create_policy(
     return db_policy
 
 
-@app.get("/policies/")
+@api_router.get("/policies/")
 def read_policies(household_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(models.Policy)
     if household_id:
@@ -164,7 +164,7 @@ def read_policies(household_id: Optional[int] = None, db: Session = Depends(get_
     return query.all()
 
 
-@app.put("/policies/{policy_id}/document")
+@api_router.put("/policies/{policy_id}/document")
 def update_policy_document(
     policy_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
 ):
@@ -172,9 +172,7 @@ def update_policy_document(
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    upload_folder = "uploads"
-    os.makedirs(upload_folder, exist_ok=True)
-    file_location = f"{upload_folder}/{file.filename}"
+    file_location = f"{UPLOADS_DIR}/{file.filename}"
 
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
@@ -185,7 +183,7 @@ def update_policy_document(
     return policy
 
 
-@app.delete("/policies/{policy_id}")
+@api_router.delete("/policies/{policy_id}")
 def delete_policy(policy_id: int, db: Session = Depends(get_db)):
     policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
     if not policy:
@@ -199,7 +197,7 @@ def delete_policy(policy_id: int, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@app.put("/policies/{policy_id}")
+@api_router.put("/policies/{policy_id}")
 def update_policy(
     policy_id: int,
     household_id: int = Form(...),
@@ -237,3 +235,19 @@ def update_policy(
     db.commit()
     db.refresh(policy)
     return policy
+
+
+app.include_router(api_router)
+
+# --- FRONTEND ---
+if os.path.exists("../frontend/dist"):
+    app.mount(
+        "/assets", StaticFiles(directory="../frontend/dist/assets"), name="assets"
+    )
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api") or full_path.startswith("uploads"):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        return FileResponse("../frontend/dist/index.html")

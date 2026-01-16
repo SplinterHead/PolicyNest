@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from './services/api'
 import NavBar from './components/NavBar.vue'
 import NavDrawer from './components/NavDrawer.vue'
 
@@ -183,7 +183,7 @@ export default {
       if (savedCurrencyCode) this.updateCurrency(savedCurrencyCode)
 
       try {
-        const res = await axios.get('http://localhost:8000/households/')
+        const res = await api.get('/households/')
         this.households = res.data
         if (this.households.length > 0) {
           this.initialized = true
@@ -209,7 +209,7 @@ export default {
       if (!this.householdToDelete) return
       this.deletingHousehold = true
       try {
-        await axios.delete(`http://localhost:8000/households/${this.householdToDelete.id}`)
+        await api.delete(`/households/${this.householdToDelete.id}`)
         this.households = this.households.filter((h) => h.id !== this.householdToDelete.id)
         if (this.currentHousehold && this.currentHousehold.id === this.householdToDelete.id) {
           if (this.households.length > 0) {
@@ -236,7 +236,7 @@ export default {
       try {
         let formData = new FormData()
         formData.append('name', this.newHouseholdName)
-        const res = await axios.post('http://localhost:8000/households/', formData)
+        const res = await api.post('/households/', formData)
         this.households.push(res.data)
         this.switchHousehold(res.data)
         this.newHouseholdName = ''
