@@ -21,6 +21,7 @@ WORKDIR /app
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY docker-entrypoint.sh .
 COPY backend/ ./backend
 
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
@@ -28,4 +29,4 @@ COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 RUN mkdir -p backend/uploads
 
 WORKDIR /app/backend
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD [ "/app/docker-entrypoint.sh"]
