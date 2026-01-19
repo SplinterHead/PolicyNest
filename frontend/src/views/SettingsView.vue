@@ -1,6 +1,11 @@
 <template>
   <div>
     <v-row>
+      <v-col>
+        <h1 class="text-h4 font-weight-thin">Settings</h1>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6">
         <v-card elevation="2" rounded="lg" class="pa-4">
           <div class="d-flex align-center mb-4 text-primary font-weight-bold">

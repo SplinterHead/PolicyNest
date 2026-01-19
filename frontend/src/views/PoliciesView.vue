@@ -2,8 +2,7 @@
   <div v-if="currentHousehold">
     <v-row class="mb-4" align="center">
       <v-col>
-        <div class="text-caption text-medium-emphasis">DASHBOARD</div>
-        <h1 class="text-h4 font-weight-thin">{{ currentHousehold.name }}</h1>
+        <h1 class="text-h4 font-weight-thin">Policies</h1>
       </v-col>
       <v-col cols="auto">
         <v-btn color="primary" prepend-icon="mdi-plus" size="large" @click="policyDialog = true">
@@ -12,13 +11,39 @@
       </v-col>
     </v-row>
 
-    <PolicyList
-      :currency-code="currencyCode"
-      :loading="loading"
-      :policies="policies"
-      @edit="openEditDialog"
-      @delete="handleDelete"
-    />
+    <div class="mb-6">
+      <div class="d-flex align-center mb-2">
+        <v-icon color="success" class="mr-2">mdi-shield-check</v-icon>
+        <h2 class="text-h6 font-weight-bold">Active Policies</h2>
+      </div>
+
+      <PolicyList
+        :currency-code="currencyCode"
+        :policies="activePolicies"
+        :loading="loading"
+        @edit="openEditDialog"
+        @delete="handleDelete"
+        @upload="handleUpload"
+      />
+    </div>
+
+    <div v-if="expiredPolicies.length > 0" class="mb-6">
+      <v-divider class="my-6" />
+
+      <div class="d-flex align-center mb-2 text-medium-emphasis">
+        <v-icon color="grey" class="mr-2">mdi-history</v-icon>
+        <h2 class="text-h6 font-weight-bold">Expired Policies</h2>
+      </div>
+
+      <PolicyList
+        :currency-code="currencyCode"
+        :policies="expiredPolicies"
+        :loading="loading"
+        @edit="openEditDialog"
+        @delete="handleDelete"
+        @upload="handleUpload"
+      />
+    </div>
 
     <PolicyForm
       v-model="policyDialog"
@@ -66,6 +91,27 @@ export default {
     policyDialog(val) {
       if (!val) this.selectedPolicy = null
     },
+  },
+  computed: {
+    activePolicies() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return this.policies.filter(p => {
+        if (!p.end_date) return true;
+        return new Date(p.end_date) >= today;
+      });
+    },
+
+    expiredPolicies() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return this.policies.filter(p => {
+        if (!p.end_date) return false;
+        return new Date(p.end_date) < today;
+      });
+    }
   },
   methods: {
     openEditDialog(policy) {

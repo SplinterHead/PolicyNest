@@ -2,8 +2,7 @@
   <div>
     <v-row class="mb-4" align="center">
       <v-col>
-        <div class="text-caption text-medium-emphasis">INVENTORY</div>
-        <h1 class="text-h4 font-weight-thin">My Assets</h1>
+        <h1 class="text-h4 font-weight-thin">Inventory</h1>
       </v-col>
       <v-col cols="auto">
         <v-btn color="primary" prepend-icon="mdi-plus" size="large" @click="dialog = true">
