@@ -30,28 +30,10 @@
       </v-container>
     </v-main>
 
-    <v-dialog v-model="showOnboarding" persistent max-width="450px">
-      <v-card class="text-center pa-6 rounded-xl">
-        <h2 class="text-h5 font-weight-bold mb-2">Welcome</h2>
-        <v-text-field
-          v-model="newHouseholdName"
-          label="Household Name"
-          variant="outlined"
-          @keyup.enter="createHousehold(true)"
-        />
-        <v-btn
-          block
-          color="primary"
-          size="large"
-          class="mt-2"
-          rounded="lg"
-          @click="createHousehold(true)"
-          :loading="creatingHousehold"
-        >
-          Get Started
-        </v-btn>
-      </v-card>
-    </v-dialog>
+    <OnboardingDialog
+      v-model="showOnboarding"
+      @complete="handleOnboardingComplete"
+    />
 
     <v-dialog v-model="manageDialog" max-width="500px">
       <v-card rounded="lg">
@@ -141,13 +123,17 @@
 import api from './services/api'
 import NavBar from './components/NavBar.vue'
 import NavDrawer from './components/NavDrawer.vue'
+import OnboardingDialog from './components/OnboardingDialog.vue'
 
 export default {
-  components: { NavBar, NavDrawer },
+  components: {
+    NavBar,
+    NavDrawer,
+    OnboardingDialog
+  },
   data() {
     return {
       checkingStatus: true,
-      creatingHousehold: false,
       currencyCode: 'GBP',
       currentHousehold: null,
       deleteHouseholdDialog: false,
@@ -157,7 +143,6 @@ export default {
       householdToDelete: null,
       initialized: false,
       manageDialog: false,
-      newHouseholdName: '',
       showOnboarding: false,
     }
   },
@@ -167,6 +152,20 @@ export default {
     },
   },
   methods: {
+    confirmDeleteHousehold(household) {
+      this.householdToDelete = household
+      this.deleteHouseholdDialog = true
+    },
+    handleOnboardingComplete(newHousehold) {
+      this.households.push(newHousehold)
+      this.switchHousehold(newHousehold)
+      this.showOnboarding = false
+      this.initialized = true
+    },
+    switchHousehold(household) {
+      this.currentHousehold = household
+      this.manageDialog = false
+    },
     toggleTheme() {
       const newTheme = this.isDark ? 'light' : 'dark'
       this.$vuetify.theme.global.name = newTheme
@@ -177,6 +176,7 @@ export default {
       localStorage.setItem('currencyCode', newVal)
     },
     async loadApp() {
+      this.loading = true
       const savedTheme = localStorage.getItem('theme')
       if (savedTheme) this.$vuetify.theme.global.name = savedTheme
       const savedCurrencyCode = localStorage.getItem('currencyCode')
@@ -188,22 +188,17 @@ export default {
         if (this.households.length > 0) {
           this.initialized = true
           if (!this.currentHousehold) this.currentHousehold = this.households[0]
+          this.showOnboarding = false
         } else {
+          this.currentHousehold = null;
           this.showOnboarding = true
         }
       } catch (e) {
         console.error(e)
       } finally {
+        this.loading = false
         this.checkingStatus = false
       }
-    },
-    switchHousehold(household) {
-      this.currentHousehold = household
-      this.manageDialog = false
-    },
-    confirmDeleteHousehold(household) {
-      this.householdToDelete = household
-      this.deleteHouseholdDialog = true
     },
     async executeDeleteHousehold() {
       if (!this.householdToDelete) return
@@ -220,7 +215,6 @@ export default {
             this.manageDialog = false
           }
         }
-
         this.deleteHouseholdDialog = false
         this.householdToDelete = null
       } catch (e) {
@@ -228,24 +222,6 @@ export default {
         alert('Could not delete household. Ensure all policies are removed or try again.')
       } finally {
         this.deletingHousehold = false
-      }
-    },
-    async createHousehold(isOnboarding) {
-      if (!this.newHouseholdName) return
-      this.creatingHousehold = true
-      try {
-        let formData = new FormData()
-        formData.append('name', this.newHouseholdName)
-        const res = await api.post('/households/', formData)
-        this.households.push(res.data)
-        this.switchHousehold(res.data)
-        this.newHouseholdName = ''
-        this.initialized = true
-        if (isOnboarding) this.showOnboarding = false
-      } catch (e) {
-        console.error(e)
-      } finally {
-        this.creatingHousehold = false
       }
     },
   },
