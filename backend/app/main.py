@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from . import database, models
+from .uploads import save_upload_file
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -17,11 +18,6 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 UPLOADS_DIR = "/data/uploads"
-
-if not os.path.exists(UPLOADS_DIR):
-    os.makedirs(UPLOADS_DIR)
-
-
 app.mount(UPLOADS_DIR, StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 
@@ -153,9 +149,8 @@ def create_policy(
 ):
     file_location = None
     if file:
-        file_location = f"{UPLOADS_DIR}/{file.filename}"
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(file.file, file_object)
+        file_location = save_upload_file(file)
+        print(f"file location: {file_location}")
 
     parsed_attributes = json.loads(attributes)
 
@@ -193,10 +188,7 @@ def update_policy_document(
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    file_location = f"{UPLOADS_DIR}/{file.filename}"
-
-    with open(file_location, "wb+") as file_object:
-        shutil.copyfileobj(file.file, file_object)
+    file_location = save_upload_file(file)
 
     policy.document_path = file_location
     db.commit()

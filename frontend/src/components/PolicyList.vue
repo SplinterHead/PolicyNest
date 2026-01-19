@@ -25,9 +25,7 @@
           </div>
         </template>
         <template v-slot:item.end_date="{ item }">
-          <div v-if="!item.end_date">
-            Perpetual
-          </div>
+          <div v-if="!item.end_date">Perpetual</div>
           <div v-else>
             {{ new Date(item.end_date).toLocaleDateString() }}
           </div>

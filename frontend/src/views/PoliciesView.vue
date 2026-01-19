@@ -94,24 +94,24 @@ export default {
   },
   computed: {
     activePolicies() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
 
-      return this.policies.filter(p => {
-        if (!p.end_date) return true;
-        return new Date(p.end_date) >= today;
-      });
+      return this.policies.filter((p) => {
+        if (!p.end_date) return true
+        return new Date(p.end_date) >= today
+      })
     },
 
     expiredPolicies() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
 
-      return this.policies.filter(p => {
-        if (!p.end_date) return false;
-        return new Date(p.end_date) < today;
-      });
-    }
+      return this.policies.filter((p) => {
+        if (!p.end_date) return false
+        return new Date(p.end_date) < today
+      })
+    },
   },
   methods: {
     openEditDialog(policy) {

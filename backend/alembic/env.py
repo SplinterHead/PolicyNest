@@ -2,13 +2,12 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
 sys.path.append(os.getcwd())
-from app.database import Base, DB_FOLDER, DB_NAME
+from app.database import DB_FOLDER, DB_NAME, Base
 from app.models import *
 
 # this is the Alembic Config object, which provides
@@ -51,7 +50,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        render_as_batch=True
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
