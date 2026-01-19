@@ -35,7 +35,7 @@ class Policy(Base):
     provider = Column(String, index=True)
     type = Column(String)
     start_date = Column(Date)
-    end_date = Column(Date)
+    end_date = Column(Date, nullable=True)
     premium = Column(Float)
     attributes = Column(JSON, default={})
     document_path = Column(String, nullable=True)

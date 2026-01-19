@@ -145,7 +145,7 @@ def create_policy(
     provider: str = Form(...),
     type: str = Form(...),
     start_date: date = Form(...),
-    end_date: date = Form(...),
+    end_date: date = Form(None),
     premium: float = Form(...),
     attributes: str = Form("{}"),
     file: Optional[UploadFile] = File(None),

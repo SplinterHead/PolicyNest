@@ -30,24 +30,24 @@
                 density="comfortable"
               ></v-select>
             </v-col>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+            <v-col cols="12" sm="6">
+              <v-text-field
                 type="date"
                 v-model="form.start_date"
                 label="Start Date"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+              />
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
                 type="date"
                 v-model="form.end_date"
                 label="End Date"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
+              />
+            </v-col>
 
             <v-col cols="12">
               <v-text-field
@@ -144,7 +144,7 @@ export default {
         provider: '',
         type: null,
         start_date: '',
-        end_date: '',
+        end_date: null,
         premium: '',
         frequency: 'Annual',
         attributes: {},
@@ -190,17 +190,13 @@ export default {
     },
     submit() {
       if (!this.form.provider || !this.form.premium) return
-
-      // 1. Merge the frequency into the attributes object
       const finalAttributes = {
         ...this.form.attributes,
         payment_frequency: this.form.frequency,
       }
-
-      // 2. Submit
       this.$emit('submit', {
         ...this.form,
-        attributes: JSON.stringify(finalAttributes), // Send merged JSON
+        attributes: JSON.stringify(finalAttributes),
         file: this.file,
         id: this.policyToEdit?.id,
       })

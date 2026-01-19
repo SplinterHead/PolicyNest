@@ -15,8 +15,22 @@
             size="small"
             variant="flat"
             class="font-weight-bold"
-            >{{ item.type }}</v-chip
           >
+            {{ item.type }}
+          </v-chip>
+        </template>
+        <template v-slot:item.start_date="{ item }">
+          <div>
+            {{ new Date(item.start_date).toLocaleDateString() }}
+          </div>
+        </template>
+        <template v-slot:item.end_date="{ item }">
+          <div v-if="!item.end_date">
+            Perpetual
+          </div>
+          <div v-else>
+            {{ new Date(item.end_date).toLocaleDateString() }}
+          </div>
         </template>
         <template v-slot:item.premium="{ item }">
           <div class="d-flex flex-column align-start">
@@ -28,10 +42,6 @@
               {{ item.attributes.payment_frequency === 'Monthly' ? '/ month' : '/ year' }}
             </span>
           </div>
-        </template>
-        <template v-slot:item.document_path="{ item }">
-          <v-icon v-if="item.document_path" color="primary" icon="mdi-file-pdf-box"></v-icon>
-          <span v-else class="text-caption text-disabled">-</span>
         </template>
         <template v-slot:item.actions="{ item }">
           <div class="d-flex justify-end">
@@ -54,12 +64,14 @@
         <v-toolbar :color="getTypeColor(selectedPolicy.type)">
           <v-toolbar-title class="font-weight-bold text-white">
             {{ selectedPolicy.provider }}
-            <span class="text-subtitle-2 ml-2 opacity-80 text-white"
-              >{{ selectedPolicy.type }} Policy</span
-            >
+            <span class="text-subtitle-2 ml-2 opacity-80 text-white">
+              {{ selectedPolicy.type }} Policy
+            </span>
           </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="showDetail = false" color="white"><v-icon>mdi-close</v-icon></v-btn>
+          <v-spacer />
+          <v-btn icon @click="showDetail = false" color="white">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-toolbar>
 
         <v-card-text
@@ -69,35 +81,26 @@
         >
           <v-container fluid class="pa-6">
             <v-row>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="4">
                 <v-card variant="flat" class="pa-4 border bg-surface">
-                  <div class="text-caption text-medium-emphasis mb-1">PREMIUM</div>
+                  <div class="text-caption text-medium-emphasis mb-1">Premium</div>
                   <div class="text-h5 font-weight-bold text-primary">
                     {{ formatCurrency(selectedPolicy.premium) }}
                   </div>
                   <div class="text-caption mt-1">Per Year</div>
                 </v-card>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="4">
                 <v-card variant="flat" class="pa-4 border bg-surface">
-                  <div class="text-caption text-medium-emphasis mb-1">COVERAGE START</div>
+                  <div class="text-caption text-medium-emphasis mb-1">Policy Start</div>
                   <div class="text-h6">{{ formatDate(selectedPolicy.start_date) }}</div>
                 </v-card>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="4">
                 <v-card variant="flat" class="pa-4 border bg-surface">
-                  <div class="text-caption text-medium-emphasis mb-1">RENEWAL DATE</div>
+                  <div class="text-caption text-medium-emphasis mb-1">Policy Renewal</div>
                   <div class="text-h6" :class="getRenewalColor(selectedPolicy.end_date)">
                     {{ formatDate(selectedPolicy.end_date) }}
-                  </div>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="3" v-if="selectedPolicy.asset">
-                <v-card variant="flat" class="pa-4 border bg-surface">
-                  <div class="text-caption text-medium-emphasis mb-1">LINKED ASSET</div>
-                  <div class="d-flex align-center">
-                    <v-icon icon="mdi-car" class="mr-2"></v-icon>
-                    <span class="text-h6">{{ selectedPolicy.asset.name }}</span>
                   </div>
                 </v-card>
               </v-col>
@@ -116,9 +119,9 @@
                       <v-col cols="12" md="6">
                         <v-list density="compact" class="bg-transparent">
                           <v-list-item>
-                            <template v-slot:prepend
-                              ><v-icon size="small" class="mr-4">mdi-identifier</v-icon></template
-                            >
+                            <template v-slot:prepend>
+                              <v-icon size="small" class="mr-4">mdi-identifier</v-icon>
+                            </template>
                             <v-list-item-title>Reg Plate</v-list-item-title>
                             <template v-slot:append
                               ><v-chip
@@ -144,8 +147,8 @@
                           </v-list-item>
                           <v-list-item>
                             <template v-slot:prepend
-                              ><v-icon size="small" class="mr-4">mdi-cash-minus</v-icon></template
-                            >
+                              ><v-icon size="small" class="mr-4">mdi-cash-minus</v-icon>
+                            </template>
                             <v-list-item-title>Total Excess</v-list-item-title>
                             <template v-slot:append
                               ><span class="font-weight-bold text-red">{{
@@ -446,7 +449,7 @@ export default {
         { title: 'Start Date', key: 'start_date' },
         { title: 'End Date', key: 'end_date' },
         { title: 'Premium', key: 'premium' },
-        { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
+        { title: '', key: 'actions', sortable: false, align: 'end' },
       ],
     }
   },
