@@ -1,7 +1,7 @@
 <template>
   <v-card class="mt-2 mb-2 elevation-0" rounded="lg">
     <div class="d-flex align-center text-primary font-weight-bold mb-4">
-      <v-icon icon="mdi-heart-pulse" class="mr-2"></v-icon>
+      <v-icon icon="mdi-heart-pulse" class="mr-2" />
       Cover Details
     </div>
 
@@ -15,7 +15,7 @@
           density="comfortable"
           bg-color="surface"
           @update:modelValue="update"
-        ></v-select>
+        />
       </v-col>
 
       <v-col cols="12" sm="6">
@@ -25,10 +25,10 @@
           type="number"
           variant="outlined"
           density="comfortable"
-          prefix="£"
+          :prefix="currencySymbol"
           bg-color="surface"
           @update:modelValue="update"
-        ></v-text-field>
+        />
       </v-col>
 
       <v-col cols="12">
@@ -40,7 +40,7 @@
           density="comfortable"
           bg-color="surface"
           @update:modelValue="update"
-        ></v-text-field>
+        />
       </v-col>
 
       <v-col cols="12" class="mt-2">
@@ -54,7 +54,7 @@
               density="compact"
               hide-details
               @update:modelValue="update"
-            ></v-checkbox>
+            />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
@@ -64,7 +64,7 @@
               density="compact"
               hide-details
               @update:modelValue="update"
-            ></v-checkbox>
+            />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
@@ -74,7 +74,7 @@
               density="compact"
               hide-details
               @update:modelValue="update"
-            ></v-checkbox>
+            />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
@@ -84,7 +84,7 @@
               density="compact"
               hide-details
               @update:modelValue="update"
-            ></v-checkbox>
+            />
           </v-col>
         </v-row>
       </v-col>
@@ -95,18 +95,11 @@
 <script>
 export default {
   props: {
-    currencyCode: String,
-    modelValue: {
-      type: Object,
-      default: () => ({}),
-    },
+    currencySymbol: String,
+    modelValue: { type: Object, default: () => ({}) },
   },
   emits: ['update:modelValue'],
   computed: {
-    currencySymbol() {
-      const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: '$', CAD: '$' }
-      return symbols[this.currencyCode] || '$'
-    },
     isDark() {
       return this.$vuetify.theme.global.name === 'dark'
     },

@@ -13,22 +13,22 @@
       <v-card-text class="pt-4" style="max-height: 80vh">
         <v-form ref="form" @submit.prevent="submit">
           <v-row dense>
-            <v-col cols="12" sm="6"
-              ><v-text-field
+            <v-col cols="12" sm="6">
+              <v-text-field
                 v-model="form.provider"
                 label="Provider"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field
-            ></v-col>
+              />
+            </v-col>
             <v-col cols="12" sm="6">
               <v-select
                 v-model="form.type"
-                :items="['Car', 'Home', 'Life', 'Medical', 'Pet']"
+                :items="policyTypes"
                 label="Type"
                 variant="outlined"
                 density="comfortable"
-              ></v-select>
+              />
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
@@ -48,7 +48,6 @@
                 density="comfortable"
               />
             </v-col>
-
             <v-col cols="12">
               <v-text-field
                 v-model="form.premium"
@@ -68,21 +67,34 @@
                     hide-details
                     width="120px"
                     class="font-weight-bold text-caption"
-                  ></v-select>
+                  />
                 </template>
               </v-text-field>
             </v-col>
 
-            <v-col cols="12" v-if="form.type === 'Car'">
+            <v-col cols="12">
+              <BuildingsPolicyForm
+                v-if="form.type === 'Buildings'"
+                v-model="form.attributes"
+                :currencySymbol="currencySymbol"
+              />
               <CarPolicyForm
+                v-else-if="form.type === 'Car'"
                 v-model="form.attributes"
                 :assets="assets"
-                :currencyCode="currencyCode"
+                :currencySymbol="currencySymbol"
                 @update:assetId="form.asset_id = $event"
               />
-            </v-col>
-            <v-col cols="12" v-else-if="form.type === 'Life'">
-              <LifePolicyForm v-model="form.attributes" :currencyCode="currencyCode" />
+              <ContentsPolicyForm
+                v-else-if="form.type === 'Contents'"
+                v-model="form.attributes"
+                :currencySymbol="currencySymbol"
+              />
+              <LifePolicyForm
+                v-else-if="form.type === 'Life'"
+                v-model="form.attributes"
+                :currencySymbol="currencySymbol"
+              />
             </v-col>
 
             <v-col cols="12">
@@ -106,7 +118,7 @@
                   class="d-none"
                   accept=".pdf"
                   @update:modelValue="handleFileUpload"
-                ></v-file-input>
+                />
               </div>
             </v-col>
           </v-row>
@@ -124,11 +136,13 @@
 </template>
 
 <script>
+import BuildingsPolicyForm from './forms/BuildingsPolicyForm.vue'
+import ContentsPolicyForm from './forms/ContentsPolicyForm.vue'
 import CarPolicyForm from './forms/CarPolicyForm.vue'
 import LifePolicyForm from './forms/LifePolicyForm.vue'
 
 export default {
-  components: { CarPolicyForm, LifePolicyForm },
+  components: { BuildingsPolicyForm, ContentsPolicyForm, CarPolicyForm, LifePolicyForm },
   props: {
     modelValue: Boolean,
     loading: Boolean,
@@ -150,6 +164,7 @@ export default {
         attributes: {},
       },
       file: null,
+      policyTypes: ['Buildings', 'Car', 'Contents', 'Life', 'Medical', 'Pet'],
     }
   },
   computed: {

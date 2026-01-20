@@ -1,7 +1,7 @@
 <template>
   <v-card class="mt-2 mb-2 elevation-0" rounded="lg">
     <div class="d-flex align-center text-primary font-weight-bold mb-4">
-      <v-icon icon="mdi-car" class="mr-2"></v-icon>
+      <v-icon icon="mdi-car" class="mr-2" />
       Vehicle Details
     </div>
 
@@ -139,7 +139,7 @@
 export default {
   props: {
     assets: { type: Array, default: () => [] },
-    currencyCode: String,
+    currencySymbol: String,
     modelValue: { type: Object, default: () => ({}) },
   },
   data() {
@@ -149,10 +149,6 @@ export default {
   },
   emits: ['update:modelValue', 'update:assetId'],
   computed: {
-    currencySymbol() {
-      const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: '$', CAD: '$' }
-      return symbols[this.currencyCode] || '$'
-    },
     isDark() {
       return this.$vuetify.theme.global.name === 'dark'
     },
