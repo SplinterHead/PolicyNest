@@ -8,7 +8,7 @@
       :households="households"
       :current-household="currentHousehold"
       @switch-household="switchHousehold"
-      @open-manage="manageDialog = true"
+      @open-manage="showManageDialog = true"
     />
 
     <v-main :class="isDark ? '' : 'bg-grey-lighten-4'">
@@ -32,90 +32,18 @@
 
     <NewHouseholdDialog
       v-model="showOnboarding"
-      @complete="handleOnboardingComplete"
+      :show-cancel="false"
+      @complete="handleNewHousehold"
     />
 
-    <v-dialog v-model="manageDialog" max-width="500px">
-      <v-card rounded="lg">
-        <v-card-title class="pa-4">Manage Households</v-card-title>
-        <v-card-text class="pa-4">
-          <v-list lines="one" border class="rounded-lg mb-4">
-            <v-list-item v-for="h in households" :key="h.id" :title="h.name">
-              <template v-slot:subtitle v-if="currentHousehold?.id === h.id">
-                <span class="text-success font-weight-bold text-caption">Currently Active</span>
-              </template>
-
-              <template v-slot:append>
-                <v-btn
-                  v-if="currentHousehold?.id !== h.id"
-                  size="small"
-                  variant="text"
-                  color="primary"
-                  @click="switchHousehold(h)"
-                  >Switch</v-btn
-                >
-
-                <v-btn
-                  icon="mdi-delete"
-                  size="small"
-                  variant="text"
-                  color="grey"
-                  class="ml-2"
-                  @click="confirmDeleteHousehold(h)"
-                ></v-btn>
-              </template>
-            </v-list-item>
-          </v-list>
-
-          <div class="d-flex">
-            <v-text-field
-              v-model="newHouseholdName"
-              label="New Household Name"
-              variant="outlined"
-              density="compact"
-              hide-details
-              class="mr-2"
-            ></v-text-field>
-            <v-btn
-              color="primary"
-              height="40"
-              @click="createHousehold(false)"
-              :loading="creatingHousehold"
-              >Add</v-btn
-            >
-          </div>
-        </v-card-text>
-        <v-card-actions
-          ><v-spacer></v-spacer
-          ><v-btn variant="text" @click="manageDialog = false">Close</v-btn></v-card-actions
-        >
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="deleteHouseholdDialog" max-width="400px">
-      <v-card>
-        <v-card-title class="text-h5 text-red">Delete Household?</v-card-title>
-        <v-card-text>
-          Are you sure you want to delete <strong>{{ householdToDelete?.name }}</strong
-          >? <br /><br />
-          <v-alert type="warning" variant="tonal" density="compact" border="start">
-            This will permanently delete all
-            <strong>Policies, Assets, and Documents</strong> associated with this household.
-          </v-alert>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="deleteHouseholdDialog = false">Cancel</v-btn>
-          <v-btn
-            color="red"
-            variant="flat"
-            @click="executeDeleteHousehold"
-            :loading="deletingHousehold"
-            >Delete Forever</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ManageHouseholdsDialog
+      v-model="showManageDialog"
+      :households="households"
+      :current-id="currentHousehold?.id"
+      @select="switchHousehold"
+      @created="handleNewHousehold"
+      @deleted="handleDeletedHousehold"
+    />
   </v-app>
 </template>
 
@@ -124,25 +52,24 @@ import api from './services/api'
 import NavBar from './components/NavBar.vue'
 import NavDrawer from './components/NavDrawer.vue'
 import NewHouseholdDialog from './components/NewHouseholdDialog.vue'
+import ManageHouseholdsDialog from './components/ManageHouseholdsDialog.vue'
 
 export default {
   components: {
+    ManageHouseholdsDialog,
     NavBar,
     NavDrawer,
-    NewHouseholdDialog
+    NewHouseholdDialog,
   },
   data() {
     return {
       checkingStatus: true,
       currencyCode: 'GBP',
       currentHousehold: null,
-      deleteHouseholdDialog: false,
-      deletingHousehold: false,
       drawer: null,
       households: [],
-      householdToDelete: null,
       initialized: false,
-      manageDialog: false,
+      showManageDialog: false,
       showOnboarding: false,
     }
   },
@@ -152,19 +79,25 @@ export default {
     },
   },
   methods: {
-    confirmDeleteHousehold(household) {
-      this.householdToDelete = household
-      this.deleteHouseholdDialog = true
-    },
-    handleOnboardingComplete(newHousehold) {
+    handleNewHousehold(newHousehold) {
       this.households.push(newHousehold)
       this.switchHousehold(newHousehold)
       this.showOnboarding = false
+      this.showManageDialog = false
+      this.initialized = true
+    },
+    handleDeletedHousehold(delHousehold) {
+      this.households = this.households.filter((household) => household.id !== delHousehold.id)
+      if (this.currentHousehold.id === delHousehold.id) {
+        this.switchHousehold(this.households[0])
+      }
+      this.showOnboarding = false
+      this.showManageDialog = false
       this.initialized = true
     },
     switchHousehold(household) {
       this.currentHousehold = household
-      this.manageDialog = false
+      this.showManageDialog = false
     },
     toggleTheme() {
       const newTheme = this.isDark ? 'light' : 'dark'
@@ -190,7 +123,7 @@ export default {
           if (!this.currentHousehold) this.currentHousehold = this.households[0]
           this.showOnboarding = false
         } else {
-          this.currentHousehold = null;
+          this.currentHousehold = null
           this.showOnboarding = true
         }
       } catch (e) {
@@ -198,30 +131,6 @@ export default {
       } finally {
         this.loading = false
         this.checkingStatus = false
-      }
-    },
-    async executeDeleteHousehold() {
-      if (!this.householdToDelete) return
-      this.deletingHousehold = true
-      try {
-        await api.delete(`/households/${this.householdToDelete.id}`)
-        this.households = this.households.filter((h) => h.id !== this.householdToDelete.id)
-        if (this.currentHousehold && this.currentHousehold.id === this.householdToDelete.id) {
-          if (this.households.length > 0) {
-            this.switchHousehold(this.households[0])
-          } else {
-            this.currentHousehold = null
-            this.showOnboarding = true
-            this.manageDialog = false
-          }
-        }
-        this.deleteHouseholdDialog = false
-        this.householdToDelete = null
-      } catch (e) {
-        console.error('Failed to delete household', e)
-        alert('Could not delete household. Ensure all policies are removed or try again.')
-      } finally {
-        this.deletingHousehold = false
       }
     },
   },

@@ -1,15 +1,15 @@
 <template>
-  <v-dialog :model-value="modelValue" max-width="500px" persistent>
+  <v-dialog :model-value="modelValue" max-width="500px" :persistent="!showCancel">
     <v-card class="text-center pa-6">
       <v-icon icon="mdi-home-plus" size="64" color="primary" class="mb-4" />
 
       <v-card-title class="text-h5 font-weight-bold">
-        Welcome to PolicyNest!
+        {{ title }}
       </v-card-title>
 
       <v-card-text>
         <p class="mb-4 text-medium-emphasis">
-          To get started, please name your household (e.g., "Smith Family" or "My Apartment").
+          {{ subtitle }}
         </p>
 
         <v-form @submit.prevent="submit" v-model="valid">
@@ -18,7 +18,7 @@
             label="Household Name"
             variant="outlined"
             placeholder="e.g. Dream Home"
-            :rules="[v => !!v || 'Name is required']"
+            :rules="[(v) => !!v || 'Name is required']"
             autofocus
             :loading="loading"
           />
@@ -26,16 +26,20 @@
       </v-card-text>
 
       <v-card-actions class="justify-center">
+        <v-btn v-if="showCancel" variant="text" @click="$emit('update:modelValue', false)">
+          Cancel
+        </v-btn>
+
         <v-btn
           color="primary"
           size="large"
           variant="flat"
-          block
+          :class="{ 'ml-2': showCancel, 'w-100': !showCancel }"
           @click="submit"
           :loading="loading"
           :disabled="!valid || !name"
         >
-          Get Started
+          Create
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -43,40 +47,38 @@
 </template>
 
 <script>
-import api from '../services/api';
+import api from '../services/api'
 
 export default {
   name: 'OnboardingDialog',
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true
-    }
+    modelValue: { type: Boolean, required: true },
+    showCancel: { type: Boolean, default: false },
+    title: { type: String, default: 'Create Household' },
+    subtitle: { type: String, default: 'Give your household a name.' },
   },
   emits: ['update:modelValue', 'complete'],
   data() {
     return {
       name: '',
       loading: false,
-      valid: false
-    };
+      valid: false,
+    }
   },
   methods: {
     async submit() {
-      if (!this.name) return;
-
-      this.loading = true;
+      if (!this.name) return
+      this.loading = true
       try {
-        const payload = { name: this.name };
-        const res = await api.post('/households/', payload);
-        this.$emit('complete', res.data);
-        this.name = '';
+        const res = await api.post('/households/', { name: this.name })
+        this.$emit('complete', res.data)
+        this.name = ''
       } catch (e) {
-        console.error("Household creation failed:", e);
+        console.error('Household creation failed:', e)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>

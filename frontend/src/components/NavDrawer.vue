@@ -56,7 +56,7 @@
             <v-list-item-title>{{ h.name }}</v-list-item-title>
           </v-list-item>
 
-          <v-divider class="my-2"></v-divider>
+          <v-divider class="my-2" />
 
           <v-list-item
             prepend-icon="mdi-cog-outline"
@@ -97,7 +97,7 @@
 <script>
 export default {
   props: {
-    modelValue: Boolean, // Standard Vue 3 prop for v-model
+    modelValue: Boolean,
     households: Array,
     currentHousehold: Object,
   },
