@@ -72,7 +72,7 @@ export default {
         this.$emit('complete', res.data);
         this.name = '';
       } catch (e) {
-        console.error("Onboarding failed:", e);
+        console.error("Household creation failed:", e);
       } finally {
         this.loading = false;
       }

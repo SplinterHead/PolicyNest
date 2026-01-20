@@ -30,7 +30,7 @@
       </v-container>
     </v-main>
 
-    <OnboardingDialog
+    <NewHouseholdDialog
       v-model="showOnboarding"
       @complete="handleOnboardingComplete"
     />
@@ -123,13 +123,13 @@
 import api from './services/api'
 import NavBar from './components/NavBar.vue'
 import NavDrawer from './components/NavDrawer.vue'
-import OnboardingDialog from './components/OnboardingDialog.vue'
+import NewHouseholdDialog from './components/NewHouseholdDialog.vue'
 
 export default {
   components: {
     NavBar,
     NavDrawer,
-    OnboardingDialog
+    NewHouseholdDialog
   },
   data() {
     return {
