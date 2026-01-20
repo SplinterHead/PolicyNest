@@ -9,7 +9,7 @@
       <v-col cols="12" sm="6">
         <v-select
           v-model="modelValue.cover_type"
-          :items="['Level Term', 'Decreasing Term (Mortgage)', 'Whole of Life', 'Over 50s Plan']"
+          :items="policyTypes"
           label="Policy Type"
           variant="outlined"
           density="comfortable"
@@ -99,6 +99,11 @@ export default {
     modelValue: { type: Object, default: () => ({}) },
   },
   emits: ['update:modelValue'],
+  data() {
+    return {
+      policyTypes: ['Level Term', 'Decreasing Term (Mortgage)', 'Whole of Life', 'Over 50s Plan'],
+    }
+  },
   computed: {
     isDark() {
       return this.$vuetify.theme.global.name === 'dark'

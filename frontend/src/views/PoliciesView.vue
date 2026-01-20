@@ -13,7 +13,7 @@
 
     <div class="mb-6">
       <div class="d-flex align-center mb-2">
-        <v-icon color="success" class="mr-2">mdi-shield-check</v-icon>
+        <v-icon color="success" icon="mdi-shield-check" class="mr-2" />
         <h2 class="text-h6 font-weight-bold">Active Policies</h2>
       </div>
 
@@ -31,7 +31,7 @@
       <v-divider class="my-6" />
 
       <div class="d-flex align-center mb-2 text-medium-emphasis">
-        <v-icon color="grey" class="mr-2">mdi-history</v-icon>
+        <v-icon color="grey" icon="mdi-history" class="mr-2" />
         <h2 class="text-h6 font-weight-bold">Expired Policies</h2>
       </div>
 

@@ -95,6 +95,16 @@
                 v-model="form.attributes"
                 :currencySymbol="currencySymbol"
               />
+              <MedicalPolicyForm
+                v-else-if="form.type === 'Medical'"
+                v-model="form.attributes"
+                :currency-symbol="currencySymbol"
+              />
+              <PetPolicyForm
+                v-else-if="form.type === 'Pet'"
+                v-model="form.attributes"
+                :currency-symbol="currencySymbol"
+              />
             </v-col>
 
             <v-col cols="12">
@@ -140,9 +150,18 @@ import BuildingsPolicyForm from './forms/BuildingsPolicyForm.vue'
 import ContentsPolicyForm from './forms/ContentsPolicyForm.vue'
 import CarPolicyForm from './forms/CarPolicyForm.vue'
 import LifePolicyForm from './forms/LifePolicyForm.vue'
+import MedicalPolicyForm from './forms/MedicalPolicyForm.vue'
+import PetPolicyForm from './forms/PetPolicyForm.vue'
 
 export default {
-  components: { BuildingsPolicyForm, ContentsPolicyForm, CarPolicyForm, LifePolicyForm },
+  components: {
+    BuildingsPolicyForm,
+    ContentsPolicyForm,
+    CarPolicyForm,
+    LifePolicyForm,
+    MedicalPolicyForm,
+    PetPolicyForm,
+  },
   props: {
     modelValue: Boolean,
     loading: Boolean,

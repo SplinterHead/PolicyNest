@@ -3,7 +3,7 @@
     <v-app-bar-nav-icon @click="$emit('toggle-drawer')"></v-app-bar-nav-icon>
 
     <v-app-bar-title class="font-weight-bold text-primary">
-      <v-icon icon="mdi-shield-check" class="mr-2"></v-icon>
+      <v-icon icon="mdi-shield-check" class="mr-2" />
       <span class="font-weight-bold">policy</span>
       <span class="font-weight-light">nest</span>
     </v-app-bar-title>
@@ -11,7 +11,7 @@
     <v-spacer />
 
     <v-btn icon @click="$emit('toggle-theme')" class="mr-2">
-      <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+      <v-icon :icom="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
     </v-btn>
   </v-app-bar>
 </template>

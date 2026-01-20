@@ -28,7 +28,7 @@
                   </div>
                 </div>
               </div>
-              <v-icon color="white" icon="mdi-chevron-down" size="small"></v-icon>
+              <v-icon color="white" icon="mdi-chevron-down" size="small" />
             </div>
           </v-card>
         </template>
@@ -51,7 +51,7 @@
                     ? 'mdi-check'
                     : 'mdi-home-outline'
                 "
-              ></v-icon>
+              />
             </template>
             <v-list-item-title>{{ h.name }}</v-list-item-title>
           </v-list-item>
