@@ -1,150 +1,213 @@
 <template>
   <v-dialog
     :model-value="modelValue"
-    max-width="700px"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', $event)"
+    width="80%"
+    scrollable
   >
-    <v-card v-if="policy" rounded="lg">
-      <v-toolbar :color="getHeaderColor(policy.type)" dark density="compact">
-        <v-icon :icon="getIcon(policy.type)" class="ml-4 mr-2" />
-        <v-toolbar-title class="font-weight-bold">
+    <v-card rounded="lg">
+      <v-toolbar :color="getHeaderColor(policy.type)">
+        <v-toolbar-title class="font-weight-bold text-white">
           {{ policy.provider }}
-          <span class="text-caption ml-2 text-white">{{ policy.type }} Policy</span>
+          <span class="text-subtitle-2 ml-2 opacity-80 text-white"> {{ policy.type }} Policy </span>
         </v-toolbar-title>
         <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="$emit('update:modelValue', false)" />
+        <v-btn icon="mdi-close" @click="$emit('update:modelValue', false)" />
       </v-toolbar>
 
-      <v-card-text class="pa-4">
-        <v-row>
-          <v-col cols="12" md="4" class="border-e">
-            <div class="text-caption text-medium-emphasis mb-1">Status</div>
-            <div class="mb-4">
-              <v-chip :color="isActive(policy.end_date) ? 'success' : 'grey'" size="small" label>
-                {{ isActive(policy.end_date) ? 'Active' : 'Expired' }}
-              </v-chip>
-            </div>
+      <v-card-text
+        class="pa-0"
+        :class="isDark ? 'bg-grey-darken-4' : 'bg-grey-lighten-5'"
+        style="height: 85vh"
+      >
+        <v-container fluid class="pa-6">
+          <v-row>
+            <v-col cols="12" md="4">
+              <v-card variant="flat" class="pa-4 border bg-surface">
+                <div class="text-caption text-medium-emphasis mb-1">Premium</div>
+                <div class="text-h5 font-weight-bold text-primary">
+                  {{ formatCurrency(policy.premium) }}
+                </div>
+                <div class="text-caption mt-1">Per Year</div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-card variant="flat" class="pa-4 border bg-surface">
+                <div class="text-caption text-medium-emphasis mb-1">Policy Start</div>
+                <div class="text-h6">{{ formatDate(policy.start_date) }}</div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-card variant="flat" class="pa-4 border bg-surface">
+                <div class="text-caption text-medium-emphasis mb-1">Policy Renewal</div>
+                <div class="text-h6" :class="getRenewalColor(policy.end_date)">
+                  {{ formatDate(policy.end_date) }}
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
 
-            <div class="text-caption text-medium-emphasis mb-1">Premium</div>
-            <div class="text-h6 font-weight-bold mb-4">
-              {{ formatCurrency(policy.premium) }}
-              <span class="text-caption text-medium-emphasis">/ {{ policy.frequency }}</span>
-            </div>
+          <v-row class="mt-2">
+            <v-col cols="12">
+              <v-card class="pa-4 bg-surface" border variant="flat">
+                <div class="text-subtitle-1 font-weight-bold mb-3 d-flex align-center">
+                  <v-icon icon="mdi-list-box-outline" class="mr-2" color="primary" />
+                  Policy Details
+                </div>
 
-            <div class="text-caption text-medium-emphasis mb-1">Dates</div>
-            <div class="text-body-2 mb-1">
-              <strong>Start:</strong> {{ formatDate(policy.start_date) }}
-            </div>
-            <div class="text-body-2">
-              <strong>End:</strong>
-              <span v-if="policy.end_date">{{ formatDate(policy.end_date) }}</span>
-              <span v-else class="text-success">Ongoing</span>
-            </div>
-          </v-col>
+                <div>
+                  <v-row dense>
+                    <BuildingsPolicyDetails
+                      v-if="policy.type === 'Buildings'"
+                      :attributes="policy.attributes"
+                      :currencyCode="currencyCode"
+                    />
+                    <CarPolicyDetails
+                      v-if="policy.type === 'Car'"
+                      :attributes="policy.attributes"
+                      :currencyCode="currencyCode"
+                    />
+                    <ContentsPolicyDetails
+                      v-if="policy.type === 'Contents'"
+                      :attributes="policy.attributes"
+                      :currencyCode="currencyCode"
+                    />
+                    <LifePolicyDetails
+                      v-if="policy.type === 'Life'"
+                      :attributes="policy.attributes"
+                      :currencyCode="currencyCode"
+                    />
+                    <MedicalPolicyDetails
+                      v-if="policy.type === 'Medical'"
+                      :attributes="policy.attributes"
+                      :currencyCode="currencyCode"
+                    />
+                    <PetPolicyDetails
+                      v-if="policy.type === 'Pet'"
+                      :attributes="policy.attributes"
+                    />
+                  </v-row>
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
 
-          <v-col cols="12" md="8">
-            <div class="text-subtitle-2 font-weight-bold mb-3 text-primary">Coverage Details</div>
+          <v-row class="mt-2">
+            <v-col cols="12">
+              <div class="text-subtitle-1 font-weight-bold mb-2">Policy Document</div>
 
-            <div v-if="policy.type === 'Contents'">
-              <v-table density="compact" class="mb-3 border rounded">
-                <tbody>
-                  <tr>
-                    <td class="text-medium-emphasis">Total Cover</td>
-                    <td class="font-weight-bold">
-                      {{ formatCurrency(policy.attributes?.total_cover) }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="text-medium-emphasis">Single Item Limit</td>
-                    <td>{{ formatCurrency(policy.attributes?.single_item_limit) }}</td>
-                  </tr>
-                </tbody>
-              </v-table>
-
-              <div v-if="policy.attributes?.high_value_items?.length" class="mt-3">
-                <div class="text-caption font-weight-bold mb-1">Specified Items:</div>
-                <v-list density="compact" bg-color="grey-lighten-4" rounded="lg" class="py-0">
-                  <v-list-item v-for="(item, i) in policy.attributes.high_value_items" :key="i">
-                    <template v-slot:prepend>
-                      <v-icon icon="mdi-diamond-stone" size="small" color="grey" />
-                    </template>
-                    <v-list-item-title class="text-body-2">{{ item.name }}</v-list-item-title>
-                    <template v-slot:append>
-                      <div class="font-weight-bold">{{ formatCurrency(item.value) }}</div>
-                    </template>
-                  </v-list-item>
-                </v-list>
-              </div>
-            </div>
-
-            <div v-else-if="policy.type === 'Medical'">
-              <div class="d-flex flex-wrap gap-2 mb-3">
-                <v-chip size="small" color="blue-lighten-4" class="text-blue-darken-3">
-                  Type: {{ policy.attributes?.cover_type || 'N/A' }}
-                </v-chip>
-                <v-chip size="small" color="blue-lighten-4" class="text-blue-darken-3">
-                  Excess: {{ formatCurrency(policy.attributes?.excess) }}
-                </v-chip>
-              </div>
-              <div class="text-body-2 text-medium-emphasis">
-                <strong>Hospital List:</strong> {{ policy.attributes?.hospital_list || 'Standard' }}
-              </div>
-            </div>
-
-            <div v-else>
-              <v-row dense>
-                <v-col
-                  v-for="(value, key) in displayableAttributes(policy.attributes)"
-                  :key="key"
-                  cols="6"
+              <v-card
+                height="600px"
+                border
+                class="d-flex align-center justify-center overflow-hidden position-relative"
+                :class="[
+                  policy.document_path ? 'bg-white' : 'bg-surface',
+                  isDragging ? 'border-primary border-dashed bg-blue-lighten-5' : '',
+                ]"
+                @dragover.prevent="isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @drop.prevent="handleDrop"
+              >
+                <object
+                  v-if="policy.document_path"
+                  :data="getDocumentUrl(policy.document_path)"
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
                 >
-                  <div class="text-caption text-medium-emphasis text-capitalize">
-                    {{ key.replace(/_/g, ' ') }}
+                  <div class="text-center text-black">
+                    <v-icon icon="mdi-file-pdf-box" size="64" color="grey" />
+                    <div class="mt-2">Preview not supported.</div>
+                    <v-btn
+                      color="primary"
+                      class="mt-4"
+                      :href="getDocumentUrl(policy.document_path)"
+                      target="_blank"
+                    >
+                      Download PDF
+                    </v-btn>
                   </div>
-                  <div class="text-body-2">{{ value }}</div>
-                </v-col>
-              </v-row>
-            </div>
-          </v-col>
-        </v-row>
+                </object>
 
-        <v-divider class="my-4" />
-        <div class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center">
-            <v-icon icon="mdi-file-document-outline" class="mr-2" color="grey" />
-            <span
-              v-if="policy.document_path"
-              class="text-body-2 text-decoration-underline text-primary cursor-pointer"
-            >
-              View Policy Document
-            </span>
-            <span v-else class="text-caption text-medium-emphasis">No document attached</span>
-          </div>
+                <div v-else-if="isUploading" class="text-center">
+                  <v-progress-circular indeterminate color="primary" size="64" />
+                  <div class="mt-4 font-weight-bold text-primary">Uploading...</div>
+                </div>
 
-          <v-btn
-            color="primary"
-            variant="tonal"
-            size="small"
-            prepend-icon="mdi-pencil"
-            @click="$emit('edit', policy)"
-          >
-            Edit Policy
-          </v-btn>
-        </div>
+                <div v-else class="text-center cursor-pointer" @click="triggerFileInput">
+                  <v-avatar color="grey-lighten-3" size="80" class="mb-4">
+                    <v-icon
+                      size="40"
+                      :color="isDragging ? 'primary' : 'grey-darken-1'"
+                      :icon="isDragging ? 'mdi-arrow-up-bold' : 'mdi-cloud-upload'"
+                    />
+                  </v-avatar>
+
+                  <h3 class="text-h6 font-weight-bold" :class="isDragging ? 'text-primary' : ''">
+                    {{ isDragging ? 'Drop file to upload' : 'No Document Uploaded' }}
+                  </h3>
+                  <div class="text-body-2 text-medium-emphasis mt-1">
+                    Drag & Drop a PDF here, or click to browse
+                  </div>
+
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    class="d-none"
+                    accept=".pdf"
+                    @change="handleFileSelect"
+                  />
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
       </v-card-text>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { getFileUrl } from '../services/api'
+
+import BuildingsPolicyDetails from './details/BuildingsPolicyDetails.vue'
+import CarPolicyDetails from './details/CarPolicyDetails.vue'
+import ContentsPolicyDetails from './details/ContentsPolicyDetails.vue'
+import LifePolicyDetails from './details/LifePolicyDetails.vue'
+import MedicalPolicyDetails from './details/MedicalPolicyDetails.vue'
+import PetPolicyDetails from './details/PetPolicyDetails.vue'
+
 export default {
   name: 'PolicyDetailsDialog',
+  components: {
+    BuildingsPolicyDetails,
+    CarPolicyDetails,
+    ContentsPolicyDetails,
+    LifePolicyDetails,
+    MedicalPolicyDetails,
+    PetPolicyDetails,
+  },
   props: {
+    currencyCode: String,
     modelValue: Boolean,
     policy: Object,
   },
   emits: ['update:modelValue', 'edit'],
+  computed: {
+    isDark() {
+      return this.$vuetify.theme.global.name === 'dark'
+    },
+  },
+  data() {
+    return {
+      isDragging: false,
+      isUploading: false,
+    }
+  },
   methods: {
+    getDocumentUrl(path) {
+      return getFileUrl(path)
+    },
     getHeaderColor(type) {
       const colors = {
         Car: 'blue-darken-2',
@@ -155,6 +218,13 @@ export default {
         Pet: 'green-darken-2',
       }
       return colors[type] || 'grey-darken-2'
+    },
+    getRenewalColor(dateStr) {
+      if (!dateStr) return 'text-grey'
+      const daysLeft = (new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24)
+      if (daysLeft < 0) return 'text-red font-weight-bold'
+      if (daysLeft < 30) return 'text-orange font-weight-bold'
+      return 'text-success'
     },
     getIcon(type) {
       const icons = {
@@ -171,20 +241,56 @@ export default {
       return new Date(endDate) >= new Date()
     },
     formatDate(date) {
-      if (!date) return ''
+      if (!date) return 'Perpetual'
       return new Date(date).toLocaleDateString()
     },
     formatCurrency(val) {
       if (val === null || val === undefined) return '-'
-      return new Intl.Number('en-GB', { style: 'currency', currency: 'GBP' }).format(val)
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: this.currencyCode,
+      }).format(val)
     },
-    // Helper to filter out complex objects from the generic fallback view
     displayableAttributes(attrs) {
       if (!attrs) return {}
-      // Filter out arrays or objects, leave simple strings/numbers
       return Object.fromEntries(
         Object.entries(attrs).filter(([_, v]) => typeof v !== 'object' && v !== null),
       )
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click()
+    },
+    handleFileSelect(event) {
+      const file = event.target.files[0]
+      if (file) this.uploadDocument(file)
+    },
+    handleDrop(event) {
+      this.isDragging = false
+      const file = event.dataTransfer.files[0]
+      if (file && file.type === 'application/pdf') {
+        this.uploadDocument(file)
+      } else {
+        alert('Please upload a PDF file.')
+      }
+    },
+    async uploadDocument(file) {
+      this.isUploading = true
+      let formData = new FormData()
+      formData.append('file', file)
+
+      try {
+        const res = await api.put(`/policies/${this.policy.id}/document`, formData)
+        this.policy.document_path = res.data.document_path
+        const index = this.policies.findIndex((p) => p.id === this.policy.id)
+        if (index !== -1) {
+          this.policies[index].document_path = res.data.document_path
+        }
+      } catch (e) {
+        console.error('Upload failed', e)
+        alert('Failed to upload document')
+      } finally {
+        this.isUploading = false
+      }
     },
   },
 }

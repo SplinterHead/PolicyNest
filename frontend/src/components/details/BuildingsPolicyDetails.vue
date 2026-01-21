@@ -76,7 +76,7 @@ export default {
   name: 'BuildingsPolicyDetails',
   props: {
     attributes: { type: Object, default: () => ({}) },
-    currencyCode: { type: String, default: 'GBP' },
+    currencyCode: String,
   },
   methods: {
     formatCurrency(value) {

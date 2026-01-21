@@ -91,7 +91,7 @@ export default {
   name: 'MedicalPolicyDetails',
   props: {
     attributes: { type: Object, default: () => ({}) },
-    currencyCode: { type: String, default: 'GBP' },
+    currencyCode: String,
   },
   methods: {
     formatCurrency(value) {

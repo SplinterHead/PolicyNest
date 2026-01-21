@@ -95,6 +95,17 @@ export default {
   name: 'PetPolicyDetails',
   props: {
     attributes: { type: Object, default: () => ({}) },
+    currencyCode: String,
+  },
+  methods: {
+    formatCurrency(value) {
+      if (value === undefined || value === null) return 'N/A'
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: this.currencyCode,
+        currencyDisplay: 'narrowSymbol',
+      }).format(value)
+    },
   },
 }
 </script>

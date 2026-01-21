@@ -93,7 +93,7 @@ export default {
   name: 'ContentsPolicyDetails',
   props: {
     attributes: { type: Object, default: () => ({}) },
-    currencyCode: { type: String, default: 'GBP' },
+    currencyCode: String,
   },
   methods: {
     formatCurrency(value) {

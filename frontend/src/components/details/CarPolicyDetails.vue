@@ -61,6 +61,7 @@
 export default {
   props: {
     attributes: { type: Object, default: () => ({}) },
+    currencyCode: String,
   },
   methods: {
     formatCurrency(value) {
