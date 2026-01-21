@@ -146,14 +146,15 @@
 </template>
 
 <script>
-import BuildingsPolicyForm from './forms/BuildingsPolicyForm.vue'
-import ContentsPolicyForm from './forms/ContentsPolicyForm.vue'
-import CarPolicyForm from './forms/CarPolicyForm.vue'
-import LifePolicyForm from './forms/LifePolicyForm.vue'
-import MedicalPolicyForm from './forms/MedicalPolicyForm.vue'
-import PetPolicyForm from './forms/PetPolicyForm.vue'
+import BuildingsPolicyForm from '@/components/forms/BuildingsPolicyForm.vue'
+import ContentsPolicyForm from '@/components/forms/ContentsPolicyForm.vue'
+import CarPolicyForm from '@/components/forms/CarPolicyForm.vue'
+import LifePolicyForm from '@/components/forms/LifePolicyForm.vue'
+import MedicalPolicyForm from '@/components/forms/MedicalPolicyForm.vue'
+import PetPolicyForm from '@/components/forms/PetPolicyForm.vue'
 
 export default {
+  name: 'PolicyForm',
   components: {
     BuildingsPolicyForm,
     ContentsPolicyForm,

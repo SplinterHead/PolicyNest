@@ -11,7 +11,7 @@
       >
         <template v-slot:item.type="{ item }">
           <v-chip
-            :color="getTypeColor(item.type)"
+            :color="getChipColour(item.type)"
             size="small"
             variant="flat"
             class="font-weight-bold"
@@ -83,9 +83,12 @@
 </template>
 
 <script>
-import PolicyDetailsDialog from './PolicyDetailsDialog.vue'
+import { getPolicyColour } from '@/utils/PolicyStyles'
+import { currencyFormat } from '@/utils/Formats'
+import PolicyDetailsDialog from '@/components/PolicyDetailsDialog.vue'
 
 export default {
+  name: 'PolicyList',
   components: {
     PolicyDetailsDialog,
   },
@@ -129,26 +132,14 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: this.currencyCode,
-        currencyDisplay: 'narrowSymbol',
-      }).format(value)
+      return currencyFormat(value)
     },
     formatDate(date) {
       if (!date) return ''
       return new Date(date).toLocaleDateString()
     },
-    getTypeColor(type) {
-      const colors = {
-        Buildings: 'Yellow',
-        Car: 'blue',
-        Contents: 'orange',
-        Life: 'green',
-        Medical: 'red',
-        Pet: 'purple',
-      }
-      return colors[type] || 'grey'
+    getChipColour(policyType) {
+      return getPolicyColour(policyType)
     },
     handleEditFromDialog(policy) {
       this.showPolicy = false

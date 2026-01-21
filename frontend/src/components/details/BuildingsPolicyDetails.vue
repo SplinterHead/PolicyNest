@@ -72,6 +72,8 @@
 </template>
 
 <script>
+import { currencyFormat } from '@/utils/Formats'
+
 export default {
   name: 'BuildingsPolicyDetails',
   props: {
@@ -80,12 +82,7 @@ export default {
   },
   methods: {
     formatCurrency(value) {
-      if (value === undefined || value === null) return 'N/A'
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: this.currencyCode,
-        currencyDisplay: 'narrowSymbol',
-      }).format(value)
+      return currencyFormat(value)
     },
   },
 }

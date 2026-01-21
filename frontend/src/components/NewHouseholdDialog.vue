@@ -47,10 +47,10 @@
 </template>
 
 <script>
-import api from '../services/api'
+import api from '@/services/api'
 
 export default {
-  name: 'OnboardingDialog',
+  name: 'NewHouseholdDialog',
   props: {
     modelValue: { type: Boolean, required: true },
     showCancel: { type: Boolean, default: false },

@@ -96,6 +96,7 @@
 
 <script>
 export default {
+  name: 'NavDrawer',
   props: {
     modelValue: Boolean,
     households: Array,

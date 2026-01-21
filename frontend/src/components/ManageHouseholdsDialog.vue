@@ -97,10 +97,11 @@
 </template>
 
 <script>
-import api from '../services/api'
-import NewHouseholdDialog from './NewHouseholdDialog.vue'
+import api from '@/services/api'
+import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
 
 export default {
+  name: 'ManageHouseholdsDialog',
   components: { NewHouseholdDialog },
   props: {
     modelValue: Boolean,

@@ -66,18 +66,17 @@
 </template>
 
 <script>
+import { currencyFormat } from '@/utils/Formats'
+
 export default {
+  name: 'LifePolicyDetails',
   props: {
     attributes: { type: Object, default: () => ({}) },
     currencyCode: String,
   },
   methods: {
     formatCurrency(value) {
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: this.currencyCode,
-        currencyDisplay: 'narrowSymbol',
-      }).format(value)
+      return currencyFormat(value)
     },
   },
 }

@@ -137,6 +137,7 @@
 
 <script>
 export default {
+  name: 'CarPolicyForm',
   props: {
     assets: { type: Array, default: () => [] },
     currencySymbol: String,

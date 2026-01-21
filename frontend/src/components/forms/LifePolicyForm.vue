@@ -94,6 +94,7 @@
 
 <script>
 export default {
+  name: 'LifePolicyForm',
   props: {
     currencySymbol: String,
     modelValue: { type: Object, default: () => ({}) },

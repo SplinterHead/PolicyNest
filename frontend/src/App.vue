@@ -48,11 +48,11 @@
 </template>
 
 <script>
-import api from './services/api'
-import NavBar from './components/NavBar.vue'
-import NavDrawer from './components/NavDrawer.vue'
-import NewHouseholdDialog from './components/NewHouseholdDialog.vue'
-import ManageHouseholdsDialog from './components/ManageHouseholdsDialog.vue'
+import api from '@/services/api'
+import NavBar from '@/components/NavBar.vue'
+import NavDrawer from '@/components/NavDrawer.vue'
+import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
+import ManageHouseholdsDialog from '@/components/ManageHouseholdsDialog.vue'
 
 export default {
   components: {

@@ -6,7 +6,7 @@
     scrollable
   >
     <v-card rounded="lg">
-      <v-toolbar :color="getHeaderColor(policy.type)">
+      <v-toolbar :color="getHeaderColour(policy.type)">
         <v-toolbar-title class="font-weight-bold text-white">
           {{ policy.provider }}
           <span class="text-subtitle-2 ml-2 opacity-80 text-white"> {{ policy.type }} Policy </span>
@@ -168,14 +168,16 @@
 </template>
 
 <script>
-import { getFileUrl } from '../services/api'
+import { getFileUrl } from '@/services/api'
+import { currencyFormat } from '@/utils/Formats'
+import { getPolicyColour } from '@/utils/PolicyStyles'
 
-import BuildingsPolicyDetails from './details/BuildingsPolicyDetails.vue'
-import CarPolicyDetails from './details/CarPolicyDetails.vue'
-import ContentsPolicyDetails from './details/ContentsPolicyDetails.vue'
-import LifePolicyDetails from './details/LifePolicyDetails.vue'
-import MedicalPolicyDetails from './details/MedicalPolicyDetails.vue'
-import PetPolicyDetails from './details/PetPolicyDetails.vue'
+import BuildingsPolicyDetails from '@/components/details/BuildingsPolicyDetails.vue'
+import CarPolicyDetails from '@/components/details/CarPolicyDetails.vue'
+import ContentsPolicyDetails from '@/components/details/ContentsPolicyDetails.vue'
+import LifePolicyDetails from '@/components/details/LifePolicyDetails.vue'
+import MedicalPolicyDetails from '@/components/details/MedicalPolicyDetails.vue'
+import PetPolicyDetails from '@/components/details/PetPolicyDetails.vue'
 
 export default {
   name: 'PolicyDetailsDialog',
@@ -208,16 +210,8 @@ export default {
     getDocumentUrl(path) {
       return getFileUrl(path)
     },
-    getHeaderColor(type) {
-      const colors = {
-        Car: 'blue-darken-2',
-        Home: 'brown-darken-1',
-        Buildings: 'blue-grey-darken-2',
-        Contents: 'amber-darken-3',
-        Medical: 'teal-darken-2',
-        Pet: 'green-darken-2',
-      }
-      return colors[type] || 'grey-darken-2'
+    getHeaderColour(policyType) {
+      return getPolicyColour(policyType)
     },
     getRenewalColor(dateStr) {
       if (!dateStr) return 'text-grey'
@@ -225,16 +219,6 @@ export default {
       if (daysLeft < 0) return 'text-red font-weight-bold'
       if (daysLeft < 30) return 'text-orange font-weight-bold'
       return 'text-success'
-    },
-    getIcon(type) {
-      const icons = {
-        Car: 'mdi-car',
-        Buildings: 'mdi-home-city',
-        Contents: 'mdi-sofa',
-        Medical: 'mdi-medical-bag',
-        Pet: 'mdi-paw',
-      }
-      return icons[type] || 'mdi-file-certificate'
     },
     isActive(endDate) {
       if (!endDate) return true
@@ -244,12 +228,8 @@ export default {
       if (!date) return 'Perpetual'
       return new Date(date).toLocaleDateString()
     },
-    formatCurrency(val) {
-      if (val === null || val === undefined) return '-'
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: this.currencyCode,
-      }).format(val)
+    formatCurrency(value) {
+      return currencyFormat(value)
     },
     displayableAttributes(attrs) {
       if (!attrs) return {}

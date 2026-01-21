@@ -45,6 +45,7 @@
 
 <script>
 export default {
+  name: 'SettingsView',
   props: ['currencyCode'],
   emits: ['update-currency'],
   data() {

@@ -57,9 +57,9 @@
 </template>
 
 <script>
-import api from '../services/api'
-import PolicyList from '../components/PolicyList.vue'
-import PolicyForm from '../components/PolicyForm.vue'
+import api from '@/services/api'
+import PolicyList from '@/components/PolicyList.vue'
+import PolicyForm from '@/components/PolicyForm.vue'
 
 export default {
   name: 'PoliciesView',
