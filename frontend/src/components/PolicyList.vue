@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import { getPolicyColour } from '@/utils/PolicyStyles'
+import { getPolicyColour } from '@/utils/PolicyTypes'
 import { currencyFormat } from '@/utils/Formats'
 import PolicyDetailsDialog from '@/components/PolicyDetailsDialog.vue'
 

@@ -4,12 +4,30 @@
       <v-col>
         <h1 class="text-h4 font-weight-thin">Inventory</h1>
       </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-plus" size="large" @click="dialog = true">
-          Add Vehicle
-        </v-btn>
-      </v-col>
     </v-row>
+
+    <v-fab app="true" color="primary" location="right bottom" size="large" icon>
+      <v-icon :icon="openFab ? 'mdi-close' : 'mdi-plus'" />
+      <v-speed-dial
+        v-model="openFab"
+        location="top left"
+        transition="slide-y-reverse-transition"
+        activator="parent"
+      >
+        <v-btn
+          v-for="(config, type) in createOptions"
+          :key="type"
+          :color="config.colour"
+          :prepend-icon="config.icon"
+          density="default"
+          rounded="xl"
+          size="large"
+          @click="dialog = true"
+        >
+          {{ config.label }}
+        </v-btn>
+      </v-speed-dial>
+    </v-fab>
 
     <v-row>
       <v-col v-for="asset in assets" :key="asset.id" cols="12" sm="6" md="4">
@@ -106,17 +124,21 @@
 <script>
 import api from '@/services/api'
 
+import { AssetTypes } from '@/utils/AssetTypes'
+
 export default {
   name: 'InventoryView',
   props: { currentHousehold: Object },
   data() {
     return {
       assets: [],
+      assetTheme: AssetTypes,
       assetToDelete: null,
       deleteDialog: false,
       deleting: false,
       dialog: false,
       form: { name: '', make: '', model: '', reg: '', vin: '' },
+      openFab: false,
       saving: false,
     }
   },
@@ -126,6 +148,11 @@ export default {
       handler(val) {
         if (val) this.fetchAssets()
       },
+    },
+  },
+  computed: {
+    createOptions() {
+      return this.assetTheme
     },
   },
   methods: {

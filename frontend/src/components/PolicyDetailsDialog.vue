@@ -177,7 +177,7 @@
 <script>
 import { getFileUrl } from '@/services/api'
 import { currencyFormat } from '@/utils/Formats'
-import { getPolicyColour, getPolicyIcon } from '@/utils/PolicyStyles'
+import { getPolicyColour, getPolicyIcon } from '@/utils/PolicyTypes'
 
 import BuildingsPolicyDetails from '@/components/details/BuildingsPolicyDetails.vue'
 import CarPolicyDetails from '@/components/details/CarPolicyDetails.vue'

@@ -1,4 +1,4 @@
-export const POLICY_THEME = {
+export const PolicyTypes = {
   Buildings: {
     colour: 'blue-grey-darken-2',
     icon: 'mdi-home-city',
@@ -32,9 +32,9 @@ export const POLICY_THEME = {
 }
 
 export const getPolicyColour = (type) => {
-  return POLICY_THEME[type]?.colour || POLICY_THEME['Other'].colour
+  return PolicyTypes[type]?.colour
 }
 
 export const getPolicyIcon = (type) => {
-  return POLICY_THEME[type]?.icon || POLICY_THEME['Other'].icon
+  return PolicyTypes[type]?.icon
 }

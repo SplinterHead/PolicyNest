@@ -77,7 +77,8 @@
 
 <script>
 import api from '@/services/api'
-import { POLICY_THEME } from '@/utils/PolicyStyles'
+
+import { PolicyTypes } from '@/utils/PolicyTypes'
 import PolicyList from '@/components/PolicyList.vue'
 import PolicyForm from '@/components/PolicyForm.vue'
 
@@ -90,15 +91,15 @@ export default {
   },
   data() {
     return {
-      policies: [],
       assets: [],
       loading: false,
+      openFab: false,
+      policies: [],
       policyDialog: false,
       policyDialogType: null,
-      submitting: false,
+      policyTheme: PolicyTypes,
       selectedPolicy: null,
-      openFab: false,
-      policyTheme: POLICY_THEME,
+      submitting: false,
     }
   },
   watch: {
