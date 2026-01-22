@@ -1,9 +1,8 @@
 <template>
   <v-dialog :model-value="modelValue" max-width="500px" :persistent="!showCancel">
-    <v-card class="text-center pa-6">
-      <v-icon icon="mdi-home-plus" size="64" color="primary" class="mb-4" />
-
+    <v-card rounded="lg" elevation="2" class="text-center pa-2 h-100 position-relative">
       <v-card-title class="text-h5 font-weight-bold">
+        <v-icon icon="mdi-home-plus" color="primary" class="mb-1" />
         {{ title }}
       </v-card-title>
 
