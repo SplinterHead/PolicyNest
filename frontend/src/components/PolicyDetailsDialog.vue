@@ -7,9 +7,16 @@
   >
     <v-card rounded="lg">
       <v-toolbar :color="getHeaderColour(policy.type)">
+        <template v-slot:prepend>
+          <div class="ml-4">
+            <v-icon :icon="getHeaderIcon(policy.type)" />
+          </div>
+        </template>
         <v-toolbar-title class="font-weight-bold text-white">
           {{ policy.provider }}
-          <span class="text-subtitle-2 ml-2 opacity-80 text-white"> {{ policy.type }} Policy </span>
+          <span v-if="policy.policy_number" class="text-subtitle-2 ml-2 opacity-80 text-white">
+            Policy No. {{ policy.policy_number }}
+          </span>
         </v-toolbar-title>
         <v-spacer />
         <v-btn icon="mdi-close" @click="$emit('update:modelValue', false)" />
@@ -170,7 +177,7 @@
 <script>
 import { getFileUrl } from '@/services/api'
 import { currencyFormat } from '@/utils/Formats'
-import { getPolicyColour } from '@/utils/PolicyStyles'
+import { getPolicyColour, getPolicyIcon } from '@/utils/PolicyStyles'
 
 import BuildingsPolicyDetails from '@/components/details/BuildingsPolicyDetails.vue'
 import CarPolicyDetails from '@/components/details/CarPolicyDetails.vue'
@@ -212,6 +219,9 @@ export default {
     },
     getHeaderColour(policyType) {
       return getPolicyColour(policyType)
+    },
+    getHeaderIcon(policyType) {
+      return getPolicyIcon(policyType)
     },
     getRenewalColor(dateStr) {
       if (!dateStr) return 'text-grey'

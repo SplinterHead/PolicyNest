@@ -4,12 +4,30 @@
       <v-col>
         <h1 class="text-h4 font-weight-thin">Policies</h1>
       </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" prepend-icon="mdi-plus" size="large" @click="policyDialog = true">
-          Add Policy
-        </v-btn>
-      </v-col>
     </v-row>
+
+    <v-fab app="true" color="primary" location="right bottom" size="large" icon>
+      <v-icon :icon="openFab ? 'mdi-close' : 'mdi-plus'" />
+      <v-speed-dial
+        v-model="openFab"
+        location="top left"
+        transition="slide-y-reverse-transition"
+        activator="parent"
+      >
+        <v-btn
+          v-for="(config, type) in createOptions"
+          :key="type"
+          :color="config.colour"
+          :prepend-icon="config.icon"
+          density="default"
+          rounded="xl"
+          size="large"
+          @click="openPolicyDialog(type)"
+        >
+          {{ config.label }}
+        </v-btn>
+      </v-speed-dial>
+    </v-fab>
 
     <div class="mb-6">
       <div class="d-flex align-center mb-2">
@@ -51,6 +69,7 @@
       :currency-code="currencyCode"
       :loading="submitting"
       :policy-to-edit="selectedPolicy"
+      :policy-type="policyDialogType"
       @submit="handlePolicySubmit"
     />
   </div>
@@ -58,6 +77,7 @@
 
 <script>
 import api from '@/services/api'
+import { POLICY_THEME } from '@/utils/PolicyStyles'
 import PolicyList from '@/components/PolicyList.vue'
 import PolicyForm from '@/components/PolicyForm.vue'
 
@@ -74,8 +94,11 @@ export default {
       assets: [],
       loading: false,
       policyDialog: false,
+      policyDialogType: null,
       submitting: false,
       selectedPolicy: null,
+      openFab: false,
+      policyTheme: POLICY_THEME,
     }
   },
   watch: {
@@ -102,7 +125,9 @@ export default {
         return new Date(p.end_date) >= today
       })
     },
-
+    createOptions() {
+      return this.policyTheme
+    },
     expiredPolicies() {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -114,6 +139,10 @@ export default {
     },
   },
   methods: {
+    openPolicyDialog(type) {
+      this.policyDialogType = type
+      this.policyDialog = true
+    },
     openEditDialog(policy) {
       this.selectedPolicy = policy
       this.policyDialog = true
@@ -139,6 +168,7 @@ export default {
       let formData = new FormData()
       formData.append('household_id', this.currentHousehold.id)
       formData.append('provider', payload.provider)
+      formData.append('policy_number', payload.policy_number)
       formData.append('type', payload.type)
       formData.append('start_date', payload.start_date)
       formData.append('end_date', payload.end_date)

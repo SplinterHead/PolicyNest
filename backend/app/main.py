@@ -139,6 +139,7 @@ def create_policy(
     household_id: int = Form(...),
     asset_id: Optional[int] = Form(None),
     provider: str = Form(...),
+    policy_number: str = Form(...),
     type: str = Form(...),
     start_date: date = Form(...),
     end_date: date = Form(None),
@@ -158,6 +159,7 @@ def create_policy(
         household_id=household_id,
         asset_id=asset_id,
         provider=provider,
+        policy_number=policy_number,
         type=type,
         start_date=start_date,
         end_date=end_date,
@@ -216,6 +218,7 @@ def update_policy(
     household_id: int = Form(...),
     asset_id: Optional[int] = Form(None),
     provider: str = Form(...),
+    policy_number: str = Form(...),
     type: str = Form(...),
     start_date: date = Form(...),
     end_date: date = Form(...),
@@ -239,6 +242,7 @@ def update_policy(
     policy.household_id = household_id
     policy.asset_id = asset_id
     policy.provider = provider
+    policy.policy_number = policy_number
     policy.type = type
     policy.start_date = start_date
     policy.end_date = end_date

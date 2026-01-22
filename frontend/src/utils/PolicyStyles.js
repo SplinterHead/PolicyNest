@@ -2,37 +2,32 @@ export const POLICY_THEME = {
   Buildings: {
     colour: 'blue-grey-darken-2',
     icon: 'mdi-home-city',
-    label: 'Buildings Insurance',
+    label: 'Buildings',
   },
   Car: {
     colour: 'blue-darken-2',
     icon: 'mdi-car',
-    label: 'Vehicle Insurance',
+    label: 'Car',
   },
   Contents: {
     colour: 'amber-darken-3',
     icon: 'mdi-sofa',
-    label: 'Contents Insurance',
+    label: 'Contents',
   },
   Life: {
     colour: 'purple-darken-2',
     icon: 'mdi-heart-pulse',
-    label: 'Life Insurance',
+    label: 'Life',
   },
   Medical: {
     colour: 'teal-darken-2',
     icon: 'mdi-medical-bag',
-    label: 'Health Insurance',
+    label: 'Medical',
   },
   Pet: {
     colour: 'brown-darken-1',
     icon: 'mdi-paw',
-    label: 'Pet Insurance',
-  },
-  Other: {
-    colour: 'grey-darken-2',
-    icon: 'mdi-file-certificate',
-    label: 'Other Policy',
+    label: 'Pet',
   },
 }
 
