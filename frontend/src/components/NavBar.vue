@@ -11,7 +11,7 @@
     <v-spacer />
 
     <v-btn icon @click="$emit('toggle-theme')" class="mr-2">
-      <v-icon :icom="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
+      <v-icon :icon="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
     </v-btn>
   </v-app-bar>
 </template>
