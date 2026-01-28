@@ -4,7 +4,7 @@
     max-width="500px"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
-    <v-card>
+    <v-card rounded="lg" elevation="2" class="pa-2">
       <v-toolbar color="transparent" density="compact">
         <v-toolbar-title class="text-h6">My Households</v-toolbar-title>
         <v-spacer />
@@ -25,9 +25,9 @@
             </template>
 
             <v-list-item-title>{{ house.name }}</v-list-item-title>
-            <v-list-item-subtitle v-if="house.id === currentId"
-              >Currently Selected</v-list-item-subtitle
-            >
+            <v-list-item-subtitle v-if="house.id === currentId">
+              Currently Selected
+            </v-list-item-subtitle>
 
             <template v-slot:append>
               <v-icon v-if="house.id === currentId" color="primary" icon="mdi-check" />

@@ -4,6 +4,11 @@ export const AssetTypes = {
     icon: 'mdi-car',
     label: 'Vehicle',
   },
+  Pet: {
+    colour: 'brown-darken-1',
+    icon: 'mdi-paw',
+    label: 'Pet',
+  },
 }
 
 export const getAssetColour = (type) => {
