@@ -243,6 +243,17 @@ onBeforeUnmount(() => {
   }
 }
 
+body {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+}
+
 .v-card-title,
 .v-app-bar-title {
   font-family: var(--v-font-heading);

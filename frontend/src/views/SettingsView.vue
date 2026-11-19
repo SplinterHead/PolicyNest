@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col>
-        <h1 class="text-headline-large font-weight-thin">Settings</h1>
+        <h1 class="text-headline-large font-weight-light">Settings</h1>
       </v-col>
     </v-row>
     <v-row>

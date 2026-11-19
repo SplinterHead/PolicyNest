@@ -2,7 +2,7 @@
   <div>
     <v-row class="mb-4" align="center">
       <v-col>
-        <h1 class="text-headline-large font-weight-thin">Inventory</h1>
+        <h1 class="text-headline-large font-weight-light">Inventory</h1>
       </v-col>
     </v-row>
 

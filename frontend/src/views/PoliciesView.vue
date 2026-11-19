@@ -2,7 +2,7 @@
   <div v-if="currentHousehold">
     <v-row class="mb-4" align="center">
       <v-col>
-        <h1 class="text-headline-large font-weight-thin">Policies</h1>
+        <h1 class="text-headline-large font-weight-light">Policies</h1>
       </v-col>
     </v-row>
 
