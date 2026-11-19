@@ -51,6 +51,7 @@
       :current-id="currentHousehold?.id"
       @select="switchHousehold"
       @created="handleNewHousehold"
+      @updated="handleUpdatedHousehold"
       @deleted="handleDeletedHousehold"
     />
   </v-app>
@@ -147,6 +148,15 @@ function handleNewHousehold(newHousehold) {
   showOnboarding.value = false
   showManageDialog.value = false
   initialized.value = true
+}
+
+function handleUpdatedHousehold(updatedHousehold) {
+  households.value = households.value.map((household) =>
+    household.id === updatedHousehold.id ? updatedHousehold : household,
+  )
+  if (currentHousehold.value?.id === updatedHousehold.id) {
+    currentHousehold.value = updatedHousehold
+  }
 }
 
 function handleDeletedHousehold(delHousehold) {

@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, Json
 
 
 class AssetForm(BaseModel):
-    """Form payload for creating an asset."""
+    """Form payload for creating or updating an asset."""
 
     household_id: int
     name: str
@@ -58,7 +58,7 @@ class PolicyResponse(BaseModel):
 
 
 class HouseholdForm(BaseModel):
-    """Form payload for creating a household."""
+    """Form payload for creating or updating a household."""
 
     name: str
 

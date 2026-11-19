@@ -30,6 +30,27 @@ def create_household(
     return new_household
 
 
+@router.put("/{household_id}", response_model=schemas.HouseholdResponse)
+def update_household(
+    household_id: int,
+    data: Annotated[schemas.HouseholdForm, Form()],
+    db: SessionDep,
+) -> models.Household:
+    """Update a household's name."""
+    household = db.get(models.Household, household_id)
+    if not household:
+        raise HTTPException(status_code=404, detail="Household not found")
+
+    name = data.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Household name cannot be empty")
+
+    household.name = name
+    db.commit()
+    db.refresh(household)
+    return household
+
+
 @router.delete("/{household_id}", response_model=schemas.DeleteResponse)
 def delete_household(
     household_id: int,

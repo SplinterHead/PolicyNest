@@ -49,16 +49,23 @@
           hover-elevation="4"
           class="h-100 position-relative"
         >
-          <v-icon-btn
-            icon="mdi-delete"
-            variant="text"
-            color="red-lighten-1"
-            size="small"
-            class="position-absolute top-0 right-0 ma-2"
-            style="z-index: 10"
-            aria-label="Delete asset"
-            @click.stop="confirmDelete(asset)"
-          />
+          <div class="position-absolute top-0 right-0 ma-2 d-flex ga-1" style="z-index: 10">
+            <v-icon-btn
+              icon="mdi-pencil-outline"
+              variant="text"
+              size="small"
+              :aria-label="`Edit ${asset.name}`"
+              @click.stop="openEditDialog(asset)"
+            />
+            <v-icon-btn
+              icon="mdi-delete"
+              variant="text"
+              color="red-lighten-1"
+              size="small"
+              :aria-label="`Delete ${asset.name}`"
+              @click.stop="confirmDelete(asset)"
+            />
+          </div>
 
           <v-card-item>
             <template #prepend>
@@ -119,6 +126,7 @@
       v-model="dialog"
       :type="dialogType"
       :household-id="currentHousehold?.id"
+      :asset-to-edit="assetToEdit"
       @saved="fetchAssets"
     />
 
@@ -157,6 +165,7 @@ const theme = useTheme()
 const isDark = computed(() => theme.current.value.dark)
 
 const assets = ref([])
+const assetToEdit = ref(null)
 const dialog = ref(false)
 const dialogType = ref('Vehicle')
 const deleteDialog = ref(false)
@@ -188,9 +197,22 @@ const groupedAssets = computed(() => {
 })
 
 function openCreateDialog(type) {
+  assetToEdit.value = null
   dialogType.value = type
   dialog.value = true
 }
+
+function openEditDialog(asset) {
+  assetToEdit.value = asset
+  dialogType.value = asset.type
+  dialog.value = true
+}
+
+watch(dialog, (isOpen) => {
+  if (!isOpen) {
+    assetToEdit.value = null
+  }
+})
 
 async function fetchAssets() {
   if (!props.currentHousehold) return

@@ -34,6 +34,29 @@ def create_asset(
     return db_asset
 
 
+@router.put("/{asset_id}", response_model=schemas.AssetResponse)
+def update_asset(
+    asset_id: int,
+    data: Annotated[schemas.AssetForm, Form()],
+    db: SessionDep,
+) -> models.Asset:
+    """Update an existing asset."""
+    asset = db.get(models.Asset, asset_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    name = data.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Asset name cannot be empty")
+
+    asset.name = name
+    asset.type = data.type
+    asset.details = data.details
+    db.commit()
+    db.refresh(asset)
+    return asset
+
+
 @router.delete("/{asset_id}", response_model=schemas.DeleteResponse)
 def delete_asset(asset_id: int, db: SessionDep) -> schemas.DeleteResponse:
     """Delete an asset and any policies attached to it."""
