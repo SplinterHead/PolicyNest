@@ -39,70 +39,74 @@
         <v-divider class="ml-4" />
       </div>
 
-      <v-row>
-        <v-col v-for="asset in group.items" :key="asset.id" cols="12" sm="6" md="4">
-          <v-card rounded="lg" elevation="2" hover-elevation="4" class="h-100 position-relative">
-            <v-icon-btn
-              icon="mdi-delete"
-              variant="text"
-              color="red-lighten-1"
-              size="small"
-              class="position-absolute top-0 right-0 ma-2"
-              style="z-index: 10"
-              aria-label="Delete asset"
-              @click.stop="confirmDelete(asset)"
-            />
+      <div class="asset-grid">
+        <v-card
+          v-for="asset in group.items"
+          :key="asset.id"
+          tag="article"
+          rounded="lg"
+          elevation="2"
+          hover-elevation="4"
+          class="h-100 position-relative"
+        >
+          <v-icon-btn
+            icon="mdi-delete"
+            variant="text"
+            color="red-lighten-1"
+            size="small"
+            class="position-absolute top-0 right-0 ma-2"
+            style="z-index: 10"
+            aria-label="Delete asset"
+            @click.stop="confirmDelete(asset)"
+          />
 
-            <v-card-item>
-              <template #prepend>
-                <v-avatar :color="getAssetColour(asset.type, isDark)" variant="tonal" rounded="0">
-                  <v-icon :icon="getAssetIcon(asset.type)" />
-                </v-avatar>
-              </template>
-              <v-card-title>{{ asset.name }}</v-card-title>
+          <v-card-item>
+            <template #prepend>
+              <v-avatar :color="getAssetColour(asset.type, isDark)" variant="tonal" rounded="0">
+                <v-icon :icon="getAssetIcon(asset.type)" />
+              </v-avatar>
+            </template>
+            <v-card-title>{{ asset.name }}</v-card-title>
 
-              <v-card-subtitle v-if="asset.type === 'Vehicle'">
-                {{
-                  [asset.details.make, asset.details.model].filter(Boolean).join(' ') || 'Vehicle'
-                }}
-              </v-card-subtitle>
-              <v-card-subtitle v-else-if="asset.type === 'Pet'">
-                {{
-                  [asset.details.species, asset.details.breed].filter(Boolean).join(' - ') || 'Pet'
-                }}
-              </v-card-subtitle>
-            </v-card-item>
+            <v-card-subtitle v-if="asset.type === 'Vehicle'">
+              {{ [asset.details.make, asset.details.model].filter(Boolean).join(' ') || 'Vehicle' }}
+            </v-card-subtitle>
+            <v-card-subtitle v-else-if="asset.type === 'Pet'">
+              {{
+                [asset.details.species, asset.details.breed].filter(Boolean).join(' - ') || 'Pet'
+              }}
+            </v-card-subtitle>
+          </v-card-item>
 
-            <v-divider />
+          <v-divider />
 
-            <v-card-text>
-              <div v-if="asset.type === 'Vehicle'">
-                <div class="d-flex justify-space-between">
-                  <span class="text-medium-emphasis">Registration</span>
-                  <span class="font-weight-bold">{{ asset.details.reg }}</span>
-                </div>
-                <div class="d-flex justify-space-between mt-2">
-                  <span class="text-medium-emphasis">VIN</span>
-                  <span class="text-mono text-body-small">
-                    {{ asset.details.vin || 'N/A' }}
-                  </span>
-                </div>
+          <v-card-text>
+            <div v-if="asset.type === 'Vehicle'">
+              <div class="d-flex justify-space-between">
+                <span class="text-medium-emphasis">Registration</span>
+                <span class="font-weight-bold">{{ asset.details.reg }}</span>
               </div>
-
-              <div v-else-if="asset.type === 'Pet'">
-                <div class="d-flex justify-space-between">
-                  <span class="text-medium-emphasis">Color</span>
-                  <span>{{ asset.details.color || 'N/A' }}</span>
-                </div>
-                <div class="d-flex justify-space-between mt-2">
-                  <span class="text-medium-emphasis">Microchip</span>
-                  <span class="text-mono">{{ asset.details.chip_id || 'N/A' }}</span>
-                </div>
+              <div class="d-flex justify-space-between mt-2">
+                <span class="text-medium-emphasis">VIN</span>
+                <span class="text-mono text-body-small">
+                  {{ asset.details.vin || 'N/A' }}
+                </span>
               </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+            </div>
+
+            <div v-else-if="asset.type === 'Pet'">
+              <div class="d-flex justify-space-between">
+                <span class="text-medium-emphasis">Color</span>
+                <span>{{ asset.details.color || 'N/A' }}</span>
+              </div>
+              <div class="d-flex justify-space-between mt-2">
+                <span class="text-medium-emphasis">Microchip</span>
+                <span class="text-mono">{{ asset.details.chip_id || 'N/A' }}</span>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
     </div>
 
     <div v-if="assets.length === 0" class="text-center mt-12 text-medium-emphasis">
@@ -226,3 +230,16 @@ watch(
   { immediate: true },
 )
 </script>
+
+<style scoped>
+.asset-grid {
+  display: grid;
+  inline-size: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 1.5rem;
+}
+
+.asset-grid > * {
+  min-inline-size: 0;
+}
+</style>
