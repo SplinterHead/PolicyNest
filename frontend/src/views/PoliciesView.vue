@@ -30,39 +30,105 @@
       </v-speed-dial>
     </v-fab>
 
-    <div class="mb-6">
-      <div class="d-flex align-center mb-2">
-        <v-icon color="success" icon="mdi-shield-check" class="mr-2" />
-        <h2 class="text-title-large font-weight-bold">Active Policies</h2>
-      </div>
+    <div v-if="!loading && policies.length === 0" class="text-center mt-12 text-medium-emphasis">
+      <v-icon icon="mdi-shield-off-outline" size="64" class="mb-4" />
+      <div class="text-title-large">No policies yet</div>
+      <div class="mb-4">Add your first policy to track renewals, cover details, and documents.</div>
+      <v-menu>
+        <template #activator="{ props: menuProps }">
+          <v-btn
+            v-bind="menuProps"
+            color="primary"
+            variant="flat"
+            prepend-icon="mdi-plus"
+            append-icon="mdi-chevron-down"
+          >
+            Add Policy
+          </v-btn>
+        </template>
 
-      <PolicyList
-        :currency-code="currencyCode"
-        :policies="activePolicies"
-        :loading="loading"
-        @edit="openEditDialog"
-        @delete="handleDelete"
-        @uploaded="handleDocumentUploaded"
-      />
+        <v-list density="compact" role="menu" aria-label="Policy types">
+          <v-list-item
+            v-for="(config, type) in PolicyTypes"
+            :key="type"
+            role="menuitem"
+            :prepend-icon="config.icon"
+            :title="config.label"
+            @click="openPolicyDialog(type)"
+          />
+        </v-list>
+      </v-menu>
     </div>
 
-    <div v-if="expiredPolicies.length > 0" class="mb-6">
-      <v-divider class="my-6" />
+    <template v-else>
+      <div class="mb-6">
+        <div class="d-flex align-center mb-2">
+          <v-icon color="success" icon="mdi-shield-check" class="mr-2" />
+          <h2 class="text-title-large font-weight-bold">Active Policies</h2>
+        </div>
 
-      <div class="d-flex align-center mb-2 text-medium-emphasis">
-        <v-icon color="grey" icon="mdi-history" class="mr-2" />
-        <h2 class="text-title-large font-weight-bold">Expired Policies</h2>
+        <v-card
+          v-if="!loading && activePolicies.length === 0"
+          elevation="2"
+          rounded="lg"
+          class="pa-6 text-center text-medium-emphasis"
+        >
+          <div class="mb-4">No active policies</div>
+          <v-menu>
+            <template #activator="{ props: menuProps }">
+              <v-btn
+                v-bind="menuProps"
+                color="primary"
+                variant="flat"
+                prepend-icon="mdi-plus"
+                append-icon="mdi-chevron-down"
+              >
+                Add Policy
+              </v-btn>
+            </template>
+
+            <v-list density="compact" role="menu" aria-label="Policy types">
+              <v-list-item
+                v-for="(config, type) in PolicyTypes"
+                :key="type"
+                role="menuitem"
+                :prepend-icon="config.icon"
+                :title="config.label"
+                @click="openPolicyDialog(type)"
+              />
+            </v-list>
+          </v-menu>
+        </v-card>
+
+        <PolicyList
+          v-else
+          :currency-code="currencyCode"
+          :policies="activePolicies"
+          :loading="loading"
+          @edit="openEditDialog"
+          @delete="handleDelete"
+          @uploaded="handleDocumentUploaded"
+        />
       </div>
 
-      <PolicyList
-        :currency-code="currencyCode"
-        :policies="expiredPolicies"
-        :loading="loading"
-        @edit="openEditDialog"
-        @delete="handleDelete"
-        @uploaded="handleDocumentUploaded"
-      />
-    </div>
+      <div v-if="expiredPolicies.length > 0" class="mb-6">
+        <v-divider class="my-6" />
+
+        <div class="d-flex align-center mb-2 text-medium-emphasis">
+          <v-icon color="grey" icon="mdi-history" class="mr-2" />
+          <h2 class="text-title-large font-weight-bold">Expired Policies</h2>
+        </div>
+
+        <PolicyList
+          :currency-code="currencyCode"
+          :policies="expiredPolicies"
+          :loading="loading"
+          @edit="openEditDialog"
+          @delete="handleDelete"
+          @uploaded="handleDocumentUploaded"
+        />
+      </div>
+    </template>
 
     <PolicyForm
       v-model="policyDialog"
