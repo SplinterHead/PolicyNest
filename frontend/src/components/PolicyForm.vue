@@ -88,7 +88,7 @@
                 v-else-if="form.type === 'Car'"
                 v-model="form.attributes"
                 v-model:asset-id="form.asset_id"
-                :assets="assets"
+                :assets="vehicleAssets"
                 :currency-symbol="currencySymbol"
               />
               <ContentsPolicyForm
@@ -109,6 +109,8 @@
               <PetPolicyForm
                 v-else-if="form.type === 'Pet'"
                 v-model="form.attributes"
+                v-model:asset-id="form.asset_id"
+                :assets="petAssets"
                 :currency-symbol="currencySymbol"
               />
             </v-col>
@@ -187,6 +189,9 @@ const currencySymbol = computed(() => {
   const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: 'A$', CAD: 'C$' }
   return symbols[props.currencyCode] || '$'
 })
+
+const vehicleAssets = computed(() => props.assets.filter((a) => a.type === 'Vehicle'))
+const petAssets = computed(() => props.assets.filter((a) => a.type === 'Pet'))
 
 watch(open, (isOpen) => {
   if (!isOpen) return
