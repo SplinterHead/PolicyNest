@@ -20,19 +20,19 @@
           >
             <div class="d-flex align-center justify-space-between">
               <div class="d-flex align-center overflow-hidden">
-                <v-avatar color="white" size="36" class="mr-3 text-primary">
+                <v-avatar color="surface" size="36" class="mr-3 text-primary">
                   <span class="text-title-small font-weight-bold">
                     {{ currentHousehold ? currentHousehold.name.charAt(0) : 'H' }}
                   </span>
                 </v-avatar>
                 <div class="text-truncate">
-                  <div class="text-body-small text-blue-lighten-4 font-weight-bold">HOUSEHOLD</div>
-                  <div class="text-title-small font-weight-bold text-white text-truncate">
+                  <div class="text-body-small font-weight-bold opacity-90">HOUSEHOLD</div>
+                  <div class="text-title-small font-weight-bold text-truncate">
                     {{ currentHousehold ? currentHousehold.name : 'Select...' }}
                   </div>
                 </div>
               </div>
-              <v-icon color="white" icon="mdi-chevron-down" size="small" />
+              <v-icon icon="mdi-chevron-down" size="small" />
             </div>
           </v-card>
         </template>

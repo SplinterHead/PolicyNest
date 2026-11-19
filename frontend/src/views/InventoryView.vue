@@ -54,7 +54,7 @@
 
             <v-card-item>
               <template #prepend>
-                <v-avatar :color="getAssetColour(asset.type)" variant="tonal" rounded="0">
+                <v-avatar :color="getAssetColour(asset.type, isDark)" variant="tonal" rounded="0">
                   <v-icon :icon="getAssetIcon(asset.type)" />
                 </v-avatar>
               </template>
@@ -137,6 +137,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useTheme } from 'vuetify'
 import api from '@/services/api'
 import { AssetTypes, getAssetColour, getAssetIcon } from '@/utils/AssetTypes'
 import AssetDialog from '@/components/AssetDialog.vue'
@@ -144,6 +145,9 @@ import AssetDialog from '@/components/AssetDialog.vue'
 const props = defineProps({
   currentHousehold: Object,
 })
+
+const theme = useTheme()
+const isDark = computed(() => theme.current.value.dark)
 
 const assets = ref([])
 const dialog = ref(false)

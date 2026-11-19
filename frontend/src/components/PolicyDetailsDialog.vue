@@ -7,9 +7,9 @@
             <v-icon :icon="getPolicyIcon(policy.type)" />
           </div>
         </template>
-        <v-toolbar-title class="font-weight-bold text-white">
+        <v-toolbar-title class="font-weight-bold">
           {{ policy.provider }}
-          <span v-if="policy.policy_number" class="text-title-small ml-2 opacity-80 text-white">
+          <span v-if="policy.policy_number" class="text-title-small ml-2 opacity-80">
             Policy No. {{ policy.policy_number }}
           </span>
         </v-toolbar-title>

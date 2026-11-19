@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="open" max-width="600px" scrollable>
     <v-card rounded="lg">
-      <v-card-title class="pa-4 bg-primary text-white">
+      <v-card-title class="pa-4 bg-primary">
         {{ policyToEdit ? 'Edit Policy' : 'New Policy' }}
       </v-card-title>
 

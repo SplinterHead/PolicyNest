@@ -215,4 +215,15 @@ onBeforeUnmount(() => {
 .v-app-bar-title {
   font-family: var(--v-font-heading);
 }
+
+.v-btn--disabled.v-btn--variant-flat,
+.v-btn--disabled.v-btn--variant-elevated {
+  background-color: rgba(var(--v-theme-on-surface), 0.14);
+  color: rgba(var(--v-theme-on-surface), 0.5);
+}
+
+.v-btn--disabled.v-btn--variant-flat .v-btn__overlay,
+.v-btn--disabled.v-btn--variant-elevated .v-btn__overlay {
+  opacity: 0;
+}
 </style>
