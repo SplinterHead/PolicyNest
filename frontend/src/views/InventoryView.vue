@@ -61,10 +61,14 @@
               <v-card-title>{{ asset.name }}</v-card-title>
 
               <v-card-subtitle v-if="asset.type === 'Vehicle'">
-                {{ asset.details.make }} {{ asset.details.model }}
+                {{
+                  [asset.details.make, asset.details.model].filter(Boolean).join(' ') || 'Vehicle'
+                }}
               </v-card-subtitle>
               <v-card-subtitle v-else-if="asset.type === 'Pet'">
-                {{ asset.details.species }} - {{ asset.details.breed }}
+                {{
+                  [asset.details.species, asset.details.breed].filter(Boolean).join(' - ') || 'Pet'
+                }}
               </v-card-subtitle>
             </v-card-item>
 

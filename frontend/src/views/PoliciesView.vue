@@ -67,9 +67,11 @@
       v-model="policyDialog"
       :assets="assets"
       :currency-code="currencyCode"
+      :household-id="currentHousehold?.id"
       :loading="submitting"
       :policy-to-edit="selectedPolicy"
       :policy-type="policyDialogType"
+      @asset-created="handleAssetCreated"
       @submit="handlePolicySubmit"
     />
   </div>
@@ -135,6 +137,12 @@ function handleDocumentUploaded(updatedPolicy) {
   const index = policies.value.findIndex((p) => p.id === updatedPolicy.id)
   if (index !== -1) {
     policies.value[index] = updatedPolicy
+  }
+}
+
+function handleAssetCreated(newAsset) {
+  if (newAsset && !assets.value.some((a) => a.id === newAsset.id)) {
+    assets.value.push(newAsset)
   }
 }
 

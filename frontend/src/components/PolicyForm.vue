@@ -90,6 +90,7 @@
                 v-model:asset-id="form.asset_id"
                 :assets="vehicleAssets"
                 :currency-symbol="currencySymbol"
+                @add-asset="openInlineAssetDialog('Vehicle')"
               />
               <ContentsPolicyForm
                 v-else-if="form.type === 'Contents'"
@@ -112,6 +113,7 @@
                 v-model:asset-id="form.asset_id"
                 :assets="petAssets"
                 :currency-symbol="currencySymbol"
+                @add-asset="openInlineAssetDialog('Pet')"
               />
             </v-col>
 
@@ -142,12 +144,30 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <AssetDialog
+      v-model="showInlineAssetDialog"
+      :type="inlineAssetType"
+      :household-id="householdId"
+      @saved="handleInlineAssetCreated"
+    />
+
+    <SaveAssetPromptDialog
+      v-model="showSaveAssetPrompt"
+      :type="pendingAssetType"
+      :household-id="householdId"
+      :details="form.attributes"
+      @saved="handlePromptAssetSaved"
+      @skip="handlePromptAssetSkipped"
+    />
   </v-dialog>
 </template>
 
 <script setup>
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { parseIsoDate, toIsoDate } from '@/utils/Formats'
+import AssetDialog from '@/components/AssetDialog.vue'
+import SaveAssetPromptDialog from '@/components/SaveAssetPromptDialog.vue'
 import BuildingsPolicyForm from '@/components/forms/BuildingsPolicyForm.vue'
 import ContentsPolicyForm from '@/components/forms/ContentsPolicyForm.vue'
 import CarPolicyForm from '@/components/forms/CarPolicyForm.vue'
@@ -160,16 +180,22 @@ const open = defineModel({ type: Boolean })
 const props = defineProps({
   assets: { type: Array, default: () => [] },
   currencyCode: String,
+  householdId: Number,
   loading: Boolean,
   policyToEdit: Object,
   policyType: String,
 })
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'asset-created'])
 
 const formRef = useTemplateRef('formRef')
 const file = ref(null)
 const form = ref(createEmptyForm())
+const showInlineAssetDialog = ref(false)
+const inlineAssetType = ref('Vehicle')
+const showSaveAssetPrompt = ref(false)
+const pendingAssetType = ref('Vehicle')
+const pendingSubmitStartDate = ref(null)
 
 function createEmptyForm(type = null) {
   return {
@@ -211,13 +237,26 @@ watch(open, (isOpen) => {
   file.value = null
 })
 
-async function submit() {
-  const validation = await formRef.value?.validate()
-  if (validation && !validation.valid) return
+function openInlineAssetDialog(type) {
+  inlineAssetType.value = type
+  showInlineAssetDialog.value = true
+}
 
-  const startDate = toIsoDate(form.value.start_date)
-  if (!form.value.provider || form.value.premium === '' || !startDate) return
+function handleInlineAssetCreated(newAsset) {
+  if (!newAsset) return
+  emit('asset-created', newAsset)
+  form.value.asset_id = newAsset.id
+  if (newAsset.type === 'Vehicle') {
+    form.value.attributes.reg_number = newAsset.details?.reg || ''
+    form.value.attributes.make_model = [newAsset.details?.make, newAsset.details?.model]
+      .filter(Boolean)
+      .join(' ')
+  } else if (newAsset.type === 'Pet') {
+    form.value.attributes.pet_name = newAsset.name || ''
+  }
+}
 
+function emitPolicySubmit(startDate) {
   const finalAttributes = {
     ...form.value.attributes,
     payment_frequency: form.value.frequency,
@@ -231,6 +270,47 @@ async function submit() {
     file: file.value,
     id: props.policyToEdit?.id,
   })
+}
+
+function handlePromptAssetSaved(newAsset) {
+  if (newAsset) {
+    emit('asset-created', newAsset)
+    form.value.asset_id = newAsset.id
+    if (newAsset.type === 'Pet') {
+      form.value.attributes.pet_name = newAsset.name
+    }
+  }
+  emitPolicySubmit(pendingSubmitStartDate.value)
+}
+
+function handlePromptAssetSkipped() {
+  emitPolicySubmit(pendingSubmitStartDate.value)
+}
+
+async function submit() {
+  const validation = await formRef.value?.validate()
+  if (validation && !validation.valid) return
+
+  const startDate = toIsoDate(form.value.start_date)
+  if (!form.value.provider || form.value.premium === '' || !startDate) return
+
+  const isCarFreeText =
+    form.value.type === 'Car' &&
+    !form.value.asset_id &&
+    Boolean(form.value.attributes?.reg_number?.trim() || form.value.attributes?.make_model?.trim())
+  const isPetFreeText =
+    form.value.type === 'Pet' &&
+    !form.value.asset_id &&
+    Boolean(form.value.attributes?.pet_name?.trim())
+
+  if ((isCarFreeText || isPetFreeText) && props.householdId) {
+    pendingSubmitStartDate.value = startDate
+    pendingAssetType.value = form.value.type === 'Car' ? 'Vehicle' : 'Pet'
+    showSaveAssetPrompt.value = true
+    return
+  }
+
+  emitPolicySubmit(startDate)
 }
 </script>
 

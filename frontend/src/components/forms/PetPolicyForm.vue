@@ -8,6 +8,7 @@
     <v-row density="compact">
       <v-col cols="12">
         <v-select
+          v-model:menu="assetMenuOpen"
           :model-value="assetId"
           :items="assets"
           item-title="name"
@@ -19,7 +20,22 @@
           clearable
           placeholder="Or leave blank for generic cover"
           @update:model-value="onAssetSelect"
-        />
+        >
+          <template #no-data>
+            <div class="d-flex align-center justify-space-between px-4 py-2 ga-2">
+              <span class="text-body-medium text-medium-emphasis">No pets in inventory</span>
+              <v-btn
+                size="small"
+                color="primary"
+                variant="tonal"
+                prepend-icon="mdi-plus"
+                @click="handleAddAsset"
+              >
+                Add Pet
+              </v-btn>
+            </div>
+          </template>
+        </v-select>
       </v-col>
 
       <v-col cols="12" sm="6">
@@ -149,6 +165,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const attributes = defineModel({ type: Object, default: () => ({}) })
 const assetId = defineModel('assetId', { default: null })
 
@@ -157,7 +175,15 @@ const props = defineProps({
   currencySymbol: String,
 })
 
+const emit = defineEmits(['add-asset'])
+
+const assetMenuOpen = ref(false)
 const coverTypes = ['Lifetime', 'Maximum Benefit', 'Time Limited', 'Accident Only']
+
+function handleAddAsset() {
+  assetMenuOpen.value = false
+  emit('add-asset')
+}
 
 function onAssetSelect(id) {
   assetId.value = id

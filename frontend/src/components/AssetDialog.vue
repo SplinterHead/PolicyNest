@@ -179,8 +179,8 @@ async function save() {
   formData.append('details', JSON.stringify(details))
 
   try {
-    await api.post('/assets/', formData)
-    emit('saved')
+    const res = await api.post('/assets/', formData)
+    emit('saved', res.data)
     open.value = false
   } catch (e) {
     console.error('Failed to save asset', e)

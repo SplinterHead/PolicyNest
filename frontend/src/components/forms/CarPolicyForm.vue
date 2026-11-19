@@ -8,6 +8,7 @@
     <v-row density="compact">
       <v-col cols="12">
         <v-select
+          v-model:menu="assetMenuOpen"
           :model-value="assetId"
           :items="assets"
           item-title="name"
@@ -16,8 +17,25 @@
           variant="outlined"
           bg-color="surface"
           prepend-inner-icon="mdi-garage"
+          clearable
+          placeholder="Or leave blank to enter manually"
           @update:model-value="onAssetSelect"
-        />
+        >
+          <template #no-data>
+            <div class="d-flex align-center justify-space-between px-4 py-2 ga-2">
+              <span class="text-body-medium text-medium-emphasis">No vehicles in inventory</span>
+              <v-btn
+                size="small"
+                color="primary"
+                variant="tonal"
+                prepend-icon="mdi-plus"
+                @click="handleAddAsset"
+              >
+                Add Vehicle
+              </v-btn>
+            </div>
+          </template>
+        </v-select>
       </v-col>
 
       <v-col cols="6">
@@ -26,7 +44,9 @@
           label="Registration"
           variant="outlined"
           density="comfortable"
-          readonly
+          bg-color="surface"
+          :readonly="!!assetId"
+          hint="Auto-filled if vehicle selected, or enter manually"
         />
       </v-col>
       <v-col cols="6">
@@ -35,7 +55,8 @@
           label="Make / Model"
           variant="outlined"
           density="comfortable"
-          readonly
+          bg-color="surface"
+          :readonly="!!assetId"
         />
       </v-col>
 
@@ -130,6 +151,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const attributes = defineModel({ type: Object, default: () => ({}) })
 const assetId = defineModel('assetId', { default: null })
 
@@ -138,13 +161,29 @@ const props = defineProps({
   currencySymbol: String,
 })
 
+const emit = defineEmits(['add-asset'])
+
+const assetMenuOpen = ref(false)
+
+function handleAddAsset() {
+  assetMenuOpen.value = false
+  emit('add-asset')
+}
+
 function onAssetSelect(id) {
   assetId.value = id
-  const asset = props.assets.find((a) => a.id === id)
 
-  if (asset) {
-    attributes.value.reg_number = asset.details.reg
-    attributes.value.make_model = `${asset.details.make} ${asset.details.model}`
+  if (id) {
+    const asset = props.assets.find((a) => a.id === id)
+    if (asset) {
+      attributes.value.reg_number = asset.details?.reg || ''
+      attributes.value.make_model = [asset.details?.make, asset.details?.model]
+        .filter(Boolean)
+        .join(' ')
+    }
+  } else {
+    attributes.value.reg_number = ''
+    attributes.value.make_model = ''
   }
 }
 </script>
