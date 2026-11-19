@@ -1,113 +1,115 @@
 <template>
-  <v-dialog v-model="open" max-width="500px">
-    <v-card rounded="lg">
-      <v-card-title class="pa-4 bg-surface-light">
-        <v-icon :icon="iconName" class="mr-2" color="primary" />
-        Add {{ type }}
-      </v-card-title>
+  <v-dialog id="asset-dialog" v-model="open" max-width="500px" aria-labelledby="asset-dialog-title">
+    <v-defaults-provider :defaults="{ VMenu: { attach: '#asset-dialog' } }">
+      <v-card rounded="lg">
+        <v-card-title id="asset-dialog-title" class="pa-4 bg-surface-light">
+          <v-icon :icon="iconName" class="mr-2" color="primary" />
+          Add {{ type }}
+        </v-card-title>
 
-      <v-card-text class="pt-4">
-        <v-form v-model="valid" @submit.prevent="save">
-          <v-text-field
-            v-model="form.name"
-            :label="type === 'Pet' ? 'Pet Name' : 'Nickname (e.g. Dad\'s Car)'"
-            variant="outlined"
-            prepend-inner-icon="mdi-tag-text"
-            :rules="[(v) => !!v || 'Name is required']"
-            class="mb-2"
-          />
+        <v-card-text class="pt-4">
+          <v-form v-model="valid" @submit.prevent="save">
+            <v-text-field
+              v-model="form.name"
+              :label="type === 'Pet' ? 'Pet Name' : 'Nickname (e.g. Dad\'s Car)'"
+              variant="outlined"
+              prepend-inner-icon="mdi-tag-text"
+              :rules="[(v) => !!v || 'Name is required']"
+              class="mb-2"
+            />
 
-          <div v-if="type === 'Vehicle'">
-            <v-row density="compact">
-              <v-col cols="6">
-                <v-text-field
-                  v-model="form.make"
-                  label="Make"
-                  placeholder="Toyota"
-                  variant="outlined"
-                  density="compact"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  v-model="form.model"
-                  label="Model"
-                  placeholder="Corolla"
-                  variant="outlined"
-                  density="compact"
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="form.reg"
-                  label="Registration Plate"
-                  variant="outlined"
-                  density="compact"
-                  prepend-inner-icon="mdi-card-account-details"
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="form.vin"
-                  label="VIN (Optional)"
-                  variant="outlined"
-                  density="compact"
-                  prepend-inner-icon="mdi-barcode"
-                />
-              </v-col>
-            </v-row>
-          </div>
+            <div v-if="type === 'Vehicle'">
+              <v-row density="compact">
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="form.make"
+                    label="Make"
+                    placeholder="Toyota"
+                    variant="outlined"
+                    density="compact"
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="form.model"
+                    label="Model"
+                    placeholder="Corolla"
+                    variant="outlined"
+                    density="compact"
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="form.reg"
+                    label="Registration Plate"
+                    variant="outlined"
+                    density="compact"
+                    prepend-inner-icon="mdi-card-account-details"
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="form.vin"
+                    label="VIN (Optional)"
+                    variant="outlined"
+                    density="compact"
+                    prepend-inner-icon="mdi-barcode"
+                  />
+                </v-col>
+              </v-row>
+            </div>
 
-          <div v-if="type === 'Pet'">
-            <v-row density="compact">
-              <v-col cols="12">
-                <v-select
-                  v-model="form.species"
-                  :items="['Dog', 'Cat', 'Rabbit', 'Bird', 'Horse', 'Reptile', 'Other']"
-                  label="Species"
-                  variant="outlined"
-                  density="compact"
-                  prepend-inner-icon="mdi-paw"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  v-model="form.breed"
-                  label="Breed"
-                  variant="outlined"
-                  density="compact"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  v-model="form.color"
-                  label="Color/Markings"
-                  variant="outlined"
-                  density="compact"
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="form.chip_id"
-                  label="Microchip ID"
-                  variant="outlined"
-                  density="compact"
-                  prepend-inner-icon="mdi-barcode-scan"
-                />
-              </v-col>
-            </v-row>
-          </div>
-        </v-form>
-      </v-card-text>
+            <div v-if="type === 'Pet'">
+              <v-row density="compact">
+                <v-col cols="12">
+                  <v-select
+                    v-model="form.species"
+                    :items="['Dog', 'Cat', 'Rabbit', 'Bird', 'Horse', 'Reptile', 'Other']"
+                    label="Species"
+                    variant="outlined"
+                    density="compact"
+                    prepend-inner-icon="mdi-paw"
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="form.breed"
+                    label="Breed"
+                    variant="outlined"
+                    density="compact"
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="form.color"
+                    label="Color/Markings"
+                    variant="outlined"
+                    density="compact"
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="form.chip_id"
+                    label="Microchip ID"
+                    variant="outlined"
+                    density="compact"
+                    prepend-inner-icon="mdi-barcode-scan"
+                  />
+                </v-col>
+              </v-row>
+            </div>
+          </v-form>
+        </v-card-text>
 
-      <v-card-actions class="pa-4 pt-0">
-        <v-spacer />
-        <v-btn variant="text" @click="open = false">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" :loading="loading" :disabled="!valid" @click="save">
-          Save {{ type }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-card-actions class="pa-4 pt-0">
+          <v-spacer />
+          <v-btn variant="text" @click="open = false">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" :loading="loading" :disabled="!valid" @click="save">
+            Save {{ type }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-defaults-provider>
   </v-dialog>
 </template>
 

@@ -13,6 +13,7 @@
         location="top left"
         transition="slide-y-reverse-transition"
         activator="parent"
+        :activator-props="{ 'aria-label': openFab ? 'Close new asset menu' : 'Add asset' }"
       >
         <v-btn
           v-for="(config, type) in AssetTypes"
@@ -117,9 +118,11 @@
       @saved="fetchAssets"
     />
 
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog v-model="deleteDialog" max-width="400px" aria-labelledby="delete-asset-title">
       <v-card>
-        <v-card-title class="text-headline-small text-red">Delete Asset?</v-card-title>
+        <v-card-title id="delete-asset-title" class="text-headline-small text-red">
+          Delete Asset?
+        </v-card-title>
         <v-card-text>
           Are you sure you want to delete <strong>{{ assetToDelete?.name }}</strong>?
         </v-card-text>

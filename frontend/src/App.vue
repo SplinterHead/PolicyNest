@@ -1,6 +1,11 @@
 <template>
   <v-app>
-    <NavBar :is-dark="isDark" @toggle-drawer="drawer = !drawer" @toggle-theme="toggleTheme" />
+    <NavBar
+      :is-dark="isDark"
+      :drawer-open="Boolean(drawer)"
+      @toggle-drawer="drawer = !drawer"
+      @toggle-theme="toggleTheme"
+    />
 
     <NavDrawer
       v-if="initialized"

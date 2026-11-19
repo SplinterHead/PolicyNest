@@ -83,9 +83,11 @@
       @uploaded="handleDocumentUploaded"
     />
 
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog v-model="deleteDialog" max-width="400px" aria-labelledby="delete-policy-title">
       <v-card>
-        <v-card-title class="text-headline-small">Delete Policy?</v-card-title>
+        <v-card-title id="delete-policy-title" class="text-headline-small">
+          Delete Policy?
+        </v-card-title>
         <v-card-text>
           Are you sure you want to delete the policy for
           <strong>{{ policyToDelete?.provider }}</strong>? This action cannot be undone.

@@ -13,6 +13,7 @@
         location="top left"
         transition="slide-y-reverse-transition"
         activator="parent"
+        :activator-props="{ 'aria-label': openFab ? 'Close new policy menu' : 'Add policy' }"
       >
         <v-btn
           v-for="(config, type) in PolicyTypes"

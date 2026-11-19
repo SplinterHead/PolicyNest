@@ -1,8 +1,10 @@
 <template>
-  <v-dialog v-model="open" max-width="500px">
+  <v-dialog v-model="open" max-width="500px" aria-labelledby="manage-households-title">
     <v-card rounded="lg" elevation="2" class="pa-2">
       <v-toolbar color="transparent" density="compact">
-        <v-toolbar-title class="text-title-large">My Households</v-toolbar-title>
+        <v-toolbar-title id="manage-households-title" class="text-title-large">
+          My Households
+        </v-toolbar-title>
         <v-spacer />
         <v-icon-btn icon="mdi-close" variant="text" aria-label="Close" @click="open = false" />
       </v-toolbar>
@@ -65,9 +67,15 @@
     @complete="handleCreate"
   />
 
-  <v-dialog v-model="deleteHouseholdDialog" max-width="500px">
+  <v-dialog
+    v-model="deleteHouseholdDialog"
+    max-width="500px"
+    aria-labelledby="delete-household-title"
+  >
     <v-card>
-      <v-card-title class="text-headline-small text-red">Delete Household?</v-card-title>
+      <v-card-title id="delete-household-title" class="text-headline-small text-red">
+        Delete Household?
+      </v-card-title>
       <v-card-text>
         Are you sure you want to delete
         <strong>{{ householdToDelete?.name }}</strong>? <br /><br />

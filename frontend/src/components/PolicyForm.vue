@@ -1,149 +1,158 @@
 <template>
-  <v-dialog v-model="open" max-width="600px" scrollable>
-    <v-card rounded="lg">
-      <v-card-title class="pa-4 bg-primary">
-        {{ policyToEdit ? 'Edit Policy' : 'New Policy' }}
-      </v-card-title>
+  <v-dialog
+    id="policy-form-dialog"
+    v-model="open"
+    max-width="600px"
+    scrollable
+    aria-labelledby="policy-form-title"
+  >
+    <v-defaults-provider :defaults="{ VMenu: { attach: '#policy-form-dialog' } }">
+      <v-card rounded="lg">
+        <v-card-title id="policy-form-title" class="pa-4 bg-primary">
+          {{ policyToEdit ? 'Edit Policy' : 'New Policy' }}
+        </v-card-title>
 
-      <v-card-text class="pt-4" style="max-height: 80vh">
-        <v-form ref="formRef" @submit.prevent="submit">
-          <v-row density="compact">
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.provider"
-                label="Provider"
-                variant="outlined"
-                density="comfortable"
-                :rules="[(v) => !!v || 'Provider is required']"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.policy_number"
-                label="Policy No."
-                variant="outlined"
-                density="comfortable"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-date-input
-                v-model="form.start_date"
-                label="Start Date"
-                input-format="yyyy-mm-dd"
-                prepend-icon=""
-                prepend-inner-icon="mdi-calendar"
-                variant="outlined"
-                density="comfortable"
-                :rules="[(v) => !!v || 'Start date is required']"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-date-input
-                v-model="form.end_date"
-                label="End Date"
-                input-format="yyyy-mm-dd"
-                prepend-icon=""
-                prepend-inner-icon="mdi-calendar"
-                variant="outlined"
-                density="comfortable"
-                clearable
-                hint="Leave empty for perpetual policy"
-                persistent-hint
-              />
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="form.premium"
-                label="Premium Cost"
-                variant="outlined"
-                density="comfortable"
-                :prefix="currencySymbol"
-                type="number"
-                step="0.01"
-                :rules="[
-                  (v) => (v !== '' && v !== null && v !== undefined) || 'Premium is required',
-                ]"
-              >
-                <template #append>
-                  <v-select
-                    v-model="form.frequency"
-                    :items="['Annual', 'Monthly']"
-                    variant="plain"
-                    density="compact"
-                    hide-details
-                    width="120px"
-                    class="font-weight-bold text-body-small"
-                  />
-                </template>
-              </v-text-field>
-            </v-col>
+        <v-card-text class="pt-4" style="max-height: 80vh">
+          <v-form ref="formRef" @submit.prevent="submit">
+            <v-row density="compact">
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="form.provider"
+                  label="Provider"
+                  variant="outlined"
+                  density="comfortable"
+                  :rules="[(v) => !!v || 'Provider is required']"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="form.policy_number"
+                  label="Policy No."
+                  variant="outlined"
+                  density="comfortable"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-date-input
+                  v-model="form.start_date"
+                  label="Start Date"
+                  input-format="yyyy-mm-dd"
+                  prepend-icon=""
+                  prepend-inner-icon="mdi-calendar"
+                  variant="outlined"
+                  density="comfortable"
+                  :rules="[(v) => !!v || 'Start date is required']"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-date-input
+                  v-model="form.end_date"
+                  label="End Date"
+                  input-format="yyyy-mm-dd"
+                  prepend-icon=""
+                  prepend-inner-icon="mdi-calendar"
+                  variant="outlined"
+                  density="comfortable"
+                  clearable
+                  hint="Leave empty for perpetual policy"
+                  persistent-hint
+                />
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="form.premium"
+                  label="Premium Cost"
+                  variant="outlined"
+                  density="comfortable"
+                  :prefix="currencySymbol"
+                  type="number"
+                  step="0.01"
+                  :rules="[
+                    (v) => (v !== '' && v !== null && v !== undefined) || 'Premium is required',
+                  ]"
+                >
+                  <template #append>
+                    <v-select
+                      v-model="form.frequency"
+                      :items="['Annual', 'Monthly']"
+                      aria-label="Payment frequency"
+                      variant="plain"
+                      density="compact"
+                      hide-details
+                      width="120px"
+                      class="font-weight-bold text-body-small"
+                    />
+                  </template>
+                </v-text-field>
+              </v-col>
 
-            <v-col cols="12">
-              <BuildingsPolicyForm
-                v-if="form.type === 'Buildings'"
-                v-model="form.attributes"
-                :currency-symbol="currencySymbol"
-              />
-              <CarPolicyForm
-                v-else-if="form.type === 'Car'"
-                v-model="form.attributes"
-                v-model:asset-id="form.asset_id"
-                :assets="vehicleAssets"
-                :currency-symbol="currencySymbol"
-                @add-asset="openInlineAssetDialog('Vehicle')"
-              />
-              <ContentsPolicyForm
-                v-else-if="form.type === 'Contents'"
-                v-model="form.attributes"
-                :currency-symbol="currencySymbol"
-              />
-              <LifePolicyForm
-                v-else-if="form.type === 'Life'"
-                v-model="form.attributes"
-                :currency-symbol="currencySymbol"
-              />
-              <MedicalPolicyForm
-                v-else-if="form.type === 'Medical'"
-                v-model="form.attributes"
-                :currency-symbol="currencySymbol"
-              />
-              <PetPolicyForm
-                v-else-if="form.type === 'Pet'"
-                v-model="form.attributes"
-                v-model:asset-id="form.asset_id"
-                :assets="petAssets"
-                :currency-symbol="currencySymbol"
-                @add-asset="openInlineAssetDialog('Pet')"
-              />
-            </v-col>
+              <v-col cols="12">
+                <BuildingsPolicyForm
+                  v-if="form.type === 'Buildings'"
+                  v-model="form.attributes"
+                  :currency-symbol="currencySymbol"
+                />
+                <CarPolicyForm
+                  v-else-if="form.type === 'Car'"
+                  v-model="form.attributes"
+                  v-model:asset-id="form.asset_id"
+                  :assets="vehicleAssets"
+                  :currency-symbol="currencySymbol"
+                  @add-asset="openInlineAssetDialog('Vehicle')"
+                />
+                <ContentsPolicyForm
+                  v-else-if="form.type === 'Contents'"
+                  v-model="form.attributes"
+                  :currency-symbol="currencySymbol"
+                />
+                <LifePolicyForm
+                  v-else-if="form.type === 'Life'"
+                  v-model="form.attributes"
+                  :currency-symbol="currencySymbol"
+                />
+                <MedicalPolicyForm
+                  v-else-if="form.type === 'Medical'"
+                  v-model="form.attributes"
+                  :currency-symbol="currencySymbol"
+                />
+                <PetPolicyForm
+                  v-else-if="form.type === 'Pet'"
+                  v-model="form.attributes"
+                  v-model:asset-id="form.asset_id"
+                  :assets="petAssets"
+                  :currency-symbol="currencySymbol"
+                  @add-asset="openInlineAssetDialog('Pet')"
+                />
+              </v-col>
 
-            <v-col cols="12">
-              <v-file-input
-                v-model="file"
-                accept=".pdf"
-                label="Policy Document"
-                placeholder="PDF files only"
-                variant="outlined"
-                density="comfortable"
-                prepend-icon=""
-                prepend-inner-icon="mdi-paperclip"
-                clearable
-                show-size
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
+              <v-col cols="12">
+                <v-file-input
+                  v-model="file"
+                  accept=".pdf"
+                  label="Policy Document"
+                  placeholder="PDF files only"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-icon=""
+                  prepend-inner-icon="mdi-paperclip"
+                  clearable
+                  show-size
+                />
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
 
-      <v-divider />
-      <v-card-actions class="pa-4">
-        <v-spacer />
-        <v-btn variant="text" @click="open = false">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" :loading="loading" @click="submit">
-          Save Policy
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-divider />
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn variant="text" @click="open = false">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" :loading="loading" @click="submit">
+            Save Policy
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-defaults-provider>
 
     <AssetDialog
       v-model="showInlineAssetDialog"

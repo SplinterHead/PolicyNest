@@ -1,6 +1,10 @@
 <template>
   <v-app-bar elevation="1">
-    <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
+    <v-app-bar-nav-icon
+      aria-label="Toggle navigation menu"
+      :aria-expanded="String(drawerOpen)"
+      @click="emit('toggle-drawer')"
+    />
 
     <v-app-bar-title class="font-weight-bold text-primary" @click="router.push('/policies')">
       <v-icon icon="mdi-shield-check" class="mr-2" />
@@ -24,6 +28,7 @@
 import { useRouter } from 'vue-router'
 
 defineProps({
+  drawerOpen: Boolean,
   isDark: Boolean,
 })
 

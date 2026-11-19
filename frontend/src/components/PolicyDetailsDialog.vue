@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="open" width="80%" scrollable>
+  <v-dialog v-model="open" width="80%" scrollable aria-labelledby="policy-details-title">
     <v-card v-if="policy" rounded="lg">
       <v-toolbar :color="getPolicyColour(policy.type)">
         <template #prepend>
@@ -7,7 +7,7 @@
             <v-icon :icon="getPolicyIcon(policy.type)" />
           </div>
         </template>
-        <v-toolbar-title class="font-weight-bold">
+        <v-toolbar-title id="policy-details-title" class="font-weight-bold">
           {{ policy.provider }}
           <span v-if="policy.policy_number" class="text-title-small ml-2 opacity-80">
             Policy No. {{ policy.policy_number }}

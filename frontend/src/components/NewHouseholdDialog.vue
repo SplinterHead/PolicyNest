@@ -1,7 +1,12 @@
 <template>
-  <v-dialog v-model="open" max-width="500px" :persistent="!showCancel">
+  <v-dialog
+    v-model="open"
+    max-width="500px"
+    :persistent="!showCancel"
+    aria-labelledby="new-household-title"
+  >
     <v-card rounded="lg" elevation="2" class="text-center pa-2 h-100 position-relative">
-      <v-card-title class="text-headline-small font-weight-bold">
+      <v-card-title id="new-household-title" class="text-headline-small font-weight-bold">
         <v-icon icon="mdi-home-plus" color="primary" class="mb-1" />
         {{ title }}
       </v-card-title>
