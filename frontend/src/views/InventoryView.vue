@@ -130,7 +130,7 @@
       :type="dialogType"
       :household-id="currentHousehold?.id"
       :asset-to-edit="assetToEdit"
-      @saved="fetchAssets"
+      @saved="emit('asset-saved', $event)"
     />
 
     <v-dialog v-model="deleteDialog" max-width="400px" aria-labelledby="delete-asset-title">
@@ -161,13 +161,15 @@ import { AssetTypes, getAssetColour, getAssetIcon } from '@/utils/AssetTypes'
 import AssetDialog from '@/components/AssetDialog.vue'
 
 const props = defineProps({
+  assets: { type: Array, default: () => [] },
   currentHousehold: Object,
 })
+
+const emit = defineEmits(['asset-saved', 'asset-deleted'])
 
 const theme = useTheme()
 const isDark = computed(() => theme.current.value.dark)
 
-const assets = ref([])
 const assetToEdit = ref(null)
 const dialog = ref(false)
 const dialogType = ref('Vehicle')
@@ -178,7 +180,7 @@ const openFab = ref(false)
 
 const groupedAssets = computed(() => {
   const groups = {}
-  assets.value.forEach((asset) => {
+  props.assets.forEach((asset) => {
     if (!groups[asset.type]) {
       groups[asset.type] = []
     }
@@ -218,16 +220,6 @@ watch(dialog, (isOpen) => {
   }
 })
 
-async function fetchAssets() {
-  if (!props.currentHousehold) return
-  try {
-    const res = await api.get(`/assets/?household_id=${props.currentHousehold.id}`)
-    assets.value = res.data
-  } catch (e) {
-    console.error(e)
-  }
-}
-
 function confirmDelete(asset) {
   assetToDelete.value = asset
   deleteDialog.value = true
@@ -238,7 +230,7 @@ async function executeDelete() {
   deleting.value = true
   try {
     await api.delete(`/assets/${assetToDelete.value.id}`)
-    assets.value = assets.value.filter((a) => a.id !== assetToDelete.value.id)
+    emit('asset-deleted', assetToDelete.value.id)
     deleteDialog.value = false
     assetToDelete.value = null
   } catch (e) {
@@ -247,14 +239,6 @@ async function executeDelete() {
     deleting.value = false
   }
 }
-
-watch(
-  () => props.currentHousehold,
-  (val) => {
-    if (val) fetchAssets()
-  },
-  { immediate: true },
-)
 </script>
 
 <style scoped>

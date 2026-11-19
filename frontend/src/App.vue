@@ -28,10 +28,19 @@
             :is="Component"
             :current-household="currentHousehold"
             :currency-code="currencyCode"
-            v-bind="route.name === 'settings' ? { themePreference } : {}"
+            v-bind="
+              route.name === 'settings'
+                ? { themePreference }
+                : route.name === 'policies' || route.name === 'inventory'
+                  ? { assets }
+                  : {}
+            "
             @update-currency="updateCurrency"
             @update-theme="setThemePreference"
             @open-manage="showManageDialog = true"
+            @asset-created="handleAssetSaved"
+            @asset-saved="handleAssetSaved"
+            @asset-deleted="handleAssetDeleted"
           />
         </router-view>
 
@@ -64,7 +73,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useDisplay, useTheme } from 'vuetify'
 import api from '@/services/api'
 import NavBar from '@/components/NavBar.vue'
@@ -75,6 +84,10 @@ import ManageHouseholdsDialog from '@/components/ManageHouseholdsDialog.vue'
 const { mobile } = useDisplay()
 const theme = useTheme()
 
+const assets = ref([])
+const loadedAssetsHouseholdId = ref(null)
+let activeAssetsFetchId = null
+let activeAssetsPromise = null
 const checkingStatus = ref(true)
 const currencyCode = ref('GBP')
 const currentHousehold = ref(null)
@@ -188,6 +201,59 @@ function handleDeletedHousehold(delHousehold) {
   showManageDialog.value = false
   initialized.value = true
 }
+
+async function fetchAssets(householdId) {
+  if (!householdId) return
+  if (activeAssetsFetchId === householdId && activeAssetsPromise) {
+    return activeAssetsPromise
+  }
+
+  activeAssetsFetchId = householdId
+  activeAssetsPromise = (async () => {
+    try {
+      const res = await api.get(`/assets/?household_id=${householdId}`)
+      if (currentHousehold.value?.id === householdId) {
+        assets.value = res.data
+        loadedAssetsHouseholdId.value = householdId
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      if (activeAssetsFetchId === householdId) {
+        activeAssetsFetchId = null
+        activeAssetsPromise = null
+      }
+    }
+  })()
+
+  return activeAssetsPromise
+}
+
+function handleAssetSaved(savedAsset) {
+  if (!savedAsset) return
+  const index = assets.value.findIndex((a) => a.id === savedAsset.id)
+  if (index !== -1) {
+    assets.value[index] = savedAsset
+  } else {
+    assets.value.push(savedAsset)
+  }
+}
+
+function handleAssetDeleted(deletedId) {
+  assets.value = assets.value.filter((a) => a.id !== deletedId)
+}
+
+watch(
+  () => currentHousehold.value?.id,
+  (newId) => {
+    if (!newId) {
+      assets.value = []
+      loadedAssetsHouseholdId.value = null
+    } else if (loadedAssetsHouseholdId.value !== newId) {
+      fetchAssets(newId)
+    }
+  },
+)
 
 async function loadApp() {
   applyTheme(getStoredTheme())

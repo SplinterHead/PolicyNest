@@ -36,11 +36,20 @@ app.include_router(api_router)
 
 # --- FRONTEND ---
 if FRONTEND_DIST.exists():
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+    dist_root = FRONTEND_DIST.resolve()
+    app.mount("/assets", StaticFiles(directory=dist_root / "assets"), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         if full_path.startswith("api") or full_path.startswith("uploads"):
             raise HTTPException(status_code=404, detail="Not Found")
 
-        return FileResponse(FRONTEND_DIST / "index.html")
+        if full_path:
+            candidate = (dist_root / full_path).resolve()
+            if candidate.is_relative_to(dist_root) and candidate.is_file():
+                return FileResponse(
+                    candidate,
+                    headers={"Cache-Control": "public, max-age=86400"},
+                )
+
+        return FileResponse(dist_root / "index.html")

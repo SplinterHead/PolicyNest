@@ -158,11 +158,13 @@ import PolicyList from '@/components/PolicyList.vue'
 import PolicyForm from '@/components/PolicyForm.vue'
 
 const props = defineProps({
+  assets: { type: Array, default: () => [] },
   currencyCode: String,
   currentHousehold: Object,
 })
 
-const assets = ref([])
+const emit = defineEmits(['asset-created'])
+
 const loading = ref(false)
 const openFab = ref(false)
 const policies = ref([])
@@ -214,21 +216,15 @@ function handleDocumentUploaded(updatedPolicy) {
 }
 
 function handleAssetCreated(newAsset) {
-  if (newAsset && !assets.value.some((a) => a.id === newAsset.id)) {
-    assets.value.push(newAsset)
-  }
+  emit('asset-created', newAsset)
 }
 
 async function loadData() {
   if (!props.currentHousehold?.id) return
   loading.value = true
   try {
-    const [polRes, assetRes] = await Promise.all([
-      api.get(`/policies/?household_id=${props.currentHousehold.id}`),
-      api.get(`/assets/?household_id=${props.currentHousehold.id}`),
-    ])
+    const polRes = await api.get(`/policies/?household_id=${props.currentHousehold.id}`)
     policies.value = polRes.data
-    assets.value = assetRes.data
   } catch (e) {
     console.error(e)
   } finally {
