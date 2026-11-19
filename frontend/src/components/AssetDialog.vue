@@ -55,7 +55,7 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="form.vin"
-                    label="VIN (Optional)"
+                    label="VIN"
                     variant="outlined"
                     density="comfortable"
                     prepend-inner-icon="mdi-barcode"

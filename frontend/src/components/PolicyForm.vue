@@ -6,7 +6,12 @@
     scrollable
     aria-labelledby="policy-form-title"
   >
-    <v-defaults-provider :defaults="{ VMenu: { attach: '#policy-form-dialog' } }">
+    <v-defaults-provider
+      :defaults="{
+        VMenu: { attach: '#policy-form-dialog' },
+        VTooltip: { attach: '#policy-form-dialog' },
+      }"
+    >
       <v-card rounded="lg">
         <v-card-title id="policy-form-title" class="pa-4 bg-primary d-flex align-center">
           <v-icon v-if="policyIcon" :icon="policyIcon" class="mr-2" />
@@ -39,7 +44,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="form.policy_number"
-                  label="Policy No. (Optional)"
+                  label="Policy No."
                   variant="outlined"
                   density="comfortable"
                 />
@@ -63,17 +68,31 @@
                 <v-date-input
                   v-model="form.end_date"
                   v-model:menu="endDateMenu"
-                  label="End Date (Optional)"
+                  label="End Date"
                   input-format="yyyy-mm-dd"
                   prepend-icon=""
                   prepend-inner-icon="mdi-calendar"
                   variant="outlined"
                   density="comfortable"
                   clearable
-                  hint="Leave empty for perpetual policy"
-                  persistent-hint
                   @keydown.enter="endDateMenu = false"
-                />
+                >
+                  <template #append-inner>
+                    <v-tooltip text="Leave empty for perpetual policy" location="top" open-on-click>
+                      <template #activator="{ props: tooltipProps }">
+                        <v-icon-btn
+                          v-bind="tooltipProps"
+                          icon="mdi-information-outline"
+                          size="small"
+                          variant="text"
+                          aria-label="End date information"
+                          @mousedown.stop
+                          @click.stop
+                        />
+                      </template>
+                    </v-tooltip>
+                  </template>
+                </v-date-input>
               </v-col>
               <v-col cols="12" sm="8">
                 <v-text-field
@@ -146,7 +165,7 @@
                 <v-file-input
                   v-model="file"
                   accept=".pdf"
-                  label="Policy Document (Optional)"
+                  label="Policy Document"
                   placeholder="PDF files only"
                   hint="Accepted format: PDF (.pdf)"
                   persistent-hint
