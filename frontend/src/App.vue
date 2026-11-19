@@ -22,12 +22,17 @@
 
     <v-main :class="isDark ? '' : 'bg-grey-lighten-4'">
       <v-container fluid class="pa-6">
-        <router-view
-          v-if="initialized"
-          :current-household="currentHousehold"
-          :currency-code="currencyCode"
-          @update-currency="updateCurrency"
-        />
+        <router-view v-if="initialized" v-slot="{ Component, route }">
+          <component
+            :is="Component"
+            :current-household="currentHousehold"
+            :currency-code="currencyCode"
+            v-bind="route.name === 'settings' ? { themePreference } : {}"
+            @update-currency="updateCurrency"
+            @update-theme="setThemePreference"
+            @open-manage="showManageDialog = true"
+          />
+        </router-view>
 
         <div
           v-else-if="checkingStatus"
@@ -77,6 +82,7 @@ const households = ref([])
 const initialized = ref(false)
 const showManageDialog = ref(false)
 const showOnboarding = ref(false)
+const themePreference = ref('system')
 
 const isDark = computed(() => theme.current.value.dark)
 const isDrawerOpen = computed(() => (drawer.value === null ? !mobile.value : Boolean(drawer.value)))
@@ -91,6 +97,7 @@ function getStoredTheme() {
 }
 
 function applyTheme(stored) {
+  themePreference.value = stored ?? 'system'
   theme.change(stored ?? 'system')
   const meta = document.querySelector('meta[name="color-scheme"]')
   if (meta) {
@@ -98,25 +105,29 @@ function applyTheme(stored) {
   }
 }
 
-function toggleTheme() {
-  const target = isDark.value ? 'light' : 'dark'
-  const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-
-  if (target === systemScheme) {
+function setThemePreference(pref) {
+  if (pref === 'system') {
     try {
       localStorage.removeItem('theme')
     } catch {
       // Ignore storage failures
     }
     applyTheme(null)
-  } else {
+  } else if (pref === 'light' || pref === 'dark') {
     try {
-      localStorage.setItem('theme', target)
+      localStorage.setItem('theme', pref)
     } catch {
       // Ignore storage failures
     }
-    applyTheme(target)
+    applyTheme(pref)
   }
+}
+
+function toggleTheme() {
+  const target = isDark.value ? 'light' : 'dark'
+  const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+
+  setThemePreference(target === systemScheme ? 'system' : target)
 }
 
 function handleStorage(event) {
