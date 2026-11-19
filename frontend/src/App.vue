@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <NavBar
       :is-dark="isDark"
       :drawer-open="isDrawerOpen"
@@ -20,7 +21,7 @@
       @open-manage="showManageDialog = true"
     />
 
-    <v-main :class="isDark ? '' : 'bg-grey-lighten-4'">
+    <v-main id="main-content" tabindex="-1" :class="isDark ? '' : 'bg-grey-lighten-4'">
       <v-container fluid class="pa-6">
         <router-view v-if="initialized" v-slot="{ Component, route }">
           <component
@@ -268,5 +269,44 @@ body {
 .v-btn--disabled.v-btn--variant-flat .v-btn__overlay,
 .v-btn--disabled.v-btn--variant-elevated .v-btn__overlay {
   opacity: 0;
+}
+
+.skip-link:where(:not(:focus-visible, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  inset-block-start: 0.75rem;
+  inset-inline-start: 0.75rem;
+  z-index: 3000;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary));
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+:where(a:any-link, button, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 2px;
+}
+
+.bg-primary :where(a:any-link, button):focus-visible {
+  outline-color: rgb(var(--v-theme-on-primary));
 }
 </style>

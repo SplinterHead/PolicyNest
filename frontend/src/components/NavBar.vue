@@ -6,10 +6,16 @@
       @click="emit('toggle-drawer')"
     />
 
-    <v-app-bar-title class="font-weight-bold text-primary" @click="router.push('/policies')">
-      <v-icon icon="mdi-shield-check" class="mr-2" />
-      <span class="font-weight-bold">policy</span>
-      <span class="font-weight-light">nest</span>
+    <v-app-bar-title>
+      <router-link
+        to="/policies"
+        class="brand-link d-inline-flex align-center text-primary text-decoration-none rounded px-1"
+        aria-label="PolicyNest Home"
+      >
+        <v-icon icon="mdi-shield-check" class="mr-2" aria-hidden="true" />
+        <span class="font-weight-bold">policy</span>
+        <span class="font-weight-light">nest</span>
+      </router-link>
     </v-app-bar-title>
 
     <v-spacer />
@@ -67,7 +73,6 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 
 defineProps({
@@ -84,14 +89,11 @@ defineProps({
 })
 
 const emit = defineEmits(['toggle-drawer', 'toggle-theme', 'switch-household', 'open-manage'])
-const router = useRouter()
 const { mobile } = useDisplay()
 </script>
 
 <style scoped>
-/* Ensure the title behaves like a button on hover */
-.v-app-bar-title:hover {
-  cursor: pointer;
-  opacity: 0.8;
+.brand-link:hover {
+  opacity: 0.85;
 }
 </style>
