@@ -46,27 +46,8 @@
           tag="article"
           rounded="lg"
           elevation="2"
-          hover-elevation="4"
-          class="h-100 position-relative"
+          class="asset-card h-100"
         >
-          <div class="position-absolute top-0 right-0 ma-2 d-flex ga-1" style="z-index: 10">
-            <v-icon-btn
-              icon="mdi-pencil-outline"
-              variant="text"
-              size="small"
-              :aria-label="`Edit ${asset.name}`"
-              @click.stop="openEditDialog(asset)"
-            />
-            <v-icon-btn
-              icon="mdi-delete"
-              variant="text"
-              color="red-lighten-1"
-              size="small"
-              :aria-label="`Delete ${asset.name}`"
-              @click.stop="confirmDelete(asset)"
-            />
-          </div>
-
           <v-card-item>
             <template #prepend>
               <v-avatar :color="getAssetColour(asset.type, isDark)" variant="tonal" rounded="0">
@@ -83,6 +64,26 @@
                 [asset.details.species, asset.details.breed].filter(Boolean).join(' - ') || 'Pet'
               }}
             </v-card-subtitle>
+
+            <template #append>
+              <div class="d-flex align-center ga-1">
+                <v-icon-btn
+                  icon="mdi-pencil-outline"
+                  variant="text"
+                  class="card-action-btn"
+                  :aria-label="`Edit ${asset.name}`"
+                  @click.stop="openEditDialog(asset)"
+                />
+                <v-icon-btn
+                  icon="mdi-delete-outline"
+                  variant="text"
+                  color="error"
+                  class="card-action-btn"
+                  :aria-label="`Delete ${asset.name}`"
+                  @click.stop="confirmDelete(asset)"
+                />
+              </div>
+            </template>
           </v-card-item>
 
           <v-divider />
@@ -263,5 +264,20 @@ watch(
 
 .asset-grid > * {
   min-inline-size: 0;
+}
+
+.asset-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.asset-card:hover {
+  box-shadow:
+    0 4px 10px -1px rgba(var(--v-shadow-color), 0.16),
+    0 2px 6px -1px rgba(var(--v-shadow-color), 0.12) !important;
+}
+
+.card-action-btn {
+  min-inline-size: 44px;
+  min-block-size: 44px;
 }
 </style>
