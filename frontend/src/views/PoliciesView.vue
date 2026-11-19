@@ -62,9 +62,10 @@
 
     <template v-else>
       <div class="mb-6">
-        <div class="d-flex align-center mb-2">
+        <div class="d-flex align-center mb-3">
           <v-icon color="success" icon="mdi-shield-check" class="mr-2" />
-          <h2 class="text-title-large font-weight-bold">Active Policies</h2>
+          <h2 class="text-headline-small font-weight-light">Active Policies</h2>
+          <v-divider class="ml-4" />
         </div>
 
         <v-card
@@ -114,9 +115,10 @@
       <div v-if="expiredPolicies.length > 0" class="mb-6">
         <v-divider class="my-6" />
 
-        <div class="d-flex align-center mb-2 text-medium-emphasis">
+        <div class="d-flex align-center mb-3 text-medium-emphasis">
           <v-icon color="grey" icon="mdi-history" class="mr-2" />
-          <h2 class="text-title-large font-weight-bold">Expired Policies</h2>
+          <h2 class="text-headline-small font-weight-light">Expired Policies</h2>
+          <v-divider class="ml-4" />
         </div>
 
         <PolicyList

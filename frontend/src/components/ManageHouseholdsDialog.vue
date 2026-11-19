@@ -1,13 +1,13 @@
 <template>
   <v-dialog v-model="open" max-width="500px" aria-labelledby="manage-households-title">
-    <v-card rounded="lg" elevation="2" class="pa-2">
-      <v-toolbar color="transparent" density="compact">
-        <v-toolbar-title id="manage-households-title" class="text-title-large">
-          My Households
-        </v-toolbar-title>
+    <v-card rounded="lg" elevation="2">
+      <v-card-title id="manage-households-title" class="pa-4 bg-surface-light d-flex align-center">
+        <v-icon icon="mdi-home-group" color="primary" class="mr-2" />
+        My Households
         <v-spacer />
         <v-icon-btn icon="mdi-close" variant="text" aria-label="Close" @click="open = false" />
-      </v-toolbar>
+      </v-card-title>
+      <v-divider />
 
       <v-card-text class="pa-0">
         <v-list lines="two">
@@ -75,11 +75,21 @@
   />
 
   <v-dialog v-model="renameDialog" max-width="460px" aria-labelledby="rename-household-title">
-    <v-card>
-      <v-card-title id="rename-household-title" class="text-headline-small">
+    <v-card rounded="lg">
+      <v-card-title id="rename-household-title" class="pa-4 bg-surface-light d-flex align-center">
+        <v-icon icon="mdi-home-edit-outline" color="primary" class="mr-2" />
         Rename Household
+        <v-spacer />
+        <v-icon-btn
+          icon="mdi-close"
+          variant="text"
+          aria-label="Close"
+          :disabled="renamingHousehold"
+          @click="renameDialog = false"
+        />
       </v-card-title>
-      <v-card-text class="pt-2">
+      <v-divider />
+      <v-card-text class="pt-4">
         <v-form v-model="renameValid" @submit.prevent="executeRenameHousehold">
           <v-text-field
             v-model="renameName"
@@ -91,7 +101,7 @@
           />
         </v-form>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="pa-4 pt-0">
         <v-spacer />
         <v-btn variant="text" :disabled="renamingHousehold" @click="renameDialog = false">
           Cancel

@@ -1,10 +1,24 @@
 <template>
-  <v-dialog v-model="open" max-width="480px" aria-labelledby="save-asset-prompt-title">
+  <v-dialog
+    v-model="open"
+    max-width="480px"
+    :persistent="saving"
+    aria-labelledby="save-asset-prompt-title"
+  >
     <v-card rounded="lg">
       <v-card-title id="save-asset-prompt-title" class="pa-4 bg-surface-light d-flex align-center">
-        <v-icon :icon="iconName" class="mr-2" color="primary" />
+        <v-icon :icon="getAssetIcon(type)" :color="getAssetColour(type, isDark)" class="mr-2" />
         Save {{ type }} to Inventory?
+        <v-spacer />
+        <v-icon-btn
+          icon="mdi-close"
+          variant="text"
+          aria-label="Close"
+          :disabled="saving"
+          @click="open = false"
+        />
       </v-card-title>
+      <v-divider />
 
       <v-card-text class="pt-4">
         <p class="text-body-medium mb-3">
@@ -70,7 +84,9 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useTheme } from 'vuetify'
 import api from '@/services/api'
+import { getAssetColour, getAssetIcon } from '@/utils/AssetTypes'
 
 const open = defineModel({ type: Boolean })
 
@@ -82,15 +98,20 @@ const props = defineProps({
 
 const emit = defineEmits(['saved', 'skip'])
 
+const theme = useTheme()
+const isDark = computed(() => theme.current.value.dark)
+
 const entityName = ref('')
 const valid = ref(false)
 const saving = ref(false)
 const errorMessage = ref('')
 
-const iconName = computed(() => (props.type === 'Pet' ? 'mdi-paw' : 'mdi-car'))
-
 watch(open, (isOpen) => {
-  if (!isOpen) return
+  if (!isOpen) {
+    errorMessage.value = ''
+    entityName.value = ''
+    return
+  }
   errorMessage.value = ''
   if (props.type === 'Pet') {
     entityName.value = (props.details?.pet_name || '').trim()

@@ -1,9 +1,9 @@
 <template>
   <v-card class="mt-2 mb-2 elevation-0" rounded="lg">
-    <div class="d-flex align-center text-primary font-weight-bold mb-4">
+    <h3 class="text-title-medium font-weight-bold text-primary d-flex align-center mb-4">
       <v-icon icon="mdi-sofa" class="mr-2" />
       Contents Details
-    </div>
+    </h3>
 
     <v-row density="compact">
       <v-col cols="6">
@@ -36,9 +36,9 @@
 
       <v-col cols="12" class="mt-2">
         <div class="d-flex justify-space-between align-center mb-2">
-          <div class="text-body-small font-weight-bold text-medium-emphasis">
+          <h4 class="text-body-small font-weight-bold text-medium-emphasis">
             Specified High Value Items
-          </div>
+          </h4>
           <v-btn
             size="small"
             variant="text"
@@ -63,7 +63,7 @@
                 label="Item Description"
                 placeholder="e.g. Diamond Ring"
                 variant="outlined"
-                density="compact"
+                density="comfortable"
                 hide-details
                 bg-color="surface"
               />
@@ -77,7 +77,7 @@
                 persistent-placeholder
                 :prefix="currencySymbol"
                 variant="outlined"
-                density="compact"
+                density="comfortable"
                 hide-details
                 bg-color="surface"
               />
@@ -107,9 +107,7 @@
       </v-col>
 
       <v-col cols="12" class="mt-2">
-        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
-          Included Extras
-        </div>
+        <h4 class="text-body-small font-weight-bold text-medium-emphasis mb-2">Included Extras</h4>
         <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox

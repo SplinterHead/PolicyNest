@@ -1,9 +1,9 @@
 <template>
   <v-card class="mt-2 mb-2 elevation-0" rounded="lg">
-    <div class="d-flex align-center text-primary font-weight-bold mb-4">
+    <h3 class="text-title-medium font-weight-bold text-primary d-flex align-center mb-4">
       <v-icon icon="mdi-home-city" class="mr-2" />
       Buildings Details
-    </div>
+    </h3>
 
     <v-row density="compact">
       <v-col cols="12" sm="6">
@@ -64,9 +64,7 @@
       </v-col>
 
       <v-col cols="12" class="mt-2">
-        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
-          Coverage Extensions
-        </div>
+        <h4 class="text-body-small font-weight-bold text-medium-emphasis mb-2">Included Extras</h4>
         <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox

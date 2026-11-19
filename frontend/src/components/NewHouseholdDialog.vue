@@ -5,13 +5,22 @@
     :persistent="!showCancel"
     aria-labelledby="new-household-title"
   >
-    <v-card rounded="lg" elevation="2" class="text-center pa-2 h-100 position-relative">
-      <v-card-title id="new-household-title" class="text-headline-small font-weight-bold">
-        <v-icon icon="mdi-home-plus" color="primary" class="mb-1" />
+    <v-card rounded="lg" elevation="2">
+      <v-card-title id="new-household-title" class="pa-4 bg-surface-light d-flex align-center">
+        <v-icon icon="mdi-home-plus" color="primary" class="mr-2" />
         {{ title }}
+        <v-spacer />
+        <v-icon-btn
+          v-if="showCancel"
+          icon="mdi-close"
+          variant="text"
+          aria-label="Close"
+          @click="open = false"
+        />
       </v-card-title>
+      <v-divider />
 
-      <v-card-text>
+      <v-card-text class="pt-4">
         <p class="mb-4 text-medium-emphasis">
           {{ subtitle }}
         </p>
@@ -21,6 +30,7 @@
             v-model="name"
             label="Household Name"
             variant="outlined"
+            density="comfortable"
             placeholder="e.g. Dream Home"
             :rules="[(v) => !!v || 'Name is required']"
             autofocus
@@ -29,14 +39,15 @@
         </v-form>
       </v-card-text>
 
-      <v-card-actions class="justify-center">
+      <v-card-actions class="pa-4 pt-0">
+        <v-spacer v-if="showCancel" />
         <v-btn v-if="showCancel" variant="text" @click="open = false">Cancel</v-btn>
 
         <v-btn
           color="primary"
-          size="large"
+          :size="showCancel ? 'default' : 'large'"
           variant="flat"
-          :class="{ 'ml-2': showCancel, 'w-100': !showCancel }"
+          :block="!showCancel"
           :loading="loading"
           :disabled="!valid || !name"
           @click="submit"

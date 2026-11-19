@@ -32,7 +32,7 @@
 
     <div v-for="group in groupedAssets" :key="group.type" class="mb-8">
       <div class="d-flex align-center mb-3">
-        <v-icon :icon="getAssetIcon(group.type)" size="large" class="mr-2" />
+        <v-icon :icon="getAssetIcon(group.type)" class="mr-2" />
         <h2 class="text-headline-small font-weight-light">
           {{ group.label }}
         </h2>

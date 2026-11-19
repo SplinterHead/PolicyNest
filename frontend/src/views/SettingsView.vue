@@ -8,10 +8,10 @@
     <v-row>
       <v-col cols="12" md="6">
         <v-card elevation="2" rounded="lg" class="pa-4">
-          <div class="d-flex align-center mb-4 text-primary font-weight-bold">
+          <h2 class="text-title-medium font-weight-bold text-primary d-flex align-center mb-4">
             <v-icon icon="mdi-earth" class="mr-2" />
             Localization
-          </div>
+          </h2>
 
           <v-select
             :model-value="currencyCode"

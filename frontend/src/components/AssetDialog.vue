@@ -2,31 +2,36 @@
   <v-dialog id="asset-dialog" v-model="open" max-width="500px" aria-labelledby="asset-dialog-title">
     <v-defaults-provider :defaults="{ VMenu: { attach: '#asset-dialog' } }">
       <v-card rounded="lg">
-        <v-card-title id="asset-dialog-title" class="pa-4 bg-surface-light">
-          <v-icon :icon="iconName" class="mr-2" color="primary" />
+        <v-card-title id="asset-dialog-title" class="pa-4 bg-surface-light d-flex align-center">
+          <v-icon :icon="iconName" :color="iconColour" class="mr-2" />
           {{ isEditing ? `Edit ${effectiveType}` : `Add ${effectiveType}` }}
+          <v-spacer />
+          <v-icon-btn icon="mdi-close" variant="text" aria-label="Close" @click="open = false" />
         </v-card-title>
+        <v-divider />
 
         <v-card-text class="pt-4">
           <v-form v-model="valid" @submit.prevent="save">
-            <v-text-field
-              v-model="form.name"
-              :label="effectiveType === 'Pet' ? 'Pet Name' : 'Nickname (e.g. Dad\'s Car)'"
-              variant="outlined"
-              prepend-inner-icon="mdi-tag-text"
-              :rules="[(v) => !!(v && v.trim()) || 'Name is required']"
-              class="mb-2"
-            />
+            <v-row density="compact">
+              <v-col cols="12">
+                <v-text-field
+                  v-model="form.name"
+                  :label="effectiveType === 'Pet' ? 'Pet Name' : 'Nickname (e.g. Dad\'s Car)'"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-tag-text"
+                  :rules="[(v) => !!(v && v.trim()) || 'Name is required']"
+                />
+              </v-col>
 
-            <div v-if="effectiveType === 'Vehicle'">
-              <v-row density="compact">
+              <template v-if="effectiveType === 'Vehicle'">
                 <v-col cols="6">
                   <v-text-field
                     v-model="form.make"
                     label="Make"
                     placeholder="Toyota"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                   />
                 </v-col>
                 <v-col cols="6">
@@ -35,7 +40,7 @@
                     label="Model"
                     placeholder="Corolla"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -43,7 +48,7 @@
                     v-model="form.reg"
                     label="Registration Plate"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                     prepend-inner-icon="mdi-card-account-details"
                   />
                 </v-col>
@@ -52,22 +57,20 @@
                     v-model="form.vin"
                     label="VIN (Optional)"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                     prepend-inner-icon="mdi-barcode"
                   />
                 </v-col>
-              </v-row>
-            </div>
+              </template>
 
-            <div v-if="effectiveType === 'Pet'">
-              <v-row density="compact">
+              <template v-else-if="effectiveType === 'Pet'">
                 <v-col cols="12">
                   <v-select
                     v-model="form.species"
                     :items="['Dog', 'Cat', 'Rabbit', 'Bird', 'Horse', 'Reptile', 'Other']"
                     label="Species"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                     prepend-inner-icon="mdi-paw"
                   />
                 </v-col>
@@ -76,7 +79,7 @@
                     v-model="form.breed"
                     label="Breed"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                   />
                 </v-col>
                 <v-col cols="6">
@@ -84,7 +87,7 @@
                     v-model="form.color"
                     label="Color/Markings"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -92,12 +95,12 @@
                     v-model="form.chip_id"
                     label="Microchip ID"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                     prepend-inner-icon="mdi-barcode-scan"
                   />
                 </v-col>
-              </v-row>
-            </div>
+              </template>
+            </v-row>
           </v-form>
         </v-card-text>
 
@@ -115,7 +118,9 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useTheme } from 'vuetify'
 import api from '@/services/api'
+import { getAssetColour, getAssetIcon } from '@/utils/AssetTypes'
 
 const open = defineModel({ type: Boolean })
 
@@ -141,13 +146,17 @@ function getResetForm() {
   }
 }
 
+const theme = useTheme()
+const isDark = computed(() => theme.current.value.dark)
+
 const valid = ref(false)
 const loading = ref(false)
 const form = ref(getResetForm())
 
 const effectiveType = computed(() => props.assetToEdit?.type || props.type)
 const isEditing = computed(() => Boolean(props.assetToEdit))
-const iconName = computed(() => (effectiveType.value === 'Pet' ? 'mdi-paw' : 'mdi-car'))
+const iconName = computed(() => getAssetIcon(effectiveType.value))
+const iconColour = computed(() => getAssetColour(effectiveType.value, isDark.value))
 
 watch(open, (val) => {
   if (!val) return
