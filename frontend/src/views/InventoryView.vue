@@ -6,13 +6,14 @@
       </v-col>
     </v-row>
 
-    <v-fab app color="primary" location="right bottom" size="large" icon>
+    <v-fab app color="primary" location="right bottom" size="large" style="z-index: 900" icon>
       <v-icon :icon="openFab ? 'mdi-close' : 'mdi-plus'" />
       <v-speed-dial
         v-model="openFab"
         location="top left"
         transition="slide-y-reverse-transition"
         activator="parent"
+        scrim
         :activator-props="{ 'aria-label': openFab ? 'Close new asset menu' : 'Add asset' }"
       >
         <v-btn
@@ -22,7 +23,8 @@
           :prepend-icon="config.icon"
           rounded="xl"
           size="large"
-          width="150"
+          width="160"
+          class="justify-start px-4"
           @click="openCreateDialog(type)"
         >
           {{ config.label }}
@@ -198,6 +200,7 @@ const groupedAssets = computed(() => {
 })
 
 function openCreateDialog(type) {
+  openFab.value = false
   assetToEdit.value = null
   dialogType.value = type
   dialog.value = true
