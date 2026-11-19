@@ -1,24 +1,20 @@
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    max-width="600px"
-    scrollable
-  >
+  <v-dialog v-model="open" max-width="600px" scrollable>
     <v-card rounded="lg">
       <v-card-title class="pa-4 bg-primary text-white">
         {{ policyToEdit ? 'Edit Policy' : 'New Policy' }}
       </v-card-title>
 
       <v-card-text class="pt-4" style="max-height: 80vh">
-        <v-form ref="form" @submit.prevent="submit">
-          <v-row dense>
+        <v-form ref="formRef" @submit.prevent="submit">
+          <v-row density="compact">
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="form.provider"
                 label="Provider"
                 variant="outlined"
                 density="comfortable"
+                :rules="[(v) => !!v || 'Provider is required']"
               />
             </v-col>
             <v-col cols="12" sm="6">
@@ -30,21 +26,29 @@
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                type="date"
+              <v-date-input
                 v-model="form.start_date"
                 label="Start Date"
+                input-format="yyyy-mm-dd"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
                 variant="outlined"
                 density="comfortable"
+                :rules="[(v) => !!v || 'Start date is required']"
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                type="date"
+              <v-date-input
                 v-model="form.end_date"
                 label="End Date"
+                input-format="yyyy-mm-dd"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
                 variant="outlined"
                 density="comfortable"
+                clearable
+                hint="Leave empty for perpetual policy"
+                persistent-hint
               />
             </v-col>
             <v-col cols="12">
@@ -56,8 +60,11 @@
                 :prefix="currencySymbol"
                 type="number"
                 step="0.01"
+                :rules="[
+                  (v) => (v !== '' && v !== null && v !== undefined) || 'Premium is required',
+                ]"
               >
-                <template v-slot:append>
+                <template #append>
                   <v-select
                     v-model="form.frequency"
                     :items="['Annual', 'Monthly']"
@@ -65,7 +72,7 @@
                     density="compact"
                     hide-details
                     width="120px"
-                    class="font-weight-bold text-caption"
+                    class="font-weight-bold text-body-small"
                   />
                 </template>
               </v-text-field>
@@ -75,24 +82,24 @@
               <BuildingsPolicyForm
                 v-if="form.type === 'Buildings'"
                 v-model="form.attributes"
-                :currencySymbol="currencySymbol"
+                :currency-symbol="currencySymbol"
               />
               <CarPolicyForm
                 v-else-if="form.type === 'Car'"
                 v-model="form.attributes"
+                v-model:asset-id="form.asset_id"
                 :assets="assets"
-                :currencySymbol="currencySymbol"
-                @update:assetId="form.asset_id = $event"
+                :currency-symbol="currencySymbol"
               />
               <ContentsPolicyForm
                 v-else-if="form.type === 'Contents'"
                 v-model="form.attributes"
-                :currencySymbol="currencySymbol"
+                :currency-symbol="currencySymbol"
               />
               <LifePolicyForm
                 v-else-if="form.type === 'Life'"
                 v-model="form.attributes"
-                :currencySymbol="currencySymbol"
+                :currency-symbol="currencySymbol"
               />
               <MedicalPolicyForm
                 v-else-if="form.type === 'Medical'"
@@ -107,28 +114,18 @@
             </v-col>
 
             <v-col cols="12">
-              <div class="d-flex align-center">
-                <v-btn
-                  color="primary"
-                  variant="tonal"
-                  prepend-icon="mdi-paperclip"
-                  @click="$refs.fileUpload.click()"
-                >
-                  {{ file ? 'Change Document' : 'Upload Document' }}
-                </v-btn>
-
-                <div v-if="file" class="ml-3 text-body-2 font-weight-bold text-primary">
-                  {{ file.name }}
-                </div>
-                <div v-else class="ml-3 text-caption text-medium-emphasis">PDF files only</div>
-
-                <v-file-input
-                  ref="fileUpload"
-                  class="d-none"
-                  accept=".pdf"
-                  @update:modelValue="handleFileUpload"
-                />
-              </div>
+              <v-file-input
+                v-model="file"
+                accept=".pdf"
+                label="Policy Document"
+                placeholder="PDF files only"
+                variant="outlined"
+                density="comfortable"
+                prepend-icon=""
+                prepend-inner-icon="mdi-paperclip"
+                clearable
+                show-size
+              />
             </v-col>
           </v-row>
         </v-form>
@@ -137,14 +134,18 @@
       <v-divider />
       <v-card-actions class="pa-4">
         <v-spacer />
-        <v-btn variant="text" @click="$emit('update:modelValue', false)">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" @click="submit" :loading="loading">Save Policy</v-btn>
+        <v-btn variant="text" @click="open = false">Cancel</v-btn>
+        <v-btn color="primary" variant="flat" :loading="loading" @click="submit">
+          Save Policy
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { parseIsoDate, toIsoDate } from '@/utils/Formats'
 import BuildingsPolicyForm from '@/components/forms/BuildingsPolicyForm.vue'
 import ContentsPolicyForm from '@/components/forms/ContentsPolicyForm.vue'
 import CarPolicyForm from '@/components/forms/CarPolicyForm.vue'
@@ -152,92 +153,79 @@ import LifePolicyForm from '@/components/forms/LifePolicyForm.vue'
 import MedicalPolicyForm from '@/components/forms/MedicalPolicyForm.vue'
 import PetPolicyForm from '@/components/forms/PetPolicyForm.vue'
 
-export default {
-  name: 'PolicyForm',
-  components: {
-    BuildingsPolicyForm,
-    ContentsPolicyForm,
-    CarPolicyForm,
-    LifePolicyForm,
-    MedicalPolicyForm,
-    PetPolicyForm,
-  },
-  props: {
-    assets: Array,
-    currencyCode: String,
-    loading: Boolean,
-    modelValue: Boolean,
-    policyToEdit: Object,
-    policyType: String,
-  },
-  emits: ['update:modelValue', 'submit'],
-  data() {
-    return {
-      form: {
-        asset_id: null,
-        type: this.policyType,
-        provider: '',
-        policy_number: '',
-        start_date: '',
-        end_date: null,
-        premium: '',
-        frequency: 'Annual',
-        attributes: {},
-      },
-      file: null,
+const open = defineModel({ type: Boolean })
+
+const props = defineProps({
+  assets: { type: Array, default: () => [] },
+  currencyCode: String,
+  loading: Boolean,
+  policyToEdit: Object,
+  policyType: String,
+})
+
+const emit = defineEmits(['submit'])
+
+const formRef = useTemplateRef('formRef')
+const file = ref(null)
+const form = ref(createEmptyForm())
+
+function createEmptyForm(type = null) {
+  return {
+    asset_id: null,
+    type,
+    provider: '',
+    policy_number: '',
+    start_date: null,
+    end_date: null,
+    premium: '',
+    frequency: 'Annual',
+    attributes: {},
+  }
+}
+
+const currencySymbol = computed(() => {
+  const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: 'A$', CAD: 'C$' }
+  return symbols[props.currencyCode] || '$'
+})
+
+watch(open, (isOpen) => {
+  if (!isOpen) return
+
+  if (props.policyToEdit) {
+    const clonedAttributes = JSON.parse(JSON.stringify(props.policyToEdit.attributes || {}))
+    form.value = {
+      ...props.policyToEdit,
+      start_date: parseIsoDate(props.policyToEdit.start_date),
+      end_date: parseIsoDate(props.policyToEdit.end_date),
+      frequency: clonedAttributes.payment_frequency || 'Annual',
+      attributes: clonedAttributes,
     }
-  },
-  computed: {
-    currencySymbol() {
-      const symbols = { GBP: '£', USD: '$', EUR: '€', AUD: '$', CAD: '$' }
-      return symbols[this.currencyCode] || '$'
-    },
-  },
-  watch: {
-    modelValue(isOpen) {
-      if (isOpen) {
-        if (this.policyToEdit) {
-          this.form = { ...this.policyToEdit }
-          this.form.frequency = this.policyToEdit.attributes.payment_frequency || 'Annual'
-        } else {
-          this.form = {
-            asset_id: null,
-            type: this.policyType,
-            provider: '',
-            policy_number: '',
-            start_date: '',
-            end_date: '',
-            premium: '',
-            frequency: 'Annual',
-            attributes: {},
-          }
-        }
-        this.file = null
-      }
-    },
-  },
-  methods: {
-    handleFileUpload(fileOrArray) {
-      if (Array.isArray(fileOrArray) && fileOrArray.length > 0) {
-        this.file = fileOrArray[0]
-      } else {
-        this.file = fileOrArray
-      }
-    },
-    submit() {
-      if (!this.form.provider || !this.form.premium) return
-      const finalAttributes = {
-        ...this.form.attributes,
-        payment_frequency: this.form.frequency,
-      }
-      this.$emit('submit', {
-        ...this.form,
-        attributes: JSON.stringify(finalAttributes),
-        file: this.file,
-        id: this.policyToEdit?.id,
-      })
-    },
-  },
+  } else {
+    form.value = createEmptyForm(props.policyType)
+  }
+  file.value = null
+})
+
+async function submit() {
+  const validation = await formRef.value?.validate()
+  if (validation && !validation.valid) return
+
+  const startDate = toIsoDate(form.value.start_date)
+  if (!form.value.provider || form.value.premium === '' || !startDate) return
+
+  const finalAttributes = {
+    ...form.value.attributes,
+    payment_frequency: form.value.frequency,
+  }
+
+  emit('submit', {
+    ...form.value,
+    start_date: startDate,
+    end_date: toIsoDate(form.value.end_date),
+    attributes: JSON.stringify(finalAttributes),
+    file: file.value,
+    id: props.policyToEdit?.id,
+  })
 }
 </script>
 

@@ -5,35 +5,33 @@
       Medical Policy Details
     </div>
 
-    <v-row dense>
+    <v-row density="compact">
       <v-col cols="12" sm="6">
         <v-select
-          v-model="modelValue.cover_type"
+          v-model="attributes.cover_type"
           :items="coverTypes"
           label="Plan Type"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
           prepend-inner-icon="mdi-account-group"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12" sm="6">
         <v-select
-          v-model="modelValue.underwriting_type"
+          v-model="attributes.underwriting_type"
           :items="underwritingTypes"
           label="Underwriting Type"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.excess"
+          v-model.number="attributes.excess"
           label="Annual Excess"
           type="number"
           variant="outlined"
@@ -41,13 +39,12 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Amount you pay per claim/year"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.outpatient_limit"
+          v-model.number="attributes.outpatient_limit"
           label="Out-patient Limit"
           type="number"
           variant="outlined"
@@ -55,85 +52,77 @@
           :prefix="currencySymbol"
           bg-color="surface"
           placeholder="Leave empty if full"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12">
         <v-text-field
-          v-model="modelValue.hospital_list"
+          v-model="attributes.hospital_list"
           label="Hospital List / Network Tier"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
           placeholder="e.g. London / Provincial / Key List"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12" class="mt-2">
-        <div class="text-caption font-weight-bold text-medium-emphasis mb-2">
+        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
           Included Extras & Benefits
         </div>
-        <v-row dense>
+        <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.dental"
+              v-model="attributes.dental"
               label="Dental Cover"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.optical"
+              v-model="attributes.optical"
               label="Optical Cover"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.mental_health"
+              v-model="attributes.mental_health"
               label="Mental Health"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.therapies"
+              v-model="attributes.therapies"
               label="Therapies (Physio/Osteo)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.travel_cover"
+              v-model="attributes.travel_cover"
               label="Worldwide Travel"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.cancer_cover"
+              v-model="attributes.cancer_cover"
               label="Full Cancer Cover"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
         </v-row>
@@ -142,24 +131,13 @@
   </v-card>
 </template>
 
-<script>
-export default {
-  name: 'MedicalPolicyForm',
-  props: {
-    currencySymbol: String,
-    modelValue: { type: Object, default: () => ({}) },
-  },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      policyTypes: ['Individual', 'Couple', 'Family', 'Single Parent', 'Child Only'],
-      underwritingTypes: ['Full Medical Underwriting', 'Moratorium', 'Switch/Continued', 'Unknown'],
-    }
-  },
-  methods: {
-    update() {
-      this.$emit('update:modelValue', this.modelValue)
-    },
-  },
-}
+<script setup>
+const attributes = defineModel({ type: Object, default: () => ({}) })
+
+defineProps({
+  currencySymbol: String,
+})
+
+const coverTypes = ['Individual', 'Couple', 'Family', 'Single Parent', 'Child Only']
+const underwritingTypes = ['Full Medical Underwriting', 'Moratorium', 'Switch/Continued', 'Unknown']
 </script>

@@ -1,0 +1,30 @@
+[project]
+name = "policynest-backend"
+version = "0.1.0"
+description = "Backend for PolicyNest"
+authors = [
+    {name = "Lewis England", email = "lewis2004@hotmail.com"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "alembic (>=1.20.1,<2.0.0)",
+    "fastapi (>=0.165.0,<0.166.0)",
+    "pydantic (>=2.14.3,<3.0.0)",
+    "python-multipart (>=0.0.34,<0.0.35)",
+    "sqlalchemy (>=2.1.9,<3.0.0)",
+    "uvicorn (>=0.54.0,<0.55.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "isort (>=9.0.2,<10.0.0)",
+    "black (>=26.10.1,<27.0.0)"
+]
+
+[tool.isort]
+profile = "black"

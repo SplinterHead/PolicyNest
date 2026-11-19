@@ -5,10 +5,10 @@
       Pet Policy Details
     </div>
 
-    <v-row dense>
+    <v-row density="compact">
       <v-col cols="12">
         <v-select
-          :model-value="selectedAssetId"
+          :model-value="assetId"
           :items="assets"
           item-title="name"
           item-value="id"
@@ -18,37 +18,36 @@
           prepend-inner-icon="mdi-cat"
           clearable
           placeholder="Or leave blank for generic cover"
-          @update:modelValue="onAssetSelect"
+          @update:model-value="onAssetSelect"
         />
       </v-col>
 
       <v-col cols="12" sm="6">
         <v-text-field
-          v-model="modelValue.pet_name"
+          v-model="attributes.pet_name"
           label="Pet Name"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
-          :readonly="!!selectedAssetId"
+          :readonly="!!assetId"
           hint="Auto-filled if pet selected"
         />
       </v-col>
 
       <v-col cols="12" sm="6">
         <v-select
-          v-model="modelValue.cover_type"
+          v-model="attributes.cover_type"
           :items="coverTypes"
           label="Cover Type"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.vet_fees_limit"
+          v-model.number="attributes.vet_fees_limit"
           label="Vet Fees Limit"
           type="number"
           variant="outlined"
@@ -56,93 +55,89 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Max payout per year/condition"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.excess"
+          v-model.number="attributes.excess"
           label="Fixed Excess"
           type="number"
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12">
-        <div class="text-caption text-medium-emphasis mb-1">Co-payment (Percentage you pay)</div>
+        <div class="text-body-small text-medium-emphasis mb-1">Co-payment (Percentage you pay)</div>
         <v-slider
-          v-model="modelValue.copay_percent"
+          v-model="attributes.copay_percent"
           :min="0"
           :max="50"
           :step="5"
           thumb-label="always"
+          variant="pill"
           color="primary"
           track-color="grey-lighten-2"
         >
-          <template v-slot:append>
+          <template #append>
             <div class="font-weight-bold" style="width: 40px">
-              {{ modelValue.copay_percent || 0 }}%
+              {{ attributes.copay_percent || 0 }}%
             </div>
           </template>
         </v-slider>
       </v-col>
 
       <v-col cols="12">
-        <div class="text-caption font-weight-bold text-medium-emphasis mb-2">Included Extras</div>
-        <v-row dense>
+        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
+          Included Extras
+        </div>
+        <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.boarding_fees"
+              v-model="attributes.boarding_fees"
               label="Boarding Fees"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.advertising_reward"
+              v-model="attributes.advertising_reward"
               label="Lost/Stolen (Advertising)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.death_benefit"
+              v-model="attributes.death_benefit"
               label="Death from Illness/Injury"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.third_party_liability"
+              v-model="attributes.third_party_liability"
               label="Third Party Liability"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.travel_cover"
+              v-model="attributes.travel_cover"
               label="Overseas Travel"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
         </v-row>
@@ -151,40 +146,27 @@
   </v-card>
 </template>
 
-<script>
-export default {
-  name: 'PetPolicyForm',
-  props: {
-    assets: { type: Array, default: () => [] },
-    currencySymbol: String,
-    modelValue: { type: Object, default: () => ({}) },
-  },
-  emits: ['update:modelValue', 'update:assetId'],
-  data() {
-    return {
-      coverTypes: ['Lifetime', 'Maximum Benefit', 'Time Limited', 'Accident Only'],
-      selectedAssetId: null,
-    }
-  },
-  methods: {
-    onAssetSelect(id) {
-      this.selectedAssetId = id
-      this.$emit('update:assetId', id)
+<script setup>
+const attributes = defineModel({ type: Object, default: () => ({}) })
+const assetId = defineModel('assetId', { default: null })
 
-      if (id) {
-        const asset = this.assets.find((a) => a.id === id)
-        if (asset) {
-          this.modelValue.pet_name = asset.name
-          this.update()
-        }
-      } else {
-        this.modelValue.pet_name = ''
-        this.update()
-      }
-    },
-    update() {
-      this.$emit('update:modelValue', this.modelValue)
-    },
-  },
+const props = defineProps({
+  assets: { type: Array, default: () => [] },
+  currencySymbol: String,
+})
+
+const coverTypes = ['Lifetime', 'Maximum Benefit', 'Time Limited', 'Accident Only']
+
+function onAssetSelect(id) {
+  assetId.value = id
+
+  if (id) {
+    const asset = props.assets.find((a) => a.id === id)
+    if (asset) {
+      attributes.value.pet_name = asset.name
+    }
+  } else {
+    attributes.value.pet_name = ''
+  }
 }
 </script>

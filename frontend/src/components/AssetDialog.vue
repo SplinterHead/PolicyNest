@@ -1,17 +1,13 @@
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="500px"
-    @update:modelValue="$emit('update:modelValue', $event)"
-  >
+  <v-dialog v-model="open" max-width="500px">
     <v-card rounded="lg">
       <v-card-title class="pa-4 bg-surface-light">
-        <v-icon :icon="getIcon" class="mr-2" color="primary" />
+        <v-icon :icon="iconName" class="mr-2" color="primary" />
         Add {{ type }}
       </v-card-title>
 
       <v-card-text class="pt-4">
-        <v-form ref="form" v-model="valid" @submit.prevent="save">
+        <v-form v-model="valid" @submit.prevent="save">
           <v-text-field
             v-model="form.name"
             :label="type === 'Pet' ? 'Pet Name' : 'Nickname (e.g. Dad\'s Car)'"
@@ -22,7 +18,7 @@
           />
 
           <div v-if="type === 'Vehicle'">
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="6">
                 <v-text-field
                   v-model="form.make"
@@ -63,7 +59,7 @@
           </div>
 
           <div v-if="type === 'Pet'">
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="12">
                 <v-select
                   v-model="form.species"
@@ -106,8 +102,8 @@
 
       <v-card-actions class="pa-4 pt-0">
         <v-spacer />
-        <v-btn variant="text" @click="$emit('update:modelValue', false)">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" @click="save" :loading="loading" :disabled="!valid">
+        <v-btn variant="text" @click="open = false">Cancel</v-btn>
+        <v-btn color="primary" variant="flat" :loading="loading" :disabled="!valid" @click="save">
           Save {{ type }}
         </v-btn>
       </v-card-actions>
@@ -115,88 +111,81 @@
   </v-dialog>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from 'vue'
 import api from '@/services/api'
 
-export default {
-  name: 'AssetDialog',
-  props: {
-    modelValue: Boolean,
-    type: { type: String, default: 'Vehicle' },
-    householdId: Number,
-  },
-  emits: ['update:modelValue', 'saved'],
-  data() {
-    return {
-      valid: false,
-      loading: false,
-      form: this.getResetForm(),
+const open = defineModel({ type: Boolean })
+
+const props = defineProps({
+  type: { type: String, default: 'Vehicle' },
+  householdId: Number,
+})
+
+const emit = defineEmits(['saved'])
+
+function getResetForm() {
+  return {
+    name: '',
+    make: '',
+    model: '',
+    reg: '',
+    vin: '',
+    species: 'Dog',
+    breed: '',
+    color: '',
+    chip_id: '',
+  }
+}
+
+const valid = ref(false)
+const loading = ref(false)
+const form = ref(getResetForm())
+
+const iconName = computed(() => (props.type === 'Pet' ? 'mdi-paw' : 'mdi-car'))
+
+watch(open, (val) => {
+  if (val) {
+    form.value = getResetForm()
+  }
+})
+
+async function save() {
+  if (!props.householdId) return
+  loading.value = true
+
+  let details = {}
+
+  if (props.type === 'Vehicle') {
+    details = {
+      make: form.value.make,
+      model: form.value.model,
+      reg: form.value.reg,
+      vin: form.value.vin,
     }
-  },
-  computed: {
-    getIcon() {
-      return this.type === 'Pet' ? 'mdi-paw' : 'mdi-car'
-    },
-  },
-  watch: {
-    modelValue(val) {
-      if (val) {
-        this.form = this.getResetForm()
-      }
-    },
-  },
-  methods: {
-    getResetForm() {
-      return {
-        name: '',
-        make: '',
-        model: '',
-        reg: '',
-        vin: '',
-        species: 'Dog',
-        breed: '',
-        color: '',
-        chip_id: '',
-      }
-    },
-    async save() {
-      if (!this.householdId) return
-      this.loading = true
+  } else if (props.type === 'Pet') {
+    details = {
+      species: form.value.species,
+      breed: form.value.breed,
+      color: form.value.color,
+      chip_id: form.value.chip_id,
+    }
+  }
 
-      let details = {}
+  const formData = new FormData()
+  formData.append('household_id', props.householdId)
+  formData.append('name', form.value.name)
+  formData.append('type', props.type)
+  formData.append('details', JSON.stringify(details))
 
-      if (this.type === 'Vehicle') {
-        details = {
-          make: this.form.make,
-          model: this.form.model,
-          reg: this.form.reg,
-          vin: this.form.vin,
-        }
-      } else if (this.type === 'Pet') {
-        details = {
-          species: this.form.species,
-          breed: this.form.breed,
-          color: this.form.color,
-          chip_id: this.form.chip_id,
-        }
-      }
-
-      let formData = new FormData()
-      formData.append('household_id', this.householdId)
-      formData.append('name', this.form.name)
-      formData.append('type', this.type)
-      formData.append('details', JSON.stringify(details))
-
-      try {
-        await api.post('/assets/', formData)
-        this.$emit('saved')
-        this.$emit('update:modelValue', false)
-      } catch (e) {
-        console.error('Failed to save asset', e)
-      } finally {
-        this.loading = false
-      }
-    },
-  },
+  try {
+    await api.post('/assets/', formData)
+    emit('saved')
+    open.value = false
+  } catch (e) {
+    console.error('Failed to save asset', e)
+  } finally {
+    loading.value = false
+  }
 }
 </script>

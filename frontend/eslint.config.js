@@ -23,5 +23,11 @@ export default defineConfig([
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
 
+  {
+    rules: {
+      'vue/valid-v-slot': ['error', { allowModifiers: true }],
+    },
+  },
+
   skipFormatting,
 ])

@@ -1,6 +1,0 @@
-alembic
-fastapi
-pydantic
-python-multipart
-sqlalchemy
-uvicorn

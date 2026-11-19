@@ -5,22 +5,21 @@
       Contents Details
     </div>
 
-    <v-row dense>
+    <v-row density="compact">
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.total_cover"
+          v-model.number="attributes.total_cover"
           label="Total Sum Insured"
           type="number"
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          @update:modelValue="update"
         />
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.single_item_limit"
+          v-model.number="attributes.single_item_limit"
           label="Single Item Limit"
           type="number"
           variant="outlined"
@@ -28,13 +27,12 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Max per item unless specified"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12" class="mt-2">
         <div class="d-flex justify-space-between align-center mb-2">
-          <div class="text-caption font-weight-bold text-medium-emphasis">
+          <div class="text-body-small font-weight-bold text-medium-emphasis">
             Specified High Value Items
           </div>
           <v-btn
@@ -49,7 +47,12 @@
         </div>
 
         <div v-if="itemsList.length > 0">
-          <v-row v-for="(item, index) in itemsList" :key="index" dense class="align-center mb-1">
+          <v-row
+            v-for="(item, index) in itemsList"
+            :key="index"
+            density="compact"
+            class="align-center mb-1"
+          >
             <v-col cols="7">
               <v-text-field
                 v-model="item.name"
@@ -59,7 +62,6 @@
                 density="compact"
                 hide-details
                 bg-color="surface"
-                @update:modelValue="update"
               />
             </v-col>
             <v-col cols="4">
@@ -72,87 +74,83 @@
                 density="compact"
                 hide-details
                 bg-color="surface"
-                @update:modelValue="update"
               />
             </v-col>
             <v-col cols="1" class="d-flex justify-center">
-              <v-btn
+              <v-icon-btn
                 icon="mdi-delete"
                 size="small"
                 variant="text"
                 color="red-lighten-2"
+                aria-label="Remove item"
                 @click="removeItem(index)"
               />
             </v-col>
           </v-row>
         </div>
 
-        <v-alert v-else type="info" variant="tonal" density="compact" class="text-caption">
+        <v-alert v-else type="info" variant="tonal" density="compact" class="text-body-small">
           No specified items added.
         </v-alert>
       </v-col>
 
       <v-col cols="12" class="mt-2">
-        <div class="text-caption font-weight-bold text-medium-emphasis mb-2">Included Extras</div>
-        <v-row dense>
+        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
+          Included Extras
+        </div>
+        <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.accidental_damage"
+              v-model="attributes.accidental_damage"
               label="Accidental Damage"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.personal_possessions"
+              v-model="attributes.personal_possessions"
               label="Cover Away From Home"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.bicycle_cover"
+              v-model="attributes.bicycle_cover"
               label="Bicycle Cover"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.garden_cover"
+              v-model="attributes.garden_cover"
               label="Garden / Outbuildings"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.student_cover"
+              v-model="attributes.student_cover"
               label="Student Cover (Uni)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.freezer_contents"
+              v-model="attributes.freezer_contents"
               label="Freezer Contents"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
         </v-row>
@@ -161,37 +159,25 @@
   </v-card>
 </template>
 
-<script>
-export default {
-  name: 'ContentsPolicyForm',
-  props: {
-    currencySymbol: String,
-    modelValue: { type: Object, default: () => ({}) },
-  },
-  emits: ['update:modelValue'],
-  computed: {
-    itemsList() {
-      if (!Array.isArray(this.modelValue.high_value_items)) {
-        this.modelValue.high_value_items = []
-      }
-      return this.modelValue.high_value_items
-    },
-  },
-  methods: {
-    addItem() {
-      if (!this.modelValue.high_value_items) {
-        this.modelValue.high_value_items = []
-      }
-      this.modelValue.high_value_items.push({ name: '', value: null })
-      this.update()
-    },
-    removeItem(index) {
-      this.modelValue.high_value_items.splice(index, 1)
-      this.update()
-    },
-    update() {
-      this.$emit('update:modelValue', this.modelValue)
-    },
-  },
+<script setup>
+import { computed } from 'vue'
+
+const attributes = defineModel({ type: Object, default: () => ({}) })
+
+defineProps({
+  currencySymbol: String,
+})
+
+const itemsList = computed(() => attributes.value.high_value_items ?? [])
+
+function addItem() {
+  if (!Array.isArray(attributes.value.high_value_items)) {
+    attributes.value.high_value_items = []
+  }
+  attributes.value.high_value_items.push({ name: '', value: null })
+}
+
+function removeItem(index) {
+  attributes.value.high_value_items?.splice(index, 1)
 }
 </script>

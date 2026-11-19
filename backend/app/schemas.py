@@ -1,72 +1,85 @@
 from datetime import date
-from typing import Any, Dict, Optional
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, Json
 
 
-# ---------------------------------------------------------
-# ASSETS (Vehicles, Homes, etc.)
-# ---------------------------------------------------------
-class AssetBase(BaseModel):
+class AssetForm(BaseModel):
+    """Form payload for creating an asset."""
+
+    household_id: int
     name: str
     type: str
-    household_id: int
-    value: Optional[float] = 0.0
+    details: Json[dict[str, Any]] | dict[str, Any] = Field(default_factory=dict)
 
 
-class AssetCreate(AssetBase):
-    pass
+class AssetResponse(BaseModel):
+    """Serialized asset returned by the API."""
 
+    model_config = ConfigDict(from_attributes=True)
 
-class Asset(AssetBase):
     id: int
+    household_id: int
+    name: str
+    type: str
+    details: dict[str, Any]
 
-    class Config:
-        from_attributes = True
 
+class PolicyForm(BaseModel):
+    """Form payload for creating or updating a policy."""
 
-# ---------------------------------------------------------
-# POLICIES
-# ---------------------------------------------------------
-class PolicyBase(BaseModel):
+    household_id: int
+    asset_id: int | None = None
     provider: str
+    policy_number: str | None = None
     type: str
-    premium: float
-    frequency: Optional[str] = "Annual"
     start_date: date
-    end_date: Optional[date] = None
-    household_id: int
-    asset_id: Optional[int] = None
-
-    attributes: Optional[Dict[str, Any]] = {}
+    end_date: date | None = None
+    premium: float
+    attributes: Json[dict[str, Any]] | dict[str, Any] = Field(default_factory=dict)
 
 
-class PolicyCreate(PolicyBase):
-    pass
+class PolicyResponse(BaseModel):
+    """Serialized policy returned by the API."""
 
+    model_config = ConfigDict(from_attributes=True)
 
-class Policy(PolicyBase):
     id: int
-    document_path: Optional[str] = None
-    asset: Optional[Asset] = None
+    household_id: int
+    asset_id: int | None = None
+    provider: str
+    policy_number: str | None = None
+    type: str
+    start_date: date
+    end_date: date | None = None
+    premium: float
+    attributes: dict[str, Any]
+    document_path: str | None = None
 
-    class Config:
-        from_attributes = True
 
+class HouseholdForm(BaseModel):
+    """Form payload for creating a household."""
 
-# ---------------------------------------------------------
-# HOUSEHOLDS
-# ---------------------------------------------------------
-class HouseholdBase(BaseModel):
     name: str
 
 
-class HouseholdCreate(HouseholdBase):
-    pass
+class HouseholdResponse(BaseModel):
+    """Serialized household returned by the API."""
 
+    model_config = ConfigDict(from_attributes=True)
 
-class Household(HouseholdBase):
     id: int
+    name: str
 
-    class Config:
-        from_attributes = True
+
+class SystemStatusResponse(BaseModel):
+    """Initialization status response for onboarding checks."""
+
+    initialized: bool
+    household: HouseholdResponse | None = None
+
+
+class DeleteResponse(BaseModel):
+    """Standard acknowledgement returned by delete endpoints."""
+
+    ok: bool = True

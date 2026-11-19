@@ -1,135 +1,98 @@
 # --- POLICY ENDPOINTS ---
-import json
-import os
-import shutil
-from datetime import date
-from typing import Optional
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from sqlalchemy import select
 
-from app import models
-from app.database import get_db
-from app.uploads import save_upload_file
+from app import models, schemas
+from app.database import SessionDep
+from app.uploads import delete_upload_file, save_upload_file
 
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", response_model=schemas.PolicyResponse)
 def create_policy(
-    household_id: int = Form(...),
-    asset_id: Optional[int] = Form(None),
-    provider: str = Form(...),
-    policy_number: str = Form(...),
-    type: str = Form(...),
-    start_date: date = Form(...),
-    end_date: date = Form(None),
-    premium: float = Form(...),
-    attributes: str = Form("{}"),
-    file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db),
-):
-    file_location = None
-    if file:
-        file_location = save_upload_file(file)
-        print(f"file location: {file_location}")
+    data: Annotated[schemas.PolicyForm, Form()],
+    db: SessionDep,
+    file: Annotated[UploadFile | None, File()] = None,
+) -> models.Policy:
+    """Create a new insurance policy with an optional PDF document."""
+    file_location = save_upload_file(file) if file else None
 
-    parsed_attributes = json.loads(attributes)
-
-    db_policy = models.Policy(
-        household_id=household_id,
-        asset_id=asset_id,
-        provider=provider,
-        policy_number=policy_number,
-        type=type,
-        start_date=start_date,
-        end_date=end_date,
-        premium=premium,
-        attributes=parsed_attributes,
-        document_path=file_location,
-    )
-
+    db_policy = models.Policy(**data.model_dump(), document_path=file_location)
     db.add(db_policy)
     db.commit()
     db.refresh(db_policy)
     return db_policy
 
 
-@router.get("/")
-def read_policies(household_id: Optional[int] = None, db: Session = Depends(get_db)):
-    query = db.query(models.Policy)
-    if household_id:
-        query = query.filter(models.Policy.household_id == household_id)
-    return query.all()
+@router.get("/", response_model=list[schemas.PolicyResponse])
+def read_policies(
+    db: SessionDep,
+    household_id: int | None = None,
+) -> list[models.Policy]:
+    """List policies, optionally filtered by household."""
+    stmt = select(models.Policy)
+    if household_id is not None:
+        stmt = stmt.where(models.Policy.household_id == household_id)
+    return list(db.scalars(stmt).all())
 
 
-@router.put("/{policy_id}/document")
+@router.put("/{policy_id}/document", response_model=schemas.PolicyResponse)
 def update_policy_document(
-    policy_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
-):
-    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+    policy_id: int,
+    file: Annotated[UploadFile, File()],
+    db: SessionDep,
+) -> models.Policy:
+    """Upload or replace the PDF document attached to a policy."""
+    policy = db.get(models.Policy, policy_id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    file_location = save_upload_file(file)
-
-    policy.document_path = file_location
+    old_path = policy.document_path
+    policy.document_path = save_upload_file(file)
     db.commit()
     db.refresh(policy)
+    delete_upload_file(old_path)
     return policy
 
 
-@router.delete("/{policy_id}")
-def delete_policy(policy_id: int, db: Session = Depends(get_db)):
-    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+@router.delete("/{policy_id}", response_model=schemas.DeleteResponse)
+def delete_policy(policy_id: int, db: SessionDep) -> schemas.DeleteResponse:
+    """Delete a policy and remove any uploaded document."""
+    policy = db.get(models.Policy, policy_id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    if policy.document_path and os.path.exists(policy.document_path):
-        os.remove(policy.document_path)
-
+    delete_upload_file(policy.document_path)
     db.delete(policy)
     db.commit()
-    return {"ok": True}
+    return schemas.DeleteResponse()
 
 
-@router.put("/{policy_id}")
+@router.put("/{policy_id}", response_model=schemas.PolicyResponse)
 def update_policy(
     policy_id: int,
-    household_id: int = Form(...),
-    asset_id: Optional[int] = Form(None),
-    provider: str = Form(...),
-    policy_number: str = Form(...),
-    type: str = Form(...),
-    start_date: date = Form(...),
-    end_date: date = Form(...),
-    premium: float = Form(...),
-    attributes: str = Form("{}"),
-    file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db),
-):
-    policy = db.query(models.Policy).filter(models.Policy.id == policy_id).first()
+    data: Annotated[schemas.PolicyForm, Form()],
+    db: SessionDep,
+    file: Annotated[UploadFile | None, File()] = None,
+) -> models.Policy:
+    """Update an existing policy and optionally replace its attached document."""
+    policy = db.get(models.Policy, policy_id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
+    old_path: str | None = None
     if file:
-        upload_folder = "uploads"
-        os.makedirs(upload_folder, exist_ok=True)
-        file_location = f"{upload_folder}/{file.filename}"
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(file.file, file_object)
-        policy.document_path = file_location
+        old_path = policy.document_path
+        policy.document_path = save_upload_file(file)
 
-    policy.household_id = household_id
-    policy.asset_id = asset_id
-    policy.provider = provider
-    policy.policy_number = policy_number
-    policy.type = type
-    policy.start_date = start_date
-    policy.end_date = end_date
-    policy.premium = premium
-    policy.attributes = json.loads(attributes)
+    for field, value in data.model_dump().items():
+        setattr(policy, field, value)
 
     db.commit()
     db.refresh(policy)
+    if old_path:
+        delete_upload_file(old_path)
     return policy

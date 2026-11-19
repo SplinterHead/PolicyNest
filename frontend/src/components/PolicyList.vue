@@ -6,12 +6,12 @@
         :items="policies"
         :loading="loading"
         hover
-        @click:row="openPolicy"
         class="cursor-pointer"
+        @click:row="openPolicy"
       >
-        <template v-slot:item.type="{ item }">
+        <template #item.type="{ item }">
           <v-chip
-            :color="getChipColour(item.type)"
+            :color="getPolicyColour(item.type)"
             size="small"
             variant="flat"
             class="font-weight-bold"
@@ -19,39 +19,57 @@
             {{ item.type }}
           </v-chip>
         </template>
-        <template v-slot:item.start_date="{ item }">
+        <template #item.start_date="{ item }">
           <div>
             {{ formatDate(item.start_date) }}
           </div>
         </template>
-        <template v-slot:item.end_date="{ item }">
+        <template #item.end_date="{ item }">
           <div v-if="!item.end_date">Perpetual</div>
           <div v-else>
             {{ formatDate(item.end_date) }}
           </div>
         </template>
-        <template v-slot:item.premium="{ item }">
+        <template #item.premium="{ item }">
           <div class="d-flex flex-column align-start">
-            <strong>{{ formatCurrency(item.premium) }}</strong>
+            <strong>{{ currencyFormat(item.premium, currencyCode) }}</strong>
             <span
-              class="text-caption text-medium-emphasis"
+              class="text-body-small text-medium-emphasis"
               style="font-size: 0.7rem !important; line-height: 1"
             >
               {{ item.attributes.payment_frequency === 'Monthly' ? '/ month' : '/ year' }}
             </span>
           </div>
         </template>
-        <template v-slot:item.actions="{ item }">
-          <div class="d-flex justify-end">
-            <v-btn icon size="small" variant="text" color="blue" @click.stop="$emit('edit', item)">
-              <v-icon icon="mdi-pencil" />
-              <v-tooltip activator="parent" location="top">Edit</v-tooltip>
-            </v-btn>
+        <template #item.actions="{ item }">
+          <div class="d-flex justify-end ga-1">
+            <v-tooltip text="Edit" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <v-icon-btn
+                  v-bind="tooltipProps"
+                  icon="mdi-pencil"
+                  size="small"
+                  variant="text"
+                  color="blue"
+                  aria-label="Edit policy"
+                  @click.stop="emit('edit', item)"
+                />
+              </template>
+            </v-tooltip>
 
-            <v-btn icon size="small" variant="text" color="red" @click.stop="confirmDelete(item)">
-              <v-icon icon="mdi-delete" />
-              <v-tooltip activator="parent" location="top">Delete</v-tooltip>
-            </v-btn>
+            <v-tooltip text="Delete" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <v-icon-btn
+                  v-bind="tooltipProps"
+                  icon="mdi-delete"
+                  size="small"
+                  variant="text"
+                  color="red"
+                  aria-label="Delete policy"
+                  @click.stop="confirmDelete(item)"
+                />
+              </template>
+            </v-tooltip>
           </div>
         </template>
       </v-data-table>
@@ -60,17 +78,17 @@
     <PolicyDetailsDialog
       v-model="showPolicy"
       :policy="selectedPolicy"
-      :currencyCode="currencyCode"
+      :currency-code="currencyCode"
       @edit="handleEditFromDialog"
+      @uploaded="handleDocumentUploaded"
     />
 
     <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
-        <v-card-title class="text-h5">Delete Policy?</v-card-title>
+        <v-card-title class="text-headline-small">Delete Policy?</v-card-title>
         <v-card-text>
           Are you sure you want to delete the policy for
-          <strong>{{ policyToDelete?.provider }}</strong
-          >? This action cannot be undone.
+          <strong>{{ policyToDelete?.provider }}</strong>? This action cannot be undone.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -82,82 +100,59 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import { getPolicyColour } from '@/utils/PolicyTypes'
-import { currencyFormat } from '@/utils/Formats'
+import { currencyFormat, formatDate } from '@/utils/Formats'
 import PolicyDetailsDialog from '@/components/PolicyDetailsDialog.vue'
 
-export default {
-  name: 'PolicyList',
-  components: {
-    PolicyDetailsDialog,
-  },
-  props: {
-    currencyCode: String,
-    loading: Boolean,
-    policies: Array,
-  },
-  emits: ['edit', 'delete', 'upload'],
-  computed: {
-    isDark() {
-      return this.$vuetify.theme.global.name === 'dark'
-    },
-  },
-  data() {
-    return {
-      deleteDialog: false,
-      policyToDelete: null,
-      selectedPolicy: null,
-      showPolicy: false,
-      headers: [
-        { title: 'Provider', key: 'provider', align: 'start' },
-        { title: 'Type', key: 'type' },
-        { title: 'Start Date', key: 'start_date' },
-        { title: 'End Date', key: 'end_date' },
-        { title: 'Premium', key: 'premium' },
-        { title: '', key: 'actions', sortable: false, align: 'end' },
-      ],
-    }
-  },
-  methods: {
-    confirmDelete(item) {
-      this.policyToDelete = item
-      this.deleteDialog = true
-    },
-    executeDelete() {
-      if (this.policyToDelete) {
-        this.$emit('delete', this.policyToDelete.id)
-        this.deleteDialog = false
-        this.policyToDelete = null
-      }
-    },
-    formatCurrency(value) {
-      return currencyFormat(value)
-    },
-    formatDate(date) {
-      if (!date) return ''
-      return new Date(date).toLocaleDateString()
-    },
-    getChipColour(policyType) {
-      return getPolicyColour(policyType)
-    },
-    handleEditFromDialog(policy) {
-      this.showPolicy = false
-      this.$emit('edit', policy)
-    },
-    openPolicy(event, { item }) {
-      this.selectedPolicy = item
-      this.showPolicy = true
-    },
-  },
+defineProps({
+  currencyCode: String,
+  loading: Boolean,
+  policies: Array,
+})
+
+const emit = defineEmits(['edit', 'delete', 'uploaded'])
+
+const deleteDialog = ref(false)
+const policyToDelete = ref(null)
+const selectedPolicy = ref(null)
+const showPolicy = ref(false)
+
+const headers = [
+  { title: 'Provider', key: 'provider', align: 'start' },
+  { title: 'Type', key: 'type' },
+  { title: 'Start Date', key: 'start_date' },
+  { title: 'End Date', key: 'end_date' },
+  { title: 'Premium', key: 'premium' },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
+]
+
+function confirmDelete(item) {
+  policyToDelete.value = item
+  deleteDialog.value = true
+}
+
+function executeDelete() {
+  if (policyToDelete.value) {
+    emit('delete', policyToDelete.value.id)
+    deleteDialog.value = false
+    policyToDelete.value = null
+  }
+}
+
+function handleEditFromDialog(policy) {
+  showPolicy.value = false
+  emit('edit', policy)
+}
+
+function handleDocumentUploaded(updatedPolicy) {
+  selectedPolicy.value = updatedPolicy
+  emit('uploaded', updatedPolicy)
+}
+
+function openPolicy(event, { item }) {
+  selectedPolicy.value = item
+  showPolicy.value = true
 }
 </script>
-
-<style scoped>
-.gap-2 {
-  gap: 8px;
-}
-.border-dashed {
-  border-style: dashed !important;
-}
-</style>

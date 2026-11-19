@@ -1,41 +1,44 @@
-import os
+import logging
 import shutil
 import uuid
+from pathlib import Path
 
 from fastapi import UploadFile
 
-UPLOADS_DIR = "/data/uploads"
+from .database import UPLOADS_DIR, UPLOADS_MOUNT_PATH
 
-# Ensure upload directory exists
-if not os.path.exists(UPLOADS_DIR):
-    os.makedirs(UPLOADS_DIR)
+logger = logging.getLogger(__name__)
 
 
 def save_upload_file(upload_file: UploadFile) -> str:
-    """
-    Saves an uploaded file with a unique name to prevent overwrites.
-    Returns the relative path to be stored in the database.
-    """
-    # 1. Generate a unique ID
-    unique_id = str(uuid.uuid4())
-    print(f"Unique ID: {unique_id}")
+    """Save an uploaded file with a UUID filename and return its public URL path."""
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    extension = Path(upload_file.filename or "").suffix
+    new_filename = f"{uuid.uuid4()}{extension}"
+    file_path = UPLOADS_DIR / new_filename
 
-    # 2. Get the original extension (e.g., .pdf, .jpg)
-    # logic: split by dot, get the last part
-    filename = upload_file.filename
-    extension = os.path.splitext(filename)[1]  # returns ".pdf"
-    print(f"Original extension: {extension}")
-
-    # 3. Construct new filename: "a1b2-c3d4-e5f6.pdf"
-    # Optional: You can keep the original name too: "uuid-policy.pdf"
-    new_filename = f"{unique_id}{extension}"
-    print(f"new filename: {new_filename}")
-
-    file_path = os.path.join(UPLOADS_DIR, new_filename)
-    print(f"file path: {file_path}")
-
-    # 4. Save the content
-    with open(file_path, "wb+") as file_obj:
+    with file_path.open("wb") as file_obj:
         shutil.copyfileobj(upload_file.file, file_obj)
 
-    return str(file_path)
+    return f"{UPLOADS_MOUNT_PATH}/{new_filename}"
+
+
+def delete_upload_file(document_path: str | None) -> None:
+    """Safely remove an uploaded document file from the uploads directory."""
+    if not document_path:
+        return
+
+    filename = Path(document_path).name
+    if not filename or filename in {".", ".."}:
+        return
+
+    uploads_root = UPLOADS_DIR.resolve()
+    target = (uploads_root / filename).resolve()
+    if target.parent != uploads_root:
+        logger.warning("Refusing to delete file outside uploads dir: %s", document_path)
+        return
+
+    try:
+        target.unlink(missing_ok=True)
+    except OSError as exc:
+        logger.error("Error deleting file %s: %s", target, exc)

@@ -2,35 +2,35 @@
   <v-col cols="12" md="6">
     <v-list density="compact" class="bg-transparent">
       <v-list-item>
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon icon="mdi-shield-star" size="small" class="mr-4" />
         </template>
         <v-list-item-title>Cover Type</v-list-item-title>
-        <template v-slot:append>
+        <template #append>
           <span class="font-weight-medium">
             {{ attributes.cover_type || 'Level Term' }}
           </span>
         </template>
       </v-list-item>
       <v-list-item>
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon icon="mdi-account-group" size="small" class="mr-4" />
         </template>
         <v-list-item-title>Beneficiaries</v-list-item-title>
-        <template v-slot:append>
-          <div class="text-right text-caption font-weight-bold" style="max-width: 150px">
+        <template #append>
+          <div class="text-right text-body-small font-weight-bold" style="max-width: 150px">
             {{ attributes.beneficiaries || '-' }}
           </div>
         </template>
       </v-list-item>
       <v-list-item>
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon icon="mdi-piggy-bank" size="small" class="mr-4" />
         </template>
         <v-list-item-title>Sum Assured</v-list-item-title>
-        <template v-slot:append>
-          <span class="text-h6 font-weight-bold text-success">
-            {{ formatCurrency(attributes.sum_assured || 0) }}
+        <template #append>
+          <span class="text-title-large font-weight-bold text-success">
+            {{ currencyFormat(attributes.sum_assured || 0, currencyCode) }}
           </span>
         </template>
       </v-list-item>
@@ -38,7 +38,7 @@
   </v-col>
 
   <v-col cols="12" md="6">
-    <div class="d-flex flex-wrap gap-2 mt-2">
+    <div class="d-flex flex-wrap ga-2 mt-2">
       <v-chip :color="attributes.joint_policy ? 'purple' : 'default'" variant="tonal">
         <v-icon
           start
@@ -65,19 +65,11 @@
   </v-col>
 </template>
 
-<script>
+<script setup>
 import { currencyFormat } from '@/utils/Formats'
 
-export default {
-  name: 'LifePolicyDetails',
-  props: {
-    attributes: { type: Object, default: () => ({}) },
-    currencyCode: String,
-  },
-  methods: {
-    formatCurrency(value) {
-      return currencyFormat(value)
-    },
-  },
-}
+defineProps({
+  attributes: { type: Object, default: () => ({}) },
+  currencyCode: String,
+})
 </script>

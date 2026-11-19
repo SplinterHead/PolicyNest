@@ -5,10 +5,10 @@
       Buildings Details
     </div>
 
-    <v-row dense>
+    <v-row density="compact">
       <v-col cols="12" sm="6">
         <v-text-field
-          v-model.number="modelValue.rebuild_cost"
+          v-model.number="attributes.rebuild_cost"
           label="Rebuild Cost"
           type="number"
           variant="outlined"
@@ -16,12 +16,11 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Cost to rebuild, not market value"
-          @update:modelValue="update"
         />
       </v-col>
       <v-col cols="12" sm="6">
         <v-text-field
-          v-model.number="modelValue.alternative_accommodation"
+          v-model.number="attributes.alternative_accommodation"
           label="Alternative Accommodation"
           type="number"
           variant="outlined"
@@ -29,25 +28,23 @@
           :prefix="currencySymbol"
           bg-color="surface"
           placeholder="e.g. 50000"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.excess_standard"
+          v-model.number="attributes.excess_standard"
           label="Standard Excess"
           type="number"
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          @update:modelValue="update"
         />
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model.number="modelValue.excess_subsidence"
+          v-model.number="attributes.excess_subsidence"
           label="Subsidence Excess"
           type="number"
           variant="outlined"
@@ -55,53 +52,48 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Usually £1000+"
-          @update:modelValue="update"
         />
       </v-col>
 
       <v-col cols="12" class="mt-2">
-        <div class="text-caption font-weight-bold text-medium-emphasis mb-2">
+        <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">
           Coverage Extensions
         </div>
-        <v-row dense>
+        <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.accidental_damage"
+              v-model="attributes.accidental_damage"
               label="Full Accidental Damage"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.trace_access"
+              v-model="attributes.trace_access"
               label="Trace & Access (Leak Detection)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.home_emergency"
+              v-model="attributes.home_emergency"
               label="Home Emergency (Boiler/Plumbing)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="modelValue.matching_sets"
+              v-model="attributes.matching_sets"
               label="Matching Sets (Bathroom suites)"
               color="primary"
               density="compact"
               hide-details
-              @update:modelValue="update"
             />
           </v-col>
         </v-row>
@@ -110,18 +102,10 @@
   </v-card>
 </template>
 
-<script>
-export default {
-  name: 'BuildingsPolicyForm',
-  props: {
-    currencySymbol: String,
-    modelValue: { type: Object, default: () => ({}) },
-  },
-  emits: ['update:modelValue'],
-  methods: {
-    update() {
-      this.$emit('update:modelValue', this.modelValue)
-    },
-  },
-}
+<script setup>
+const attributes = defineModel({ type: Object, default: () => ({}) })
+
+defineProps({
+  currencySymbol: String,
+})
 </script>

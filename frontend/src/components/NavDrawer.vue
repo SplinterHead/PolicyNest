@@ -1,11 +1,8 @@
 <template>
-  <v-navigation-drawer
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-  >
+  <v-navigation-drawer v-model="drawer">
     <div class="pa-2">
       <v-menu location="bottom">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-card
             v-bind="props"
             color="primary"
@@ -17,13 +14,13 @@
             <div class="d-flex align-center justify-space-between">
               <div class="d-flex align-center overflow-hidden">
                 <v-avatar color="white" size="36" class="mr-3 text-primary">
-                  <span class="text-subtitle-2 font-weight-bold">
+                  <span class="text-title-small font-weight-bold">
                     {{ currentHousehold ? currentHousehold.name.charAt(0) : 'H' }}
                   </span>
                 </v-avatar>
                 <div class="text-truncate">
-                  <div class="text-caption text-blue-lighten-4 font-weight-bold">HOUSEHOLD</div>
-                  <div class="text-subtitle-2 font-weight-bold text-white text-truncate">
+                  <div class="text-body-small text-blue-lighten-4 font-weight-bold">HOUSEHOLD</div>
+                  <div class="text-title-small font-weight-bold text-white text-truncate">
                     {{ currentHousehold ? currentHousehold.name : 'Select...' }}
                   </div>
                 </div>
@@ -40,11 +37,11 @@
             v-for="h in households"
             :key="h.id"
             :value="h.id"
-            @click="$emit('switch-household', h)"
             :active="currentHousehold && currentHousehold.id === h.id"
             color="primary"
+            @click="emit('switch-household', h)"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon
                 :icon="
                   currentHousehold && currentHousehold.id === h.id
@@ -61,7 +58,7 @@
           <v-list-item
             prepend-icon="mdi-cog-outline"
             title="Manage Households"
-            @click="$emit('open-manage')"
+            @click="emit('open-manage')"
           />
         </v-list>
       </v-menu>
@@ -82,6 +79,7 @@
         title="Inventory"
         value="inventory"
         to="/inventory"
+        color="primary"
       />
       <v-list-item
         prepend-icon="mdi-cog"
@@ -94,14 +92,13 @@
   </v-navigation-drawer>
 </template>
 
-<script>
-export default {
-  name: 'NavDrawer',
-  props: {
-    modelValue: Boolean,
-    households: Array,
-    currentHousehold: Object,
-  },
-  emits: ['update:modelValue', 'switch-household', 'open-manage'],
-}
+<script setup>
+const drawer = defineModel()
+
+defineProps({
+  households: Array,
+  currentHousehold: Object,
+})
+
+const emit = defineEmits(['switch-household', 'open-manage'])
 </script>

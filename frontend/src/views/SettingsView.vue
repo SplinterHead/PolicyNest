@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col>
-        <h1 class="text-h4 font-weight-thin">Settings</h1>
+        <h1 class="text-headline-large font-weight-thin">Settings</h1>
       </v-col>
     </v-row>
     <v-row>
@@ -15,7 +15,6 @@
 
           <v-select
             :model-value="currencyCode"
-            @update:modelValue="$emit('update-currency', $event)"
             :items="currencies"
             item-title="label"
             item-value="code"
@@ -24,15 +23,16 @@
             density="comfortable"
             hint="This affects how premiums and sums are displayed."
             persistent-hint
+            @update:model-value="emit('update-currency', $event)"
           >
-            <template v-slot:selection="{ item }">
-              <span class="mr-2 text-h6">{{ item.raw.symbol }}</span>
-              {{ item.raw.label }}
+            <template #selection="{ item }">
+              <span class="mr-2 text-title-large">{{ item.symbol }}</span>
+              {{ item.label }}
             </template>
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" :subtitle="item.raw.code">
-                <template v-slot:prepend>
-                  <span class="mr-4 font-weight-bold">{{ item.raw.symbol }}</span>
+            <template #item="{ props, item }">
+              <v-list-item v-bind="props" :subtitle="item.code">
+                <template #prepend>
+                  <span class="mr-4 font-weight-bold">{{ item.symbol }}</span>
                 </template>
               </v-list-item>
             </template>
@@ -43,21 +43,18 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SettingsView',
-  props: ['currencyCode'],
-  emits: ['update-currency'],
-  data() {
-    return {
-      currencies: [
-        { code: 'GBP', label: 'British Pound', symbol: '£' },
-        { code: 'EUR', label: 'Euro', symbol: '€' },
-        { code: 'USD', label: 'US Dollar', symbol: '$' },
-        { code: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
-        { code: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
-      ],
-    }
-  },
-}
+<script setup>
+defineProps({
+  currencyCode: String,
+})
+
+const emit = defineEmits(['update-currency'])
+
+const currencies = [
+  { code: 'GBP', label: 'British Pound', symbol: '£' },
+  { code: 'EUR', label: 'Euro', symbol: '€' },
+  { code: 'USD', label: 'US Dollar', symbol: '$' },
+  { code: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
+  { code: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
+]
 </script>

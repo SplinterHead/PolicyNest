@@ -1,48 +1,51 @@
 # --- HOUSEHOLD ENDPOINTS ---
-import os
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Form, HTTPException
+from sqlalchemy import select
 
-from app import models
-from app.database import get_db
+from app import models, schemas
+from app.database import SessionDep
+from app.uploads import delete_upload_file
 
 router = APIRouter()
 
 
-@router.get("/")
-def read_households(db: Session = Depends(get_db)):
+@router.get("/", response_model=list[schemas.HouseholdResponse])
+def read_households(db: SessionDep) -> list[models.Household]:
     """List all households for the switcher menu."""
-    return db.query(models.Household).all()
+    return list(db.scalars(select(models.Household)).all())
 
 
-@router.post("/")
-def create_household(name: str = Form(...), db: Session = Depends(get_db)):
-    new_household = models.Household(name=name)
+@router.post("/", response_model=schemas.HouseholdResponse)
+def create_household(
+    data: Annotated[schemas.HouseholdForm, Form()],
+    db: SessionDep,
+) -> models.Household:
+    """Create a new household."""
+    new_household = models.Household(name=data.name)
     db.add(new_household)
     db.commit()
     db.refresh(new_household)
     return new_household
 
 
-@router.delete("/{household_id}")
-def delete_household(household_id: int, db: Session = Depends(get_db)):
-    household = (
-        db.query(models.Household).filter(models.Household.id == household_id).first()
-    )
+@router.delete("/{household_id}", response_model=schemas.DeleteResponse)
+def delete_household(
+    household_id: int,
+    db: SessionDep,
+) -> schemas.DeleteResponse:
+    """Delete a household along with its associated policies, assets, and documents."""
+    household = db.get(models.Household, household_id)
     if not household:
         raise HTTPException(status_code=404, detail="Household not found")
-    policies = (
-        db.query(models.Policy).filter(models.Policy.household_id == household_id).all()
-    )
+
+    policies = db.scalars(
+        select(models.Policy).where(models.Policy.household_id == household_id)
+    ).all()
     for policy in policies:
-        if policy.document_path and os.path.exists(policy.document_path):
-            try:
-                os.remove(policy.document_path)
-            except Exception as e:
-                print(f"Error deleting file {policy.document_path}: {e}")
+        delete_upload_file(policy.document_path)
 
     db.delete(household)
     db.commit()
-
-    return {"ok": True}
+    return schemas.DeleteResponse()

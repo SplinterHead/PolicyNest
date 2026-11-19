@@ -1,14 +1,10 @@
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="500px"
-    @update:modelValue="$emit('update:modelValue', $event)"
-  >
+  <v-dialog v-model="open" max-width="500px">
     <v-card rounded="lg" elevation="2" class="pa-2">
       <v-toolbar color="transparent" density="compact">
-        <v-toolbar-title class="text-h6">My Households</v-toolbar-title>
+        <v-toolbar-title class="text-title-large">My Households</v-toolbar-title>
         <v-spacer />
-        <v-btn icon="mdi-close" @click="$emit('update:modelValue', false)" />
+        <v-icon-btn icon="mdi-close" variant="text" aria-label="Close" @click="open = false" />
       </v-toolbar>
 
       <v-card-text class="pa-0">
@@ -18,9 +14,9 @@
             :key="house.id"
             :active="house.id === currentId"
             color="primary"
-            @click="$emit('select', house)"
+            @click="emit('select', house)"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon :icon="house.id === currentId ? 'mdi-home' : 'mdi-home-outline'" />
             </template>
 
@@ -29,15 +25,16 @@
               Currently Selected
             </v-list-item-subtitle>
 
-            <template v-slot:append>
+            <template #append>
               <v-icon v-if="house.id === currentId" color="primary" icon="mdi-check" />
-              <v-btn
+              <v-icon-btn
                 icon="mdi-delete"
                 size="small"
                 variant="text"
                 color="grey"
                 class="ml-2"
-                @click="confirmDeleteHousehold(house)"
+                aria-label="Delete household"
+                @click.stop="confirmDeleteHousehold(house)"
               />
             </template>
           </v-list-item>
@@ -70,11 +67,10 @@
 
   <v-dialog v-model="deleteHouseholdDialog" max-width="500px">
     <v-card>
-      <v-card-title class="text-h5 text-red">Delete Household?</v-card-title>
+      <v-card-title class="text-headline-small text-red">Delete Household?</v-card-title>
       <v-card-text>
         Are you sure you want to delete
-        <strong>{{ householdToDelete?.name }}</strong
-        >? <br /><br />
+        <strong>{{ householdToDelete?.name }}</strong>? <br /><br />
         <v-alert type="warning" variant="tonal" density="compact" border="start">
           This will permanently delete all
           <strong>Policies, Assets, and Documents</strong> associated with this household.
@@ -86,8 +82,8 @@
         <v-btn
           color="red"
           variant="flat"
-          @click="executeDeleteHousehold"
           :loading="deletingHousehold"
+          @click="executeDeleteHousehold"
         >
           Delete Forever
         </v-btn>
@@ -96,51 +92,48 @@
   </v-dialog>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import api from '@/services/api'
 import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
 
-export default {
-  name: 'ManageHouseholdsDialog',
-  components: { NewHouseholdDialog },
-  props: {
-    modelValue: Boolean,
-    households: Array,
-    currentId: Number,
-  },
-  emits: ['update:modelValue', 'select', 'created'],
-  data() {
-    return {
-      deleteHouseholdDialog: false,
-      deletingHousehold: false,
-      householdToDelete: null,
-      showCreate: false,
-    }
-  },
-  methods: {
-    handleCreate(newHousehold) {
-      this.showCreate = false
-      this.$emit('created', newHousehold)
-    },
-    confirmDeleteHousehold(household) {
-      this.householdToDelete = household
-      this.deleteHouseholdDialog = true
-    },
-    async executeDeleteHousehold() {
-      if (!this.householdToDelete) return
-      this.deletingHousehold = true
-      try {
-        const household = this.householdToDelete
-        await api.delete(`/households/${household.id}`)
-        this.deleteHouseholdDialog = false
-        this.householdToDelete = null
-        this.$emit('deleted', household)
-      } catch (e) {
-        console.error('Failed to delete household', e)
-      } finally {
-        this.deletingHousehold = false
-      }
-    },
-  },
+const open = defineModel({ type: Boolean })
+
+defineProps({
+  households: Array,
+  currentId: Number,
+})
+
+const emit = defineEmits(['select', 'created', 'deleted'])
+
+const deleteHouseholdDialog = ref(false)
+const deletingHousehold = ref(false)
+const householdToDelete = ref(null)
+const showCreate = ref(false)
+
+function handleCreate(newHousehold) {
+  showCreate.value = false
+  emit('created', newHousehold)
+}
+
+function confirmDeleteHousehold(household) {
+  householdToDelete.value = household
+  deleteHouseholdDialog.value = true
+}
+
+async function executeDeleteHousehold() {
+  if (!householdToDelete.value) return
+  deletingHousehold.value = true
+  try {
+    const household = householdToDelete.value
+    await api.delete(`/households/${household.id}`)
+    deleteHouseholdDialog.value = false
+    householdToDelete.value = null
+    emit('deleted', household)
+  } catch (e) {
+    console.error('Failed to delete household', e)
+  } finally {
+    deletingHousehold.value = false
+  }
 }
 </script>

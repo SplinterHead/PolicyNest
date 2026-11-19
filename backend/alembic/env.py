@@ -7,8 +7,10 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 sys.path.append(os.getcwd())
-from app.database import DB_FOLDER, DB_NAME, Base
-from app.models import *
+from app import models  # noqa: F401
+from app.database import SQLALCHEMY_DATABASE_URL, Base, ensure_data_dirs
+
+ensure_data_dirs()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,7 +31,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", f"sqlite:///{DB_FOLDER}/{DB_NAME}")
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 
 
 def run_migrations_offline() -> None:

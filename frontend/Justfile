@@ -1,2 +1,5 @@
+install:
+  npm i
+
 format:
   npm run format

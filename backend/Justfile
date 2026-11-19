@@ -1,3 +1,6 @@
+install:
+  poetry install --no-root
+
 format:
-  isort --profile=black .
-  black .
+  poetry run isort --profile=black .
+  poetry run black .

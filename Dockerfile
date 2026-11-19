@@ -1,11 +1,11 @@
 # ----------------------------
 # STAGE 1: Build Frontend
 # ----------------------------
-FROM node:22-alpine AS frontend-build
+FROM node:26-alpine AS frontend-build
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY frontend/ ./
 RUN npm run build
@@ -14,11 +14,17 @@ RUN npm run build
 # ----------------------------
 # STAGE 2: Setup Backend & Serve
 # ----------------------------
-FROM python:3.14-slim
+FROM python:3.15-slim AS requirements-stage
+WORKDIR /tmp
+RUN pip install --no-cache-dir poetry poetry-plugin-export
+COPY backend/pyproject.toml backend/poetry.lock ./
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+FROM python:3.15-slim
 
 WORKDIR /app
 
-COPY backend/requirements.txt ./
+COPY --from=requirements-stage /tmp/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY docker-entrypoint.sh .

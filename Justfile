@@ -1,3 +1,7 @@
+install:
+  just backend/install
+  just frontend/install
+
 fmt:
   just backend/format
   just frontend/format

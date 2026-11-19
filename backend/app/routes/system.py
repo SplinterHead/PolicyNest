@@ -1,17 +1,19 @@
 # --- API ENDPOINTS ---
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
+from sqlalchemy import select
 
-from app.database import get_db
+from app import schemas
+from app.database import SessionDep
 from app.models import Household
 
 router = APIRouter()
 
 
-@router.get("/status")
-def get_system_status(db: Session = Depends(get_db)):
-    """Checks if a household exists to determine if onboarding is needed."""
-    household = db.query(Household).first()
-    if household:
-        return {"initialized": True, "household": household}
-    return {"initialized": False, "household": None}
+@router.get("/status", response_model=schemas.SystemStatusResponse)
+def get_system_status(db: SessionDep) -> schemas.SystemStatusResponse:
+    """Check if a household exists to determine if onboarding is needed."""
+    household = db.scalar(select(Household).limit(1))
+    return schemas.SystemStatusResponse(
+        initialized=household is not None,
+        household=household,
+    )

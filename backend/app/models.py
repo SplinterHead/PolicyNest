@@ -1,45 +1,67 @@
-from sqlalchemy import JSON, Column, Date, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from datetime import date
+from typing import Any
+
+from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
 
 
 class Household(Base):
+    """Household grouping assets and insurance policies."""
+
     __tablename__ = "households"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, index=True, nullable=False)
 
-    policies = relationship("Policy", back_populates="household")
-    assets = relationship("Asset", back_populates="household")
+    policies: Mapped[list["Policy"]] = relationship(
+        back_populates="household", cascade="all, delete-orphan"
+    )
+    assets: Mapped[list["Asset"]] = relationship(
+        back_populates="household", cascade="all, delete-orphan"
+    )
 
 
 class Asset(Base):
-    __tablename__ = "assets"
-    id = Column(Integer, primary_key=True, index=True)
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
-    name = Column(String, nullable=False)
-    type = Column(String, nullable=False)
-    details = Column(JSON, nullable=False, default={})
+    """Insurable asset (such as a vehicle or pet) belonging to a household."""
 
-    household = relationship("Household", back_populates="assets")
-    policies = relationship("Policy", back_populates="asset")
+    __tablename__ = "assets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    household_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("households.id"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    type: Mapped[str] = mapped_column(String, nullable=False)
+    details: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+
+    household: Mapped["Household"] = relationship(back_populates="assets")
+    policies: Mapped[list["Policy"]] = relationship(back_populates="asset")
 
 
 class Policy(Base):
+    """Insurance policy record belonging to a household and optionally an asset."""
+
     __tablename__ = "policies"
 
-    id = Column(Integer, primary_key=True, index=True)
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
-    asset_id = Column(Integer, ForeignKey("assets.id"), nullable=True)
-    provider = Column(String, index=True, nullable=False)
-    policy_number = Column(String, nullable=True)
-    type = Column(String, nullable=False)
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=True)
-    premium = Column(Float, nullable=False)
-    attributes = Column(JSON, nullable=False, default={})
-    document_path = Column(String, nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    household_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("households.id"), nullable=False
+    )
+    asset_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("assets.id"), nullable=True
+    )
+    provider: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    policy_number: Mapped[str | None] = mapped_column(String, nullable=True)
+    type: Mapped[str] = mapped_column(String, nullable=False)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    premium: Mapped[float] = mapped_column(Float, nullable=False)
+    attributes: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default=dict
+    )
+    document_path: Mapped[str | None] = mapped_column(String, nullable=True)
 
-    household = relationship("Household", back_populates="policies")
-    asset = relationship("Asset", back_populates="policies")
+    household: Mapped["Household"] = relationship(back_populates="policies")
+    asset: Mapped["Asset | None"] = relationship(back_populates="policies")

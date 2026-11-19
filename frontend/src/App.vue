@@ -47,112 +47,172 @@
   </v-app>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useTheme } from 'vuetify'
 import api from '@/services/api'
 import NavBar from '@/components/NavBar.vue'
 import NavDrawer from '@/components/NavDrawer.vue'
 import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
 import ManageHouseholdsDialog from '@/components/ManageHouseholdsDialog.vue'
 
-export default {
-  components: {
-    ManageHouseholdsDialog,
-    NavBar,
-    NavDrawer,
-    NewHouseholdDialog,
-  },
-  data() {
-    return {
-      checkingStatus: true,
-      currencyCode: 'GBP',
-      currentHousehold: null,
-      drawer: null,
-      households: [],
-      initialized: false,
-      showManageDialog: false,
-      showOnboarding: false,
-    }
-  },
-  computed: {
-    isDark() {
-      return this.$vuetify.theme.global.name === 'dark'
-    },
-  },
-  methods: {
-    handleNewHousehold(newHousehold) {
-      this.households.push(newHousehold)
-      this.switchHousehold(newHousehold)
-      this.showOnboarding = false
-      this.showManageDialog = false
-      this.initialized = true
-    },
-    handleDeletedHousehold(delHousehold) {
-      this.households = this.households.filter((household) => household.id !== delHousehold.id)
-      if (this.currentHousehold.id === delHousehold.id) {
-        this.switchHousehold(this.households[0])
-      }
-      this.showOnboarding = false
-      this.showManageDialog = false
-      this.initialized = true
-    },
-    switchHousehold(household) {
-      this.currentHousehold = household
-      this.showManageDialog = false
-    },
-    toggleTheme() {
-      const newTheme = this.isDark ? 'light' : 'dark'
-      this.$vuetify.theme.global.name = newTheme
-      localStorage.setItem('theme', newTheme)
-    },
-    updateCurrency(newVal) {
-      this.currencyCode = newVal
-      localStorage.setItem('currencyCode', newVal)
-    },
-    async loadApp() {
-      this.loading = true
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme) this.$vuetify.theme.global.name = savedTheme
-      const savedCurrencyCode = localStorage.getItem('currencyCode')
-      if (savedCurrencyCode) this.updateCurrency(savedCurrencyCode)
+const theme = useTheme()
 
-      try {
-        const res = await api.get('/households/')
-        this.households = res.data
-        if (this.households.length > 0) {
-          this.initialized = true
-          if (!this.currentHousehold) this.currentHousehold = this.households[0]
-          this.showOnboarding = false
-        } else {
-          this.currentHousehold = null
-          this.showOnboarding = true
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        this.loading = false
-        this.checkingStatus = false
-      }
-    },
-  },
-  mounted() {
-    this.loadApp()
-  },
+const checkingStatus = ref(true)
+const currencyCode = ref('GBP')
+const currentHousehold = ref(null)
+const drawer = ref(null)
+const households = ref([])
+const initialized = ref(false)
+const showManageDialog = ref(false)
+const showOnboarding = ref(false)
+
+const isDark = computed(() => theme.current.value.dark)
+
+function getStoredTheme() {
+  try {
+    const val = localStorage.getItem('theme')
+    return val === 'light' || val === 'dark' ? val : null
+  } catch {
+    return null
+  }
 }
+
+function applyTheme(stored) {
+  theme.change(stored ?? 'system')
+  const meta = document.querySelector('meta[name="color-scheme"]')
+  if (meta) {
+    meta.content = stored ?? 'light dark'
+  }
+}
+
+function toggleTheme() {
+  const target = isDark.value ? 'light' : 'dark'
+  const systemScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+
+  if (target === systemScheme) {
+    try {
+      localStorage.removeItem('theme')
+    } catch {
+      // Ignore storage failures
+    }
+    applyTheme(null)
+  } else {
+    try {
+      localStorage.setItem('theme', target)
+    } catch {
+      // Ignore storage failures
+    }
+    applyTheme(target)
+  }
+}
+
+function handleStorage(event) {
+  if (event.key === 'theme' || event.key === null) {
+    applyTheme(getStoredTheme())
+  }
+  if (event.key === 'currencyCode' && event.newValue) {
+    currencyCode.value = event.newValue
+  }
+}
+
+function updateCurrency(newVal) {
+  currencyCode.value = newVal
+  try {
+    localStorage.setItem('currencyCode', newVal)
+  } catch {
+    // Ignore storage failures
+  }
+}
+
+function switchHousehold(household) {
+  currentHousehold.value = household
+  showManageDialog.value = false
+}
+
+function handleNewHousehold(newHousehold) {
+  households.value.push(newHousehold)
+  switchHousehold(newHousehold)
+  showOnboarding.value = false
+  showManageDialog.value = false
+  initialized.value = true
+}
+
+function handleDeletedHousehold(delHousehold) {
+  households.value = households.value.filter((household) => household.id !== delHousehold.id)
+  if (households.value.length === 0) {
+    currentHousehold.value = null
+    initialized.value = false
+    showManageDialog.value = false
+    showOnboarding.value = true
+    return
+  }
+
+  if (currentHousehold.value?.id === delHousehold.id) {
+    switchHousehold(households.value[0])
+  }
+  showOnboarding.value = false
+  showManageDialog.value = false
+  initialized.value = true
+}
+
+async function loadApp() {
+  applyTheme(getStoredTheme())
+  try {
+    const savedCurrencyCode = localStorage.getItem('currencyCode')
+    if (savedCurrencyCode) {
+      currencyCode.value = savedCurrencyCode
+    }
+  } catch {
+    // Ignore storage failures
+  }
+
+  try {
+    const res = await api.get('/households/')
+    households.value = res.data
+    if (households.value.length > 0) {
+      initialized.value = true
+      if (!currentHousehold.value) {
+        currentHousehold.value = households.value[0]
+      }
+      showOnboarding.value = false
+    } else {
+      currentHousehold.value = null
+      showOnboarding.value = true
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    checkingStatus.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('storage', handleStorage)
+  loadApp()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', handleStorage)
+})
 </script>
 
 <style>
 :root {
-  --title-font: 'Montserrat', sans-serif;
+  color-scheme: light dark;
+  --v-font-heading: 'Montserrat', sans-serif;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
 }
 
-.v-application .text-h1,
-.v-application .text-h2,
-.v-application .text-h3,
-.v-application .text-h4,
-.v-application .text-h5,
-.v-application .text-h6,
 .v-card-title,
 .v-app-bar-title {
-  font-family: var(--title-font) !important;
+  font-family: var(--v-font-heading);
 }
 </style>

@@ -1,18 +1,30 @@
-import os
+from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import database, models
 from .routes import asset, household, policy, system
 
-UPLOADS_DIR = "/data/uploads"
+FRONTEND_DIST = Path("../frontend/dist")
 
-models.Base.metadata.create_all(bind=database.engine)
 
-app = FastAPI(title="PolicyNest API")
-app.mount(UPLOADS_DIR, StaticFiles(directory=UPLOADS_DIR), name="uploads")
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Initialize storage directories and database tables on startup."""
+    database.ensure_data_dirs()
+    models.Base.metadata.create_all(bind=database.engine)
+    yield
+
+
+app = FastAPI(title="PolicyNest API", lifespan=lifespan)
+app.mount(
+    database.UPLOADS_MOUNT_PATH,
+    StaticFiles(directory=database.UPLOADS_DIR, check_dir=False),
+    name="uploads",
+)
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(asset.router, prefix="/assets", tags=["assets"])
@@ -23,14 +35,12 @@ api_router.include_router(system.router, prefix="/system", tags=["system"])
 app.include_router(api_router)
 
 # --- FRONTEND ---
-if os.path.exists("../frontend/dist"):
-    app.mount(
-        "/assets", StaticFiles(directory="../frontend/dist/assets"), name="assets"
-    )
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         if full_path.startswith("api") or full_path.startswith("uploads"):
             raise HTTPException(status_code=404, detail="Not Found")
 
-        return FileResponse("../frontend/dist/index.html")
+        return FileResponse(FRONTEND_DIST / "index.html")
