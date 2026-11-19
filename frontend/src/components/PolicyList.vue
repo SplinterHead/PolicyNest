@@ -5,10 +5,15 @@
         :headers="headers"
         :items="policies"
         :loading="loading"
+        :mobile="xs"
+        :hide-default-footer="policies.length === 0"
         hover
         class="cursor-pointer"
         @click:row="openPolicy"
       >
+        <template #header.actions>
+          <span class="d-sr-only">Actions</span>
+        </template>
         <template #item.type="{ item }">
           <v-chip
             :color="getPolicyColour(item.type)"
@@ -31,7 +36,7 @@
           </div>
         </template>
         <template #item.premium="{ item }">
-          <div class="d-flex flex-column align-start">
+          <div class="d-flex flex-column align-end">
             <strong>{{ currencyFormat(item.premium, currencyCode) }}</strong>
             <span
               class="text-body-small text-medium-emphasis"
@@ -104,6 +109,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useDisplay } from 'vuetify'
 import { getPolicyColour } from '@/utils/PolicyTypes'
 import { currencyFormat, formatDate } from '@/utils/Formats'
 import PolicyDetailsDialog from '@/components/PolicyDetailsDialog.vue'
@@ -116,6 +122,8 @@ defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'uploaded'])
 
+const { xs } = useDisplay()
+
 const deleteDialog = ref(false)
 const policyToDelete = ref(null)
 const selectedPolicy = ref(null)
@@ -126,8 +134,8 @@ const headers = [
   { title: 'Type', key: 'type' },
   { title: 'Start Date', key: 'start_date' },
   { title: 'End Date', key: 'end_date' },
-  { title: 'Premium', key: 'premium' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
+  { title: 'Premium', key: 'premium', align: 'end' },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]
 
 function confirmDelete(item) {

@@ -2,9 +2,13 @@
   <v-app>
     <NavBar
       :is-dark="isDark"
-      :drawer-open="Boolean(drawer)"
-      @toggle-drawer="drawer = !drawer"
+      :drawer-open="isDrawerOpen"
+      :households="households"
+      :current-household="currentHousehold"
+      @toggle-drawer="drawer = !isDrawerOpen"
       @toggle-theme="toggleTheme"
+      @switch-household="switchHousehold"
+      @open-manage="showManageDialog = true"
     />
 
     <NavDrawer
@@ -54,13 +58,14 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useTheme } from 'vuetify'
+import { useDisplay, useTheme } from 'vuetify'
 import api from '@/services/api'
 import NavBar from '@/components/NavBar.vue'
 import NavDrawer from '@/components/NavDrawer.vue'
 import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
 import ManageHouseholdsDialog from '@/components/ManageHouseholdsDialog.vue'
 
+const { mobile } = useDisplay()
 const theme = useTheme()
 
 const checkingStatus = ref(true)
@@ -73,6 +78,7 @@ const showManageDialog = ref(false)
 const showOnboarding = ref(false)
 
 const isDark = computed(() => theme.current.value.dark)
+const isDrawerOpen = computed(() => (drawer.value === null ? !mobile.value : Boolean(drawer.value)))
 
 function getStoredTheme() {
   try {
