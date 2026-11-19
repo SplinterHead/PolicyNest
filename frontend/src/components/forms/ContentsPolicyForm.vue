@@ -11,6 +11,8 @@
           v-model.number="attributes.total_cover"
           label="Total Sum Insured"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -22,6 +24,8 @@
           v-model.number="attributes.single_item_limit"
           label="Single Item Limit"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -69,6 +73,8 @@
                 v-model.number="item.value"
                 label="Value"
                 type="number"
+                min="0"
+                persistent-placeholder
                 :prefix="currencySymbol"
                 variant="outlined"
                 density="compact"
@@ -89,9 +95,15 @@
           </v-row>
         </div>
 
-        <v-alert v-else type="info" variant="tonal" density="compact" class="text-body-small">
+        <v-sheet
+          v-else
+          rounded="md"
+          border
+          class="d-flex align-center px-3 py-2 text-body-small text-medium-emphasis bg-surface-light"
+        >
+          <v-icon icon="mdi-information-outline" size="small" class="mr-2" aria-hidden="true" />
           No specified items added.
-        </v-alert>
+        </v-sheet>
       </v-col>
 
       <v-col cols="12" class="mt-2">

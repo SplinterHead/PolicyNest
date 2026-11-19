@@ -66,6 +66,8 @@
           v-model.number="attributes.vet_fees_limit"
           label="Vet Fees Limit"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -79,6 +81,8 @@
           v-model.number="attributes.excess"
           label="Fixed Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"

@@ -65,6 +65,8 @@
           v-model.number="attributes.excess_voluntary"
           label="Voluntary Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -76,6 +78,8 @@
           v-model.number="attributes.excess_compulsory"
           label="Compulsory Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"

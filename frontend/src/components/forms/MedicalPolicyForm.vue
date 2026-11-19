@@ -34,6 +34,8 @@
           v-model.number="attributes.excess"
           label="Annual Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -47,6 +49,8 @@
           v-model.number="attributes.outpatient_limit"
           label="Out-patient Limit"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"

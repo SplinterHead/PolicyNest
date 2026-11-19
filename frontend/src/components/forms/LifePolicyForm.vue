@@ -22,6 +22,8 @@
           v-model.number="attributes.sum_assured"
           label="Sum Assured (Payout)"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"

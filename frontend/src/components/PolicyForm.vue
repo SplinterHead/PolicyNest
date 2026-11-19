@@ -8,26 +8,38 @@
   >
     <v-defaults-provider :defaults="{ VMenu: { attach: '#policy-form-dialog' } }">
       <v-card rounded="lg">
-        <v-card-title id="policy-form-title" class="pa-4 bg-primary">
-          {{ policyToEdit ? 'Edit Policy' : 'New Policy' }}
+        <v-card-title id="policy-form-title" class="pa-4 bg-primary d-flex align-center">
+          <v-icon v-if="policyIcon" :icon="policyIcon" class="mr-2" />
+          {{
+            policyToEdit
+              ? policyLabel
+                ? `Edit ${policyLabel} Policy`
+                : 'Edit Policy'
+              : policyLabel
+                ? `New ${policyLabel} Policy`
+                : 'New Policy'
+          }}
+          <v-spacer />
+          <v-icon-btn icon="mdi-close" variant="text" aria-label="Close" @click="open = false" />
         </v-card-title>
 
-        <v-card-text class="pt-4" style="max-height: 80vh">
-          <v-form ref="formRef" @submit.prevent="submit">
+        <v-card-text class="pt-4 policy-form-scroll" style="max-height: 80vh">
+          <v-form ref="formRef" validate-on="submit lazy" @submit.prevent="submit">
             <v-row density="compact">
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="form.provider"
-                  label="Provider"
+                  label="Provider *"
                   variant="outlined"
                   density="comfortable"
+                  required
                   :rules="[(v) => !!v || 'Provider is required']"
                 />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="form.policy_number"
-                  label="Policy No."
+                  label="Policy No. (Optional)"
                   variant="outlined"
                   density="comfortable"
                 />
@@ -35,19 +47,23 @@
               <v-col cols="12" sm="6">
                 <v-date-input
                   v-model="form.start_date"
-                  label="Start Date"
+                  v-model:menu="startDateMenu"
+                  label="Start Date *"
                   input-format="yyyy-mm-dd"
                   prepend-icon=""
                   prepend-inner-icon="mdi-calendar"
                   variant="outlined"
                   density="comfortable"
+                  required
                   :rules="[(v) => !!v || 'Start date is required']"
+                  @keydown.enter="startDateMenu = false"
                 />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-date-input
                   v-model="form.end_date"
-                  label="End Date"
+                  v-model:menu="endDateMenu"
+                  label="End Date (Optional)"
                   input-format="yyyy-mm-dd"
                   prepend-icon=""
                   prepend-inner-icon="mdi-calendar"
@@ -56,34 +72,35 @@
                   clearable
                   hint="Leave empty for perpetual policy"
                   persistent-hint
+                  @keydown.enter="endDateMenu = false"
                 />
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" sm="8">
                 <v-text-field
                   v-model="form.premium"
-                  label="Premium Cost"
+                  label="Premium Cost *"
                   variant="outlined"
                   density="comfortable"
                   :prefix="currencySymbol"
+                  persistent-placeholder
                   type="number"
+                  min="0"
                   step="0.01"
+                  required
                   :rules="[
                     (v) => (v !== '' && v !== null && v !== undefined) || 'Premium is required',
+                    (v) => Number(v) >= 0 || 'Premium cannot be negative',
                   ]"
-                >
-                  <template #append>
-                    <v-select
-                      v-model="form.frequency"
-                      :items="['Annual', 'Monthly']"
-                      aria-label="Payment frequency"
-                      variant="plain"
-                      density="compact"
-                      hide-details
-                      width="120px"
-                      class="font-weight-bold text-body-small"
-                    />
-                  </template>
-                </v-text-field>
+                />
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-select
+                  v-model="form.frequency"
+                  :items="['Annual', 'Monthly']"
+                  label="Frequency"
+                  variant="outlined"
+                  density="comfortable"
+                />
               </v-col>
 
               <v-col cols="12">
@@ -129,8 +146,10 @@
                 <v-file-input
                   v-model="file"
                   accept=".pdf"
-                  label="Policy Document"
+                  label="Policy Document (Optional)"
                   placeholder="PDF files only"
+                  hint="Accepted format: PDF (.pdf)"
+                  persistent-hint
                   variant="outlined"
                   density="comfortable"
                   prepend-icon=""
@@ -147,7 +166,13 @@
         <v-card-actions class="pa-4">
           <v-spacer />
           <v-btn variant="text" @click="open = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" :loading="loading" @click="submit">
+          <v-btn
+            color="primary"
+            variant="flat"
+            :disabled="loading"
+            :loading="loading"
+            @click="submit"
+          >
             Save Policy
           </v-btn>
         </v-card-actions>
@@ -173,8 +198,9 @@
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { parseIsoDate, toIsoDate } from '@/utils/Formats'
+import { PolicyTypes, getPolicyIcon } from '@/utils/PolicyTypes'
 import AssetDialog from '@/components/AssetDialog.vue'
 import SaveAssetPromptDialog from '@/components/SaveAssetPromptDialog.vue'
 import BuildingsPolicyForm from '@/components/forms/BuildingsPolicyForm.vue'
@@ -200,6 +226,8 @@ const emit = defineEmits(['submit', 'asset-created'])
 const formRef = useTemplateRef('formRef')
 const file = ref(null)
 const form = ref(createEmptyForm())
+const startDateMenu = ref(false)
+const endDateMenu = ref(false)
 const showInlineAssetDialog = ref(false)
 const inlineAssetType = ref('Vehicle')
 const showSaveAssetPrompt = ref(false)
@@ -225,10 +253,15 @@ const currencySymbol = computed(() => {
   return symbols[props.currencyCode] || '$'
 })
 
+const policyIcon = computed(() => getPolicyIcon(form.value.type))
+const policyLabel = computed(() => PolicyTypes[form.value.type]?.label || form.value.type || '')
+
 const vehicleAssets = computed(() => props.assets.filter((a) => a.type === 'Vehicle'))
 const petAssets = computed(() => props.assets.filter((a) => a.type === 'Pet'))
 
 watch(open, (isOpen) => {
+  startDateMenu.value = false
+  endDateMenu.value = false
   if (!isOpen) return
 
   if (props.policyToEdit) {
@@ -244,6 +277,7 @@ watch(open, (isOpen) => {
     form.value = createEmptyForm(props.policyType)
   }
   file.value = null
+  nextTick(() => formRef.value?.resetValidation())
 })
 
 function openInlineAssetDialog(type) {
@@ -298,7 +332,13 @@ function handlePromptAssetSkipped() {
 
 async function submit() {
   const validation = await formRef.value?.validate()
-  if (validation && !validation.valid) return
+  if (validation && !validation.valid) {
+    const firstErrorId = validation.errors?.[0]?.id
+    if (firstErrorId) {
+      document.getElementById(firstErrorId)?.focus()
+    }
+    return
+  }
 
   const startDate = toIsoDate(form.value.start_date)
   if (!form.value.provider || form.value.premium === '' || !startDate) return
@@ -334,5 +374,85 @@ async function submit() {
 /* Firefox */
 :deep(input[type='number']) {
   -moz-appearance: textfield;
+}
+
+.policy-form-scroll {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  container-type: scroll-state;
+}
+
+.policy-form-scroll::before,
+.policy-form-scroll::after {
+  content: '';
+  display: block;
+  position: sticky;
+  block-size: 0.75rem;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.policy-form-scroll::before {
+  inset-block-start: 0;
+  margin-block-end: -0.75rem;
+  background: radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 0.16), transparent);
+}
+
+.policy-form-scroll::after {
+  inset-block-end: 0;
+  margin-block-start: -0.75rem;
+  background: radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 0.16), transparent);
+}
+
+@container scroll-state(scrollable: block-start) {
+  .policy-form-scroll::before {
+    opacity: 1;
+  }
+}
+
+@container scroll-state(scrollable: block-end) {
+  .policy-form-scroll::after {
+    opacity: 1;
+  }
+}
+
+@supports not (container-type: scroll-state) {
+  .policy-form-scroll::before,
+  .policy-form-scroll::after {
+    animation: show-scroll-shadow linear both;
+    animation-timeline: scroll();
+  }
+
+  .policy-form-scroll::before {
+    animation-range: 0 2rem;
+  }
+
+  .policy-form-scroll::after {
+    animation-direction: reverse;
+    animation-range: calc(100% - 2rem) 100%;
+  }
+}
+
+@supports not ((container-type: scroll-state) or (animation-timeline: scroll())) {
+  .policy-form-scroll {
+    background:
+      linear-gradient(rgb(var(--v-theme-surface)) 30%, transparent) top / 100% 2.5rem no-repeat
+        local,
+      linear-gradient(transparent, rgb(var(--v-theme-surface)) 70%) bottom / 100% 2.5rem no-repeat
+        local,
+      radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 0.16), transparent) top / 100% 0.75rem
+        no-repeat,
+      radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 0.16), transparent) bottom / 100%
+        0.75rem no-repeat,
+      rgb(var(--v-theme-surface));
+  }
+}
+
+@keyframes show-scroll-shadow {
+  to {
+    opacity: 1;
+  }
 }
 </style>

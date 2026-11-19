@@ -11,6 +11,8 @@
           v-model.number="attributes.rebuild_cost"
           label="Rebuild Cost"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -23,6 +25,8 @@
           v-model.number="attributes.alternative_accommodation"
           label="Alternative Accommodation"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -36,6 +40,8 @@
           v-model.number="attributes.excess_standard"
           label="Standard Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
@@ -47,11 +53,13 @@
           v-model.number="attributes.excess_subsidence"
           label="Subsidence Excess"
           type="number"
+          min="0"
+          persistent-placeholder
           variant="outlined"
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          hint="Usually £1000+"
+          :hint="`Usually ${currencySymbol}1000+`"
         />
       </v-col>
 
