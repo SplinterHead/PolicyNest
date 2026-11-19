@@ -71,13 +71,15 @@
       </v-col>
 
       <v-col cols="12">
-        <div class="text-body-small text-medium-emphasis mb-1">Co-payment (Percentage you pay)</div>
+        <div id="pet-copay-label" class="text-body-small text-medium-emphasis mb-1">
+          Co-payment (Percentage you pay)
+        </div>
         <v-slider
           v-model="attributes.copay_percent"
           :min="0"
           :max="50"
           :step="5"
-          thumb-label="always"
+          aria-labelledby="pet-copay-label"
           variant="pill"
           color="primary"
           track-color="grey-lighten-2"
