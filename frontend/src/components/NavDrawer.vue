@@ -5,10 +5,17 @@
         <template #activator="{ props }">
           <v-card
             v-bind="props"
+            tag="button"
+            type="button"
             color="primary"
             elevation="0"
             rounded="lg"
-            class="pa-3 cursor-pointer"
+            class="w-100 text-left pa-3 cursor-pointer household-switcher-btn"
+            :aria-label="
+              currentHousehold
+                ? `Switch household, currently ${currentHousehold.name}`
+                : 'Switch household'
+            "
             v-ripple
           >
             <div class="d-flex align-center justify-space-between">
@@ -30,13 +37,14 @@
           </v-card>
         </template>
 
-        <v-list density="compact" nav class="mt-2">
+        <v-list density="compact" nav role="menu" aria-label="Households" class="mt-2">
           <v-list-subheader>Switch Household</v-list-subheader>
 
           <v-list-item
             v-for="h in households"
             :key="h.id"
-            :value="h.id"
+            role="menuitemradio"
+            :aria-checked="Boolean(currentHousehold && currentHousehold.id === h.id)"
             :active="currentHousehold && currentHousehold.id === h.id"
             color="primary"
             @click="emit('switch-household', h)"
@@ -56,6 +64,7 @@
           <v-divider class="my-2" />
 
           <v-list-item
+            role="menuitem"
             prepend-icon="mdi-cog-outline"
             title="Manage Households"
             @click="emit('open-manage')"
@@ -102,3 +111,10 @@ defineProps({
 
 const emit = defineEmits(['switch-household', 'open-manage'])
 </script>
+
+<style scoped>
+.household-switcher-btn:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-on-surface));
+  outline-offset: 2px;
+}
+</style>
