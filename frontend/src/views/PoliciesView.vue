@@ -119,8 +119,6 @@
       </div>
 
       <div v-if="expiredPolicies.length > 0" class="mb-6">
-        <v-divider class="my-6" />
-
         <div class="d-flex align-center mb-3 text-medium-emphasis">
           <v-icon color="grey" icon="mdi-history" class="mr-2 flex-shrink-0" />
           <h2 class="text-headline-small font-weight-light text-no-wrap flex-shrink-0">
