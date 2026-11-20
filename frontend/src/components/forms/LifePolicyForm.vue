@@ -31,14 +31,38 @@
         />
       </v-col>
 
-      <v-col cols="12">
-        <v-text-field
-          v-model="attributes.beneficiaries"
-          label="Beneficiaries / Trust Name"
-          placeholder="e.g. Spouse, Children, or 'The Smith Family Trust'"
+      <v-col cols="12" sm="6">
+        <v-select
+          v-model="attributes.premium_type"
+          :items="premiumTypes"
+          label="Premium Type"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="attributes.life_assured"
+          label="Life Assured"
+          placeholder="e.g. John Smith"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+        />
+      </v-col>
+
+      <v-col cols="12" class="mt-2">
+        <StringListField
+          v-model="attributes.beneficiaries"
+          title="Beneficiaries"
+          add-label="Add Beneficiary"
+          item-label="Beneficiary Name"
+          placeholder="e.g. Jane Smith (Spouse)"
+          empty-text="No beneficiaries added."
+          remove-aria-label="Remove beneficiary"
         />
       </v-col>
 
@@ -58,6 +82,24 @@
             <v-checkbox
               v-model="attributes.critical_illness"
               label="Critical Illness Cover"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.terminal_illness"
+              label="Terminal Illness Benefit"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.children_critical_illness"
+              label="Children's Critical Illness"
               color="primary"
               density="compact"
               hide-details
@@ -88,11 +130,21 @@
 </template>
 
 <script setup>
+import StringListField from '@/components/forms/StringListField.vue'
+
 const attributes = defineModel({ type: Object, default: () => ({}) })
 
 defineProps({
   currencySymbol: String,
 })
 
-const policyTypes = ['Level Term', 'Decreasing Term (Mortgage)', 'Whole of Life', 'Over 50s Plan']
+const policyTypes = [
+  'Level Term',
+  'Decreasing Term (Mortgage)',
+  'Increasing Term (Inflation-Linked)',
+  'Family Income Benefit',
+  'Whole of Life',
+  'Over 50s Plan',
+]
+const premiumTypes = ['Guaranteed', 'Reviewable']
 </script>
