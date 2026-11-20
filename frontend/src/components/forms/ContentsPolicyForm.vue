@@ -6,7 +6,7 @@
     </h3>
 
     <v-row density="compact">
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.total_cover"
           label="Total Sum Insured"
@@ -19,7 +19,20 @@
           bg-color="surface"
         />
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.excess"
+          label="Standard Excess"
+          type="number"
+          min="0"
+          persistent-placeholder
+          variant="outlined"
+          density="comfortable"
+          :prefix="currencySymbol"
+          bg-color="surface"
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.single_item_limit"
           label="Single Item Limit"
@@ -31,6 +44,34 @@
           :prefix="currencySymbol"
           bg-color="surface"
           hint="Max per item unless specified"
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.away_cover_limit"
+          label="Away-from-Home Limit"
+          type="number"
+          min="0"
+          persistent-placeholder
+          placeholder="e.g. 2000"
+          variant="outlined"
+          density="comfortable"
+          :prefix="currencySymbol"
+          bg-color="surface"
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.outbuildings_limit"
+          label="Outbuildings Limit"
+          type="number"
+          min="0"
+          persistent-placeholder
+          placeholder="e.g. 2500"
+          variant="outlined"
+          density="comfortable"
+          :prefix="currencySymbol"
+          bg-color="surface"
         />
       </v-col>
 
@@ -147,8 +188,8 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="attributes.student_cover"
-              label="Student Cover (Uni)"
+              v-model="attributes.keys_locks"
+              label="Keys & Locks"
               color="primary"
               density="compact"
               hide-details
@@ -156,8 +197,8 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="attributes.freezer_contents"
-              label="Freezer Contents"
+              v-model="attributes.legal_expenses"
+              label="Legal Expenses Cover"
               color="primary"
               density="compact"
               hide-details

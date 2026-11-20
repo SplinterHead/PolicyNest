@@ -36,6 +36,42 @@
           </span>
         </template>
       </v-list-item>
+
+      <v-list-item
+        v-if="
+          attributes.away_cover_limit !== undefined &&
+          attributes.away_cover_limit !== null &&
+          attributes.away_cover_limit !== ''
+        "
+      >
+        <template #prepend>
+          <v-icon icon="mdi-bag-suitcase-outline" size="small" class="mr-4" />
+        </template>
+        <v-list-item-title>Away-from-Home Limit</v-list-item-title>
+        <template #append>
+          <span class="font-weight-medium">
+            {{ currencyFormat(attributes.away_cover_limit, currencyCode) }}
+          </span>
+        </template>
+      </v-list-item>
+
+      <v-list-item
+        v-if="
+          attributes.outbuildings_limit !== undefined &&
+          attributes.outbuildings_limit !== null &&
+          attributes.outbuildings_limit !== ''
+        "
+      >
+        <template #prepend>
+          <v-icon icon="mdi-home-roof" size="small" class="mr-4" />
+        </template>
+        <v-list-item-title>Outbuildings Limit</v-list-item-title>
+        <template #append>
+          <span class="font-weight-medium">
+            {{ currencyFormat(attributes.outbuildings_limit, currencyCode) }}
+          </span>
+        </template>
+      </v-list-item>
     </v-list>
   </v-col>
 
@@ -77,8 +113,8 @@ const features = computed(() => [
   { label: 'Accidental', enabled: Boolean(props.attributes.accidental_damage) },
   { label: 'Away Cover', enabled: Boolean(props.attributes.personal_possessions) },
   { label: 'Bicycles', enabled: Boolean(props.attributes.bicycle_cover) },
-  { label: 'Student', enabled: Boolean(props.attributes.student_cover) },
   { label: 'Garden', enabled: Boolean(props.attributes.garden_cover) },
-  { label: 'Freezer', enabled: Boolean(props.attributes.freezer_contents) },
+  { label: 'Keys & Locks', enabled: Boolean(props.attributes.keys_locks) },
+  { label: 'Legal Expenses', enabled: Boolean(props.attributes.legal_expenses) },
 ])
 </script>
