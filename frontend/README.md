@@ -1,44 +1,21 @@
-# policynest
+# PolicyNest Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Built with Vue 3.5, Vuetify 4.3, Vue Router 5, and Vite 8.
 
-## Recommended IDE Setup
+## Requirements
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Node.js `^20.19.0 || ^22.13.0 || >=24`
 
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Scripts
 
 ```sh
-npm install
+npm install                  # Install dependencies
+npm run dev                  # Start Vite dev server
+npm run build                # Build production bundle into dist/
+npm run preview              # Preview production bundle
+npm run lint                 # Lint and auto-fix with ESLint
+npx eslint . --max-warnings 0 # Verify zero ESLint errors/warnings
+npm run format               # Format src/ with Prettier
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+API requests use the relative `/api` base path (`src/services/api.js`) and are served alongside the built `dist/` bundle by the FastAPI backend on port `8000` (see the root [README](../README.md) for full-stack startup instructions).
