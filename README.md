@@ -1,4 +1,4 @@
-# PolicyNest
+# <img src="./frontend/public/favicon.svg" alt="" width="36" height="36" align="absmiddle" /> PolicyNest
 
 > **Stop digging through email attachments.** Keep your family's policy documents safe, organized, and fully under your control.
 
