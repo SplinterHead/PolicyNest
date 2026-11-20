@@ -29,11 +29,16 @@
         <template #prepend>
           <v-icon icon="mdi-cash-minus" size="small" class="mr-4" />
         </template>
-        <v-list-item-title>Annual Excess</v-list-item-title>
+        <v-list-item-title>Excess</v-list-item-title>
         <template #append>
-          <span class="font-weight-bold text-red">
-            {{ currencyFormat(attributes.excess, currencyCode) }}
-          </span>
+          <div class="text-right">
+            <div class="font-weight-bold text-red">
+              {{ currencyFormat(attributes.excess, currencyCode) }}
+            </div>
+            <div class="text-body-small text-medium-emphasis">
+              {{ attributes.excess_type || 'Per Year' }}
+            </div>
+          </div>
         </template>
       </v-list-item>
 
@@ -80,5 +85,6 @@ const features = computed(() => [
   { label: 'Dental', enabled: Boolean(props.attributes.dental) },
   { label: 'Optical', enabled: Boolean(props.attributes.optical) },
   { label: 'Travel', enabled: Boolean(props.attributes.travel_cover) },
+  { label: '24/7 Digital GP', enabled: Boolean(props.attributes.digital_gp) },
 ])
 </script>

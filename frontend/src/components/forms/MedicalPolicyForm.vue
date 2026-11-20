@@ -29,10 +29,10 @@
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="7" sm="6">
         <v-text-field
           v-model.number="attributes.excess"
-          label="Annual Excess"
+          label="Excess"
           type="number"
           min="0"
           persistent-placeholder
@@ -40,11 +40,23 @@
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          hint="Amount you pay per claim/year"
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="5" sm="6">
+        <v-select
+          v-model="attributes.excess_type"
+          :items="excessTypes"
+          label="Excess Basis"
+          placeholder="Per Year"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.outpatient_limit"
           label="Out-patient Limit"
@@ -59,14 +71,14 @@
         />
       </v-col>
 
-      <v-col cols="12">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model="attributes.hospital_list"
           label="Hospital List / Network Tier"
           variant="outlined"
           density="comfortable"
           bg-color="surface"
-          placeholder="e.g. London / Provincial / Key List"
+          placeholder="e.g. Standard / Extended / London"
         />
       </v-col>
 
@@ -127,6 +139,15 @@
               hide-details
             />
           </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.digital_gp"
+              label="24/7 Digital GP"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -141,5 +162,12 @@ defineProps({
 })
 
 const coverTypes = ['Individual', 'Couple', 'Family', 'Single Parent', 'Child Only']
-const underwritingTypes = ['Full Medical Underwriting', 'Moratorium', 'Switch/Continued', 'Unknown']
+const underwritingTypes = [
+  'Full Medical Underwriting',
+  'Moratorium',
+  'Medical History Disregarded (MHD)',
+  'Switch/Continued',
+  'Unknown',
+]
+const excessTypes = ['Per Year', 'Per Claim']
 </script>
