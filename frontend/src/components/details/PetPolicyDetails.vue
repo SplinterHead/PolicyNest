@@ -17,9 +17,7 @@
         </template>
         <v-list-item-title>Cover Type</v-list-item-title>
         <template #append>
-          <v-chip size="small" color="brown" variant="tonal" class="font-weight-medium">
-            {{ attributes.cover_type || 'Unknown' }}
-          </v-chip>
+          <span class="font-weight-medium">{{ attributes.cover_type || 'Unknown' }}</span>
         </template>
       </v-list-item>
 
@@ -29,9 +27,14 @@
         </template>
         <v-list-item-title>Vet Fees Limit</v-list-item-title>
         <template #append>
-          <span class="font-weight-bold text-primary">
-            {{ currencyFormat(attributes.vet_fees_limit, currencyCode) }}
-          </span>
+          <div class="text-right">
+            <div class="font-weight-bold text-primary">
+              {{ currencyFormat(attributes.vet_fees_limit, currencyCode) }}
+            </div>
+            <div v-if="attributes.vet_fees_limit_type" class="text-body-small text-medium-emphasis">
+              {{ attributes.vet_fees_limit_type }}
+            </div>
+          </div>
         </template>
       </v-list-item>
 
@@ -83,9 +86,9 @@ const props = defineProps({
 
 const features = computed(() => [
   { label: 'Liability', enabled: Boolean(props.attributes.third_party_liability) },
-  { label: 'Boarding', enabled: Boolean(props.attributes.boarding_fees) },
-  { label: 'Lost/Stolen', enabled: Boolean(props.attributes.advertising_reward) },
+  { label: 'Dental Cover', enabled: Boolean(props.attributes.dental_cover) },
+  { label: 'Hydro/Physio', enabled: Boolean(props.attributes.complementary_therapies) },
   { label: 'Death Benefit', enabled: Boolean(props.attributes.death_benefit) },
-  { label: 'Travel', enabled: Boolean(props.attributes.travel_cover) },
+  { label: '24/7 Video Vet', enabled: Boolean(props.attributes.video_vet) },
 ])
 </script>

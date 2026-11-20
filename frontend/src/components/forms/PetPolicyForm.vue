@@ -62,7 +62,7 @@
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="7" sm="6">
         <v-text-field
           v-model.number="attributes.vet_fees_limit"
           label="Vet Fees Limit"
@@ -73,11 +73,23 @@
           density="comfortable"
           :prefix="currencySymbol"
           bg-color="surface"
-          hint="Max payout per year/condition"
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="5" sm="6">
+        <v-select
+          v-model="attributes.vet_fees_limit_type"
+          :items="vetFeesLimitTypes"
+          label="Limit Basis"
+          placeholder="Per Year"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.excess"
           label="Fixed Excess"
@@ -102,8 +114,11 @@
           :step="5"
           aria-labelledby="pet-copay-label"
           variant="pill"
+          size="x-small"
+          hide-details
           color="primary"
           track-color="grey-lighten-2"
+          class="copay-slider"
         >
           <template #append>
             <div class="font-weight-bold" style="width: 40px">
@@ -113,13 +128,13 @@
         </v-slider>
       </v-col>
 
-      <v-col cols="12">
+      <v-col cols="12" class="mt-2">
         <h4 class="text-body-small font-weight-bold text-medium-emphasis mb-2">Included Extras</h4>
         <v-row density="compact">
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="attributes.boarding_fees"
-              label="Boarding Fees"
+              v-model="attributes.dental_cover"
+              label="Dental Cover"
               color="primary"
               density="compact"
               hide-details
@@ -127,8 +142,8 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="attributes.advertising_reward"
-              label="Lost/Stolen (Advertising)"
+              v-model="attributes.complementary_therapies"
+              label="Hydro/Physio Therapies"
               color="primary"
               density="compact"
               hide-details
@@ -154,8 +169,8 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-checkbox
-              v-model="attributes.travel_cover"
-              label="Overseas Travel"
+              v-model="attributes.video_vet"
+              label="24/7 Video Vet"
               color="primary"
               density="compact"
               hide-details
@@ -182,6 +197,7 @@ const emit = defineEmits(['add-asset'])
 
 const assetMenuOpen = ref(false)
 const coverTypes = ['Lifetime', 'Maximum Benefit', 'Time Limited', 'Accident Only']
+const vetFeesLimitTypes = ['Per Year', 'Per Condition']
 
 function handleAddAsset() {
   assetMenuOpen.value = false
@@ -201,3 +217,15 @@ function onAssetSelect(id) {
   }
 }
 </script>
+
+<style scoped>
+.copay-slider :deep(.v-slider__container) {
+  --v-slider-track-size: 12px;
+  --v-slider-pill-handle-height: 20px;
+  --v-slider-pill-track-radius: 6px;
+}
+
+.copay-slider :deep(.v-input__control) {
+  min-height: 20px;
+}
+</style>
