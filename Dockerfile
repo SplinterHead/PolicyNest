@@ -8,6 +8,8 @@ COPY frontend/package*.json ./
 RUN npm ci
 
 COPY frontend/ ./
+ARG APP_VERSION=""
+ENV VITE_APP_VERSION=${APP_VERSION}
 RUN npm run build
 
 

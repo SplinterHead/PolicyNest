@@ -98,6 +98,23 @@
         color="primary"
       />
     </v-list>
+
+    <template #append>
+      <v-divider />
+      <div class="d-flex flex-column align-center pa-3 ga-1 text-medium-emphasis">
+        <span class="text-body-small">{{ formattedVersion }}</span>
+        <v-btn
+          icon="mdi-github"
+          variant="text"
+          density="comfortable"
+          color="default"
+          href="https://github.com/SplinterHead/PolicyNest"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="View PolicyNest on GitHub (opens in a new tab)"
+        />
+      </div>
+    </template>
   </v-navigation-drawer>
 </template>
 
@@ -110,6 +127,10 @@ defineProps({
 })
 
 const emit = defineEmits(['switch-household', 'open-manage'])
+
+const rawVersion = (import.meta.env.VITE_APP_VERSION || 'dev').trim()
+const formattedVersion =
+  rawVersion === 'dev' || rawVersion.startsWith('v') ? rawVersion : `v${rawVersion}`
 </script>
 
 <style scoped>
