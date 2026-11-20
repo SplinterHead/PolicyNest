@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="shield-grad" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E88E5" />
+      <stop offset="100%" stop-color="#0D47A1" />
+    </linearGradient>
+    <linearGradient id="facet-grad" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.02" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer shield -->
+  <path
+    d="M32 3 L56 12.5 V30 C56 46 45.2 56.2 32 61 C18.8 56.2 8 46 8 30 V12.5 Z"
+    fill="url(#shield-grad)"
+  />
+
+  <!-- Left facet highlight -->
+  <path
+    d="M32 3 L8 12.5 V30 C8 46 18.8 56.2 32 61 Z"
+    fill="url(#facet-grad)"
+  />
+
+  <!-- Inner rim for contrast on both light and dark browser tabs -->
+  <path
+    d="M32 4.4 L54.6 13.4 V30 C54.6 44.9 44.5 54.7 32 59.5 C19.5 54.7 9.4 44.9 9.4 30 V13.4 Z"
+    fill="none"
+    stroke="#90CAF9"
+    stroke-opacity="0.45"
+    stroke-width="1.5"
+  />
+
+  <!-- House silhouette (Nest) -->
+  <path
+    d="M32 16 L48 28.5 H44 V44.5 C44 45.9 42.9 47 41.5 47 H22.5 C21.1 47 20 45.9 20 44.5 V28.5 H16 Z"
+    fill="#FFFFFF"
+  />
+
+  <!-- Checkmark inside the house -->
+  <path
+    d="M25 35.5 L29.5 40 L39 30.5"
+    fill="none"
+    stroke="#1565C0"
+    stroke-width="4.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

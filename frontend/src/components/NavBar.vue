@@ -12,7 +12,14 @@
         class="brand-link d-inline-flex align-center text-primary text-decoration-none rounded px-1"
         aria-label="PolicyNest Home"
       >
-        <v-icon icon="mdi-shield-check" class="mr-2" aria-hidden="true" />
+        <img
+          src="/favicon.svg"
+          alt=""
+          width="28"
+          height="28"
+          class="mr-2 flex-shrink-0"
+          aria-hidden="true"
+        />
         <span class="font-weight-bold">policy</span>
         <span class="font-weight-light">nest</span>
       </router-link>
