@@ -99,6 +99,44 @@
         />
       </v-col>
 
+      <v-col cols="12" sm="6">
+        <v-select
+          v-model="attributes.class_of_use"
+          :items="classOfUseOptions"
+          label="Class of Use"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+          clearable
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.annual_mileage"
+          label="Annual Mileage"
+          type="number"
+          min="0"
+          persistent-placeholder
+          suffix="miles"
+          placeholder="e.g. 8000"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+        />
+      </v-col>
+
+      <v-col cols="12" class="mt-2">
+        <StringListField
+          v-model="attributes.additional_drivers"
+          title="Additional Drivers"
+          add-label="Add Driver"
+          item-label="Driver Name"
+          placeholder="e.g. Jane Doe"
+          empty-text="No additional drivers added."
+          remove-aria-label="Remove driver"
+        />
+      </v-col>
+
       <v-col cols="12" class="mt-2">
         <h4 class="text-body-small font-weight-bold text-medium-emphasis mb-2">Included Extras</h4>
         <v-row density="compact">
@@ -147,6 +185,24 @@
               hide-details
             />
           </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.driving_other_cars"
+              label="Driving Other Cars"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.key_cover"
+              label="Key Cover"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -155,6 +211,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import StringListField from '@/components/forms/StringListField.vue'
 
 const attributes = defineModel({ type: Object, default: () => ({}) })
 const assetId = defineModel('assetId', { default: null })
@@ -167,6 +224,7 @@ const props = defineProps({
 const emit = defineEmits(['add-asset'])
 
 const assetMenuOpen = ref(false)
+const classOfUseOptions = ['Social, Domestic & Pleasure', 'SDP & Commuting', 'Business Use']
 
 function handleAddAsset() {
   assetMenuOpen.value = false
