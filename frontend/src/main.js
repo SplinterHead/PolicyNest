@@ -6,9 +6,14 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 
 import '@mdi/font/css/materialdesignicons.css'
+import { vuetifyLocale } from './utils/Formats'
 
 const app = createApp(App)
 const vuetify = createVuetify({
+  locale: {
+    locale: vuetifyLocale.value,
+    fallback: 'en',
+  },
   theme: {
     defaultTheme: 'system',
     themes: {

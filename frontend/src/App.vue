@@ -30,12 +30,13 @@
             :currency-code="currencyCode"
             v-bind="
               route.name === 'settings'
-                ? { themePreference }
+                ? { localePreference, themePreference }
                 : route.name === 'policies' || route.name === 'inventory'
                   ? { assets }
                   : {}
             "
             @update-currency="updateCurrency"
+            @update-locale="setLocalePreference"
             @update-theme="setThemePreference"
             @open-manage="showManageDialog = true"
             @asset-created="handleAssetSaved"
@@ -74,14 +75,22 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useDisplay, useTheme } from 'vuetify'
+import { useDisplay, useLocale, useTheme } from 'vuetify'
 import api from '@/services/api'
+import {
+  LOCALE_STORAGE_KEY,
+  localePreference,
+  setLocalePreference,
+  syncLocalePreferenceFromStorage,
+  vuetifyLocale,
+} from '@/utils/Formats'
 import NavBar from '@/components/NavBar.vue'
 import NavDrawer from '@/components/NavDrawer.vue'
 import NewHouseholdDialog from '@/components/NewHouseholdDialog.vue'
 import ManageHouseholdsDialog from '@/components/ManageHouseholdsDialog.vue'
 
 const { mobile } = useDisplay()
+const { current: currentVuetifyLocale } = useLocale()
 const theme = useTheme()
 
 const assets = ref([])
@@ -147,6 +156,9 @@ function toggleTheme() {
 function handleStorage(event) {
   if (event.key === 'theme' || event.key === null) {
     applyTheme(getStoredTheme())
+  }
+  if (event.key === LOCALE_STORAGE_KEY || event.key === null) {
+    syncLocalePreferenceFromStorage()
   }
   if (event.key === 'currencyCode' && event.newValue) {
     currencyCode.value = event.newValue
@@ -290,6 +302,14 @@ onMounted(() => {
   window.addEventListener('storage', handleStorage)
   loadApp()
 })
+
+watch(
+  vuetifyLocale,
+  (val) => {
+    currentVuetifyLocale.value = val
+  },
+  { immediate: true },
+)
 
 onBeforeUnmount(() => {
   window.removeEventListener('storage', handleStorage)

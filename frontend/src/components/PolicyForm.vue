@@ -54,7 +54,7 @@
                   v-model="form.start_date"
                   v-model:menu="startDateMenu"
                   label="Start Date *"
-                  input-format="yyyy-mm-dd"
+                  :input-format="isIsoDateLocale ? 'yyyy-mm-dd' : undefined"
                   prepend-icon=""
                   prepend-inner-icon="mdi-calendar"
                   variant="outlined"
@@ -69,7 +69,7 @@
                   v-model="form.end_date"
                   v-model:menu="endDateMenu"
                   label="End Date"
-                  input-format="yyyy-mm-dd"
+                  :input-format="isIsoDateLocale ? 'yyyy-mm-dd' : undefined"
                   prepend-icon=""
                   prepend-inner-icon="mdi-calendar"
                   variant="outlined"
@@ -218,7 +218,7 @@
 
 <script setup>
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
-import { parseIsoDate, toIsoDate } from '@/utils/Formats'
+import { isIsoDateLocale, parseIsoDate, toIsoDate } from '@/utils/Formats'
 import { PolicyTypes, getPolicyIcon } from '@/utils/PolicyTypes'
 import AssetDialog from '@/components/AssetDialog.vue'
 import SaveAssetPromptDialog from '@/components/SaveAssetPromptDialog.vue'

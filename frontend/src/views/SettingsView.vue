@@ -21,6 +21,7 @@
             label="Application Currency"
             variant="outlined"
             density="comfortable"
+            class="mb-4"
             hint="Display format only (no exchange-rate conversion). Saved locally in this browser."
             persistent-hint
             @update:model-value="emit('update-currency', $event)"
@@ -38,6 +39,29 @@
                   </span>
                 </template>
               </v-list-item>
+            </template>
+          </v-select>
+
+          <v-select
+            :model-value="localePreference"
+            :items="localeOptions"
+            item-title="label"
+            item-value="code"
+            label="Date & Number Format"
+            variant="outlined"
+            density="comfortable"
+            :hint="localeSampleHint"
+            persistent-hint
+            @update:model-value="emit('update-locale', $event)"
+          >
+            <template #selection="{ item }">
+              <span>{{ item.label }}</span>
+              <span v-if="item.dateHint" class="text-medium-emphasis ml-1">
+                ({{ item.dateHint }})
+              </span>
+            </template>
+            <template #item="{ props: itemProps, item }">
+              <v-list-item v-bind="itemProps" :subtitle="item.subtitle" />
             </template>
           </v-select>
         </v-card>
@@ -101,18 +125,23 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { SUPPORTED_LOCALES, currencyFormat, formatDate, getBrowserLocale } from '@/utils/Formats'
 
-defineProps({
+const props = defineProps({
   currencyCode: String,
   currentHousehold: Object,
+  localePreference: {
+    type: String,
+    default: 'auto',
+  },
   themePreference: {
     type: String,
     default: 'system',
   },
 })
 
-const emit = defineEmits(['update-currency', 'update-theme', 'open-manage'])
+const emit = defineEmits(['update-currency', 'update-locale', 'update-theme', 'open-manage'])
 
 const currencies = [
   { code: 'GBP', label: 'British Pound', symbol: '£' },
@@ -121,6 +150,47 @@ const currencies = [
   { code: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
   { code: 'CAD', label: 'Canadian Dollar', symbol: 'C$' },
 ]
+
+const SAMPLE_DATE = new Date(2026, 10, 20)
+const SAMPLE_AMOUNT = 1234.5
+const browserLocale = getBrowserLocale()
+
+function formatSampleDate(loc) {
+  if (loc === 'iso') return '2026-11-20'
+  return new Intl.DateTimeFormat(loc, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(SAMPLE_DATE)
+}
+
+function formatSampleCurrency(loc) {
+  return new Intl.NumberFormat(loc, {
+    style: 'currency',
+    currency: props.currencyCode || 'GBP',
+    currencyDisplay: 'narrowSymbol',
+  }).format(SAMPLE_AMOUNT)
+}
+
+const localeOptions = computed(() => [
+  {
+    code: 'auto',
+    label: `Browser Default (${browserLocale})`,
+    dateHint: '',
+    subtitle: `${formatSampleDate(browserLocale)} · ${formatSampleCurrency(browserLocale)}`,
+  },
+  ...SUPPORTED_LOCALES.map((item) => ({
+    ...item,
+    subtitle: `${item.dateHint} · ${formatSampleDate(item.code)} · ${formatSampleCurrency(
+      item.code === 'iso' ? browserLocale : item.code,
+    )}`,
+  })),
+])
+
+const localeSampleHint = computed(
+  () =>
+    `Preview: ${formatDate('2026-11-20')} · ${currencyFormat(SAMPLE_AMOUNT, props.currencyCode)}. Saved locally in this browser.`,
+)
 
 const systemIsDark = ref(
   typeof window !== 'undefined' &&

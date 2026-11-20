@@ -1,3 +1,77 @@
+import { computed, ref } from 'vue'
+
+export const LOCALE_STORAGE_KEY = 'locale'
+
+export const SUPPORTED_LOCALES = [
+  { code: 'en-GB', label: 'English (UK)', dateHint: 'DD/MM/YYYY' },
+  { code: 'en-US', label: 'English (US)', dateHint: 'MM/DD/YYYY' },
+  { code: 'en-AU', label: 'English (Australia)', dateHint: 'DD/MM/YYYY' },
+  { code: 'en-CA', label: 'English (Canada)', dateHint: 'YYYY-MM-DD' },
+  { code: 'iso', label: 'ISO 8601 Date', dateHint: 'YYYY-MM-DD' },
+  { code: 'de-DE', label: 'German (Germany)', dateHint: 'DD.MM.YYYY' },
+  { code: 'fr-FR', label: 'French (France)', dateHint: 'DD/MM/YYYY' },
+]
+
+const VALID_LOCALE_CODES = new Set(SUPPORTED_LOCALES.map((item) => item.code))
+
+export const getBrowserLocale = () => {
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language
+  }
+
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().locale || 'en-GB'
+  } catch {
+    return 'en-GB'
+  }
+}
+
+export const getStoredLocalePreference = () => {
+  try {
+    const val = localStorage.getItem(LOCALE_STORAGE_KEY)
+    return val && VALID_LOCALE_CODES.has(val) ? val : 'auto'
+  } catch {
+    return 'auto'
+  }
+}
+
+export const localePreference = ref(getStoredLocalePreference())
+
+export const setLocalePreference = (pref) => {
+  const next = pref && VALID_LOCALE_CODES.has(pref) ? pref : 'auto'
+  localePreference.value = next
+
+  try {
+    if (next === 'auto') {
+      localStorage.removeItem(LOCALE_STORAGE_KEY)
+    } else {
+      localStorage.setItem(LOCALE_STORAGE_KEY, next)
+    }
+  } catch {
+    // Ignore storage failures
+  }
+}
+
+export const syncLocalePreferenceFromStorage = () => {
+  localePreference.value = getStoredLocalePreference()
+}
+
+export const resolvedNumberLocale = computed(() =>
+  localePreference.value === 'auto' || localePreference.value === 'iso'
+    ? getBrowserLocale()
+    : localePreference.value,
+)
+
+export const resolvedDateLocale = computed(() =>
+  localePreference.value === 'auto' ? getBrowserLocale() : localePreference.value,
+)
+
+export const vuetifyLocale = computed(() =>
+  localePreference.value === 'iso' ? 'en-GB' : resolvedDateLocale.value,
+)
+
+export const isIsoDateLocale = computed(() => localePreference.value === 'iso')
+
 export const currencyFormat = (value, code) => {
   if (value === undefined || value === null || value === '') return 'N/A'
 
@@ -10,7 +84,7 @@ export const currencyFormat = (value, code) => {
     }
   }
 
-  return new Intl.NumberFormat('en-GB', {
+  return new Intl.NumberFormat(resolvedNumberLocale.value, {
     style: 'currency',
     currency: currencyCode || 'GBP',
     currencyDisplay: 'narrowSymbol',
@@ -48,7 +122,16 @@ export const toIsoDate = (value) => {
 }
 
 export const formatDate = (isoStr, emptyLabel = '') => {
+  if (localePreference.value === 'iso') {
+    return toIsoDate(isoStr) || emptyLabel
+  }
+
   const date = parseIsoDate(isoStr)
   if (!date) return emptyLabel
-  return date.toLocaleDateString()
+
+  return new Intl.DateTimeFormat(resolvedDateLocale.value, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
 }
