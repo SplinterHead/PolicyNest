@@ -48,6 +48,40 @@
           </span>
         </template>
       </v-list-item>
+
+      <v-list-item
+        v-if="
+          attributes.excess_escape_water !== undefined &&
+          attributes.excess_escape_water !== null &&
+          attributes.excess_escape_water !== ''
+        "
+      >
+        <template #prepend>
+          <v-icon icon="mdi-water-alert-outline" size="small" class="mr-4" />
+        </template>
+        <v-list-item-title>Escape of Water Excess</v-list-item-title>
+        <template #append>
+          <span class="font-weight-bold text-red">
+            {{ currencyFormat(attributes.excess_escape_water, currencyCode) }}
+          </span>
+        </template>
+      </v-list-item>
+
+      <v-list-item
+        v-if="
+          attributes.unoccupancy_limit !== undefined &&
+          attributes.unoccupancy_limit !== null &&
+          attributes.unoccupancy_limit !== ''
+        "
+      >
+        <template #prepend>
+          <v-icon icon="mdi-calendar-clock" size="small" class="mr-4" />
+        </template>
+        <v-list-item-title>Unoccupancy Limit</v-list-item-title>
+        <template #append>
+          <span class="font-weight-medium">{{ attributes.unoccupancy_limit }} days</span>
+        </template>
+      </v-list-item>
     </v-list>
   </v-col>
 
@@ -71,5 +105,6 @@ const features = computed(() => [
   { label: 'Trace & Access', enabled: Boolean(props.attributes.trace_access) },
   { label: 'Home Emergency', enabled: Boolean(props.attributes.home_emergency) },
   { label: 'Matching Sets', enabled: Boolean(props.attributes.matching_sets) },
+  { label: 'Legal Expenses', enabled: Boolean(props.attributes.legal_expenses) },
 ])
 </script>

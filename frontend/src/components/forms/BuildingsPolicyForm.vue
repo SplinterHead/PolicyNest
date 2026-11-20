@@ -35,7 +35,7 @@
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.excess_standard"
           label="Standard Excess"
@@ -48,7 +48,7 @@
           bg-color="surface"
         />
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model.number="attributes.excess_subsidence"
           label="Subsidence Excess"
@@ -60,6 +60,35 @@
           :prefix="currencySymbol"
           bg-color="surface"
           :hint="`Usually ${currencySymbol}1000+`"
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.excess_escape_water"
+          label="Escape of Water Excess"
+          type="number"
+          min="0"
+          persistent-placeholder
+          variant="outlined"
+          density="comfortable"
+          :prefix="currencySymbol"
+          bg-color="surface"
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model.number="attributes.unoccupancy_limit"
+          label="Unoccupancy Limit"
+          type="number"
+          min="0"
+          persistent-placeholder
+          suffix="days"
+          placeholder="e.g. 30"
+          variant="outlined"
+          density="comfortable"
+          bg-color="surface"
+          hint="Max consecutive days unoccupied"
         />
       </v-col>
 
@@ -97,6 +126,15 @@
             <v-checkbox
               v-model="attributes.matching_sets"
               label="Matching Sets (Bathroom suites)"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-checkbox
+              v-model="attributes.legal_expenses"
+              label="Legal Expenses"
               color="primary"
               density="compact"
               hide-details
