@@ -40,40 +40,7 @@
   </v-col>
 
   <v-col cols="12" md="6">
-    <div class="d-flex flex-wrap ga-2 mt-2 mb-4">
-      <v-chip
-        :color="attributes.accidental_damage ? 'amber-darken-3' : 'default'"
-        variant="tonal"
-        size="small"
-      >
-        <v-icon start :icon="attributes.accidental_damage ? 'mdi-check' : 'mdi-close'" />
-        Accidental
-      </v-chip>
-      <v-chip
-        :color="attributes.personal_possessions ? 'amber-darken-3' : 'default'"
-        variant="tonal"
-        size="small"
-      >
-        <v-icon start :icon="attributes.personal_possessions ? 'mdi-bag-suitcase' : 'mdi-close'" />
-        Away Cover
-      </v-chip>
-      <v-chip
-        :color="attributes.bicycle_cover ? 'amber-darken-3' : 'default'"
-        variant="tonal"
-        size="small"
-      >
-        <v-icon start :icon="attributes.bicycle_cover ? 'mdi-bicycle' : 'mdi-close'" />
-        Bicycles
-      </v-chip>
-      <v-chip
-        :color="attributes.student_cover ? 'amber-darken-3' : 'default'"
-        variant="tonal"
-        size="small"
-      >
-        <v-icon start :icon="attributes.student_cover ? 'mdi-school' : 'mdi-close'" />
-        Student
-      </v-chip>
-    </div>
+    <FeatureChips :items="features" class="mt-2 mb-4" />
 
     <div v-if="attributes.high_value_items && attributes.high_value_items.length > 0">
       <div class="text-body-small font-weight-bold text-medium-emphasis mb-1">Specified Items</div>
@@ -97,10 +64,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { currencyFormat } from '@/utils/Formats'
+import FeatureChips from '@/components/details/FeatureChips.vue'
 
-defineProps({
+const props = defineProps({
   attributes: { type: Object, default: () => ({}) },
   currencyCode: String,
 })
+
+const features = computed(() => [
+  { label: 'Accidental', enabled: Boolean(props.attributes.accidental_damage) },
+  { label: 'Away Cover', enabled: Boolean(props.attributes.personal_possessions) },
+  { label: 'Bicycles', enabled: Boolean(props.attributes.bicycle_cover) },
+  { label: 'Student', enabled: Boolean(props.attributes.student_cover) },
+  { label: 'Garden', enabled: Boolean(props.attributes.garden_cover) },
+  { label: 'Freezer', enabled: Boolean(props.attributes.freezer_contents) },
+])
 </script>

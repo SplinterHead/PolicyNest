@@ -56,28 +56,7 @@
 
   <v-col cols="12" md="6">
     <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">Policy Features</div>
-    <div class="d-flex flex-wrap ga-2">
-      <v-chip :color="attributes.third_party_liability ? 'brown' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.third_party_liability ? 'mdi-gavel' : 'mdi-close'" />
-        Liability
-      </v-chip>
-      <v-chip :color="attributes.boarding_fees ? 'brown' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.boarding_fees ? 'mdi-home-outline' : 'mdi-close'" />
-        Boarding
-      </v-chip>
-      <v-chip :color="attributes.advertising_reward ? 'brown' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.advertising_reward ? 'mdi-bullhorn' : 'mdi-close'" />
-        Lost/Stolen
-      </v-chip>
-      <v-chip :color="attributes.death_benefit ? 'brown' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.death_benefit ? 'mdi-heart-broken' : 'mdi-close'" />
-        Death Benefit
-      </v-chip>
-      <v-chip :color="attributes.travel_cover ? 'brown' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.travel_cover ? 'mdi-airplane' : 'mdi-close'" />
-        Travel
-      </v-chip>
-    </div>
+    <FeatureChips :items="features" />
 
     <v-alert
       v-if="attributes.cover_type === 'Accident Only'"
@@ -93,10 +72,20 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { currencyFormat } from '@/utils/Formats'
+import FeatureChips from '@/components/details/FeatureChips.vue'
 
-defineProps({
+const props = defineProps({
   attributes: { type: Object, default: () => ({}) },
   currencyCode: String,
 })
+
+const features = computed(() => [
+  { label: 'Liability', enabled: Boolean(props.attributes.third_party_liability) },
+  { label: 'Boarding', enabled: Boolean(props.attributes.boarding_fees) },
+  { label: 'Lost/Stolen', enabled: Boolean(props.attributes.advertising_reward) },
+  { label: 'Death Benefit', enabled: Boolean(props.attributes.death_benefit) },
+  { label: 'Travel', enabled: Boolean(props.attributes.travel_cover) },
+])
 </script>

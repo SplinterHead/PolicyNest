@@ -54,32 +54,7 @@
 
   <v-col cols="12" md="6">
     <div class="text-body-small font-weight-bold text-medium-emphasis mb-2">Benefits Included</div>
-    <div class="d-flex flex-wrap ga-2">
-      <v-chip :color="attributes.cancer_cover ? 'pink' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.cancer_cover ? 'mdi-ribbon' : 'mdi-close'" />
-        Cancer Care
-      </v-chip>
-      <v-chip :color="attributes.mental_health ? 'teal' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.mental_health ? 'mdi-brain' : 'mdi-close'" />
-        Mental Health
-      </v-chip>
-      <v-chip :color="attributes.therapies ? 'teal' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.therapies ? 'mdi-human-handsup' : 'mdi-close'" />
-        Therapies
-      </v-chip>
-      <v-chip :color="attributes.dental ? 'teal' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.dental ? 'mdi-tooth' : 'mdi-close'" />
-        Dental
-      </v-chip>
-      <v-chip :color="attributes.optical ? 'teal' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.optical ? 'mdi-eye' : 'mdi-close'" />
-        Optical
-      </v-chip>
-      <v-chip :color="attributes.travel_cover ? 'teal' : 'default'" variant="tonal">
-        <v-icon start :icon="attributes.travel_cover ? 'mdi-airplane' : 'mdi-close'" />
-        Travel
-      </v-chip>
-    </div>
+    <FeatureChips :items="features" />
 
     <div v-if="attributes.underwriting_type" class="mt-4">
       <div class="text-body-small text-medium-emphasis">Underwriting</div>
@@ -89,10 +64,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { currencyFormat } from '@/utils/Formats'
+import FeatureChips from '@/components/details/FeatureChips.vue'
 
-defineProps({
+const props = defineProps({
   attributes: { type: Object, default: () => ({}) },
   currencyCode: String,
 })
+
+const features = computed(() => [
+  { label: 'Cancer Care', enabled: Boolean(props.attributes.cancer_cover) },
+  { label: 'Mental Health', enabled: Boolean(props.attributes.mental_health) },
+  { label: 'Therapies', enabled: Boolean(props.attributes.therapies) },
+  { label: 'Dental', enabled: Boolean(props.attributes.dental) },
+  { label: 'Optical', enabled: Boolean(props.attributes.optical) },
+  { label: 'Travel', enabled: Boolean(props.attributes.travel_cover) },
+])
 </script>
