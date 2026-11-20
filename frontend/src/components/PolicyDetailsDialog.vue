@@ -18,148 +18,146 @@
       </v-toolbar>
 
       <v-card-text
-        class="pa-0"
+        class="pa-0 d-flex flex-column"
         :class="isDark ? 'bg-grey-darken-4' : 'bg-grey-lighten-5'"
-        style="height: 85vh"
+        style="height: 85dvh"
       >
-        <v-container fluid class="pa-6">
-          <v-row density="compact">
-            <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface h-100">
-                <div class="text-body-small text-medium-emphasis mb-1">Premium</div>
-                <div class="text-headline-small font-weight-bold text-primary">
-                  {{ currencyFormat(policy.premium, currencyCode) }}
-                </div>
-                <div class="text-body-small mt-1">
-                  {{
-                    policy.attributes?.payment_frequency === 'Monthly' ? 'Per Month' : 'Per Year'
-                  }}
-                </div>
-              </v-card>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface h-100">
-                <div class="text-body-small text-medium-emphasis mb-1">Policy Start</div>
-                <div class="text-title-large">{{ formatDate(policy.start_date, 'N/A') }}</div>
-              </v-card>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface h-100">
-                <div class="text-body-small text-medium-emphasis mb-1">Policy Renewal</div>
-                <div class="text-title-large" :class="getRenewalColor(policy.end_date)">
-                  {{ formatDate(policy.end_date, 'Perpetual') }}
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <v-row class="mt-2">
-            <v-col cols="12">
-              <v-card class="pa-4 bg-surface" border variant="flat">
-                <div class="text-title-medium font-weight-bold mb-3 d-flex align-center">
-                  <v-icon icon="mdi-list-box-outline" class="mr-2" color="primary" />
-                  Policy Details
-                </div>
-
-                <div>
-                  <v-row density="compact">
-                    <BuildingsPolicyDetails
-                      v-if="policy.type === 'Buildings'"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                    <CarPolicyDetails
-                      v-if="policy.type === 'Car'"
-                      :asset="linkedAsset"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                    <ContentsPolicyDetails
-                      v-if="policy.type === 'Contents'"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                    <LifePolicyDetails
-                      v-if="policy.type === 'Life'"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                    <MedicalPolicyDetails
-                      v-if="policy.type === 'Medical'"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                    <PetPolicyDetails
-                      v-if="policy.type === 'Pet'"
-                      :attributes="policy.attributes"
-                      :currency-code="currencyCode"
-                    />
-                  </v-row>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <v-row class="mt-2">
-            <v-col cols="12">
-              <div class="text-title-medium font-weight-bold mb-2">Policy Document</div>
-
-              <v-alert
-                v-if="uploadError"
-                type="error"
-                variant="tonal"
-                density="compact"
-                closable
-                class="mb-3"
-                @click:close="uploadError = ''"
-              >
-                {{ uploadError }}
-              </v-alert>
-
-              <v-card
-                v-if="policy.document_path"
-                height="600px"
-                border
-                class="d-flex align-center justify-center overflow-hidden bg-white"
-              >
-                <object
-                  :data="getFileUrl(policy.document_path)"
-                  type="application/pdf"
-                  width="100%"
-                  height="100%"
-                >
-                  <div class="text-center text-black">
-                    <v-icon icon="mdi-file-pdf-box" size="64" color="grey" />
-                    <div class="mt-2">Preview not supported.</div>
-                    <v-btn
-                      color="primary"
-                      class="mt-4"
-                      :href="getFileUrl(policy.document_path)"
-                      target="_blank"
-                    >
-                      Download PDF
-                    </v-btn>
+        <div class="pa-6 d-flex flex-column ga-4 policy-details-body">
+          <div class="flex-shrink-0">
+            <v-row density="compact">
+              <v-col cols="12" md="4">
+                <v-card variant="flat" class="pa-4 border bg-surface h-100">
+                  <div class="text-body-small text-medium-emphasis mb-1">Premium</div>
+                  <div class="text-headline-small font-weight-bold text-primary">
+                    {{ currencyFormat(policy.premium, currencyCode) }}
                   </div>
-                </object>
-              </v-card>
+                  <div class="text-body-small mt-1">
+                    {{
+                      policy.attributes?.payment_frequency === 'Monthly' ? 'Per Month' : 'Per Year'
+                    }}
+                  </div>
+                </v-card>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-card variant="flat" class="pa-4 border bg-surface h-100">
+                  <div class="text-body-small text-medium-emphasis mb-1">Policy Start</div>
+                  <div class="text-title-large">{{ formatDate(policy.start_date, 'N/A') }}</div>
+                </v-card>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-card variant="flat" class="pa-4 border bg-surface h-100">
+                  <div class="text-body-small text-medium-emphasis mb-1">Policy Renewal</div>
+                  <div class="text-title-large" :class="getRenewalColor(policy.end_date)">
+                    {{ formatDate(policy.end_date, 'Perpetual') }}
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
 
-              <v-file-upload
-                v-else
-                :model-value="selectedUpload"
-                accept=".pdf"
-                filter-by-type=".pdf,application/pdf"
-                icon="mdi-cloud-upload"
-                title="No Document Uploaded"
-                subtitle="Drag & Drop a PDF here, or click to browse"
-                :loading="isUploading"
-                :disabled="isUploading"
-                clearable
-                @update:model-value="handleFileUpload"
-                @rejected="handleFileRejected"
-              />
-            </v-col>
-          </v-row>
-        </v-container>
+          <v-card class="pa-4 bg-surface flex-shrink-0" border variant="flat">
+            <div class="text-title-medium font-weight-bold mb-3 d-flex align-center">
+              <v-icon icon="mdi-list-box-outline" class="mr-2" color="primary" />
+              Policy Details
+            </div>
+
+            <div>
+              <v-row density="compact">
+                <BuildingsPolicyDetails
+                  v-if="policy.type === 'Buildings'"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+                <CarPolicyDetails
+                  v-if="policy.type === 'Car'"
+                  :asset="linkedAsset"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+                <ContentsPolicyDetails
+                  v-if="policy.type === 'Contents'"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+                <LifePolicyDetails
+                  v-if="policy.type === 'Life'"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+                <MedicalPolicyDetails
+                  v-if="policy.type === 'Medical'"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+                <PetPolicyDetails
+                  v-if="policy.type === 'Pet'"
+                  :attributes="policy.attributes"
+                  :currency-code="currencyCode"
+                />
+              </v-row>
+            </div>
+          </v-card>
+
+          <section class="d-flex flex-column policy-doc-section">
+            <div class="text-title-medium font-weight-bold mb-2 flex-shrink-0">Policy Document</div>
+
+            <v-alert
+              v-if="uploadError"
+              type="error"
+              variant="tonal"
+              density="compact"
+              closable
+              class="mb-3 flex-shrink-0"
+              @click:close="uploadError = ''"
+            >
+              {{ uploadError }}
+            </v-alert>
+
+            <v-card
+              v-if="policy.document_path"
+              border
+              class="d-flex flex-column overflow-hidden bg-white policy-pdf-card"
+            >
+              <object
+                :data="getFileUrl(policy.document_path)"
+                type="application/pdf"
+                class="policy-pdf-object"
+              >
+                <div
+                  class="d-flex flex-column align-center justify-center text-center text-black flex-grow-1 pa-4"
+                >
+                  <v-icon icon="mdi-file-pdf-box" size="64" color="grey" />
+                  <div class="mt-2">Preview not supported.</div>
+                  <v-btn
+                    color="primary"
+                    class="mt-4"
+                    :href="getFileUrl(policy.document_path)"
+                    target="_blank"
+                  >
+                    Download PDF
+                  </v-btn>
+                </div>
+              </object>
+            </v-card>
+
+            <v-file-upload
+              v-else
+              :model-value="selectedUpload"
+              accept=".pdf"
+              filter-by-type=".pdf,application/pdf"
+              icon="mdi-cloud-upload"
+              title="No Document Uploaded"
+              subtitle="Drag & Drop a PDF here, or click to browse"
+              :loading="isUploading"
+              :disabled="isUploading"
+              clearable
+              hide-details
+              class="policy-upload"
+              @update:model-value="handleFileUpload"
+              @rejected="handleFileRejected"
+            />
+          </section>
+        </div>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -248,3 +246,35 @@ async function uploadDocument(file) {
   }
 }
 </script>
+
+<style scoped>
+.policy-details-body {
+  flex: 1 0 auto;
+}
+
+.policy-doc-section {
+  flex: 1 0 auto;
+}
+
+.policy-pdf-card {
+  flex: 1 0 auto;
+  min-height: 280px;
+}
+
+.policy-pdf-object {
+  flex: 1 1 0;
+  inline-size: 100%;
+  min-block-size: 280px;
+  display: block;
+}
+
+.policy-upload {
+  flex: 1 0 auto;
+}
+
+.policy-upload :deep(.v-file-upload-dropzone) {
+  flex: 1 1 auto;
+  min-block-size: 220px;
+  padding-block: 32px;
+}
+</style>
