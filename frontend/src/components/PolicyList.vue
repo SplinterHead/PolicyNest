@@ -82,6 +82,7 @@
 
     <PolicyDetailsDialog
       v-model="showPolicy"
+      :assets="assets"
       :policy="selectedPolicy"
       :currency-code="currencyCode"
       @edit="handleEditFromDialog"
@@ -115,6 +116,7 @@ import { currencyFormat, formatDate } from '@/utils/Formats'
 import PolicyDetailsDialog from '@/components/PolicyDetailsDialog.vue'
 
 defineProps({
+  assets: { type: Array, default: () => [] },
   currencyCode: String,
   loading: Boolean,
   policies: Array,

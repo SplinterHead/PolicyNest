@@ -23,9 +23,9 @@
         style="height: 85vh"
       >
         <v-container fluid class="pa-6">
-          <v-row>
+          <v-row density="compact">
             <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface">
+              <v-card variant="flat" class="pa-4 border bg-surface h-100">
                 <div class="text-body-small text-medium-emphasis mb-1">Premium</div>
                 <div class="text-headline-small font-weight-bold text-primary">
                   {{ currencyFormat(policy.premium, currencyCode) }}
@@ -38,13 +38,13 @@
               </v-card>
             </v-col>
             <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface">
+              <v-card variant="flat" class="pa-4 border bg-surface h-100">
                 <div class="text-body-small text-medium-emphasis mb-1">Policy Start</div>
                 <div class="text-title-large">{{ formatDate(policy.start_date, 'N/A') }}</div>
               </v-card>
             </v-col>
             <v-col cols="12" md="4">
-              <v-card variant="flat" class="pa-4 border bg-surface">
+              <v-card variant="flat" class="pa-4 border bg-surface h-100">
                 <div class="text-body-small text-medium-emphasis mb-1">Policy Renewal</div>
                 <div class="text-title-large" :class="getRenewalColor(policy.end_date)">
                   {{ formatDate(policy.end_date, 'Perpetual') }}
@@ -70,6 +70,7 @@
                     />
                     <CarPolicyDetails
                       v-if="policy.type === 'Car'"
+                      :asset="linkedAsset"
                       :attributes="policy.attributes"
                       :currency-code="currencyCode"
                     />
@@ -181,6 +182,7 @@ import PetPolicyDetails from '@/components/details/PetPolicyDetails.vue'
 const open = defineModel({ type: Boolean })
 
 const props = defineProps({
+  assets: { type: Array, default: () => [] },
   currencyCode: String,
   policy: Object,
 })
@@ -189,6 +191,9 @@ const emit = defineEmits(['edit', 'uploaded'])
 
 const theme = useTheme()
 const isDark = computed(() => theme.current.value.dark)
+const linkedAsset = computed(
+  () => props.assets.find((asset) => asset.id === props.policy?.asset_id) || null,
+)
 
 const isUploading = ref(false)
 const selectedUpload = ref(null)

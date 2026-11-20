@@ -108,6 +108,7 @@
 
         <PolicyList
           v-else
+          :assets="assets"
           :currency-code="currencyCode"
           :policies="activePolicies"
           :loading="loading"
@@ -129,6 +130,7 @@
         </div>
 
         <PolicyList
+          :assets="assets"
           :currency-code="currencyCode"
           :policies="expiredPolicies"
           :loading="loading"
